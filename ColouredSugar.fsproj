@@ -59,6 +59,7 @@
     <None Include="particle_vert.glsl" />
     <None Include="particle_frag.glsl" />
     <Content Include="OpenTK.dll.config" />
+    <None Include="README.md" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FSharp.Core">
