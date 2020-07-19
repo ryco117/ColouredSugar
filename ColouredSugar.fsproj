@@ -60,6 +60,7 @@
     <None Include="particle_frag.glsl" />
     <Content Include="OpenTK.dll.config" />
     <None Include="README.md" />
+    <None Include="COPYING" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FSharp.Core">
