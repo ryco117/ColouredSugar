@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30309.148
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "ColouredSugar", "ColouredSugar.fsproj", "{1EEEC86B-BA07-4D17-95EA-C7B8FC53A03A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1EEEC86B-BA07-4D17-95EA-C7B8FC53A03A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1EEEC86B-BA07-4D17-95EA-C7B8FC53A03A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1EEEC86B-BA07-4D17-95EA-C7B8FC53A03A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1EEEC86B-BA07-4D17-95EA-C7B8FC53A03A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {529E18BD-26B7-4CB2-AA44-11C497C4B0E2}
+	EndGlobalSection
+EndGlobal
