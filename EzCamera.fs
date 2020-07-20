@@ -20,12 +20,10 @@ module EzCamera
 open System
 open OpenTK
 
-let up = new Vector3(0.f, 1.f, 0.f)
-
 type EzCamera() =
-    let rotateSensitivity = 0.06f
+    let rotateSensitivity = 0.08f
     let moveSensitivity = 1.0f
-    let mutable position = Vector3(0.f, 0.f, 2.f)
+    let mutable position = Vector3(0.f, 0.f, 0.9f)
     let mutable pitch = 0.f
     let mutable yaw = 0.f
     let mutable strafeRight = 1.f

@@ -25,18 +25,24 @@ let DualRealToComplex (samples: float32[]) =
         (samples.Length / 2)
         (fun i ->
             let mutable z = new Complex()
-            z.X <- samples.[2 * i] + samples.[2 * i + 1]
+            // Mix stereo to mono
+            z.X <- (samples.[2 * i] + samples.[2 * i + 1]) / 2.f
+            // Only left
+            //z.X <- samples.[2 * i]
+            // Only right
+            //z.X <- samples.[2 * i + 1]
             z)
 
-type AudioOutStreamer(onDataAvail) =
+type AudioOutStreamer(onDataAvail, onClose) =
     let capture = new WasapiLoopbackCapture()
     do if capture.WaveFormat.Channels <> 2 then raise (new System.Exception())
     do if capture.WaveFormat.Encoding <> WaveFormatEncoding.IeeeFloat then raise (new System.Exception())
     let bytesPerSample = capture.WaveFormat.BitsPerSample / 8
     do capture.DataAvailable.Add (
         fun (eventArgs: WaveInEventArgs) ->
-            if eventArgs.BytesRecorded = 0 then
+            if eventArgs.BytesRecorded < 1 then
                 capture.StopRecording ()
+                onClose ()
             else
                 let samplesReal = Array.zeroCreate<float32> (eventArgs.BytesRecorded / bytesPerSample)
                 System.Buffer.BlockCopy(eventArgs.Buffer, 0, samplesReal, 0, eventArgs.BytesRecorded)
@@ -48,7 +54,7 @@ type AudioOutStreamer(onDataAvail) =
                     log2 0 complex.Length
                 let finalForm = Array.sub complex 0 (1 <<< logSize)
                 FastFourierTransform.FFT(true, logSize, finalForm)
-                onDataAvail finalForm)
+                onDataAvail capture.WaveFormat.SampleRate finalForm)
     do capture.StartRecording ()
     interface System.IDisposable with
         member _.Dispose () =
@@ -56,6 +62,7 @@ type AudioOutStreamer(onDataAvail) =
             | NAudio.CoreAudioApi.CaptureState.Capturing
             | NAudio.CoreAudioApi.CaptureState.Starting ->
                 capture.StopRecording()
+                onClose ()
             | _ -> ()
             capture.Dispose()
     member _.RecordingState = capture.CaptureState

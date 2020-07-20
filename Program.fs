@@ -28,7 +28,6 @@ open EzCamera
 let random = new System.Random ()
 let randF () = float32 (random.NextDouble ())
 let randNormF () = (randF () - 0.5f) * 2.f
-let fpsWait: uint64 = 100UL
 
 [<EntryPoint>]
 let main _ =
@@ -36,6 +35,7 @@ let main _ =
     let mutable perspective = true
     let mutable wireframe = false
     let mutable tick = 0UL
+    let fpsWait: uint64 = 300UL
 
     // Particle System
     let particleCount = 1024*1024
@@ -46,11 +46,14 @@ let main _ =
     let mutable particleRenderShader = 0
     let mutable mouseX = 0.f
     let mutable mouseY = 0.f
-    let defaultMass = -0.005f
-    let mutable blackHoleMass = defaultMass
     let mutable mouseDown = false
+    let defaultMass = 0.005f
+    let mutable blackHole = new Vector4()
+    let mutable whiteHole = new Vector4()
 
-    let rec audioOutCapture = new EzSound.AudioOutStreamer(fun complex ->
+    let onDataAvail samplingRate (complex: NAudio.Dsp.Complex[]) =
+        blackHole.W <- 0.f
+        whiteHole.W <- 0.f
         if complex.Length > 0 then
             let mag (c: NAudio.Dsp.Complex) = sqrt(c.X*c.X + c.Y*c.Y)
             let phase (c: NAudio.Dsp.Complex) =
@@ -65,36 +68,50 @@ let main _ =
                 | 1, -1 -> atan (c.Y / c.X)
                 | -1, -1 -> (float32 -System.Math.PI) + atan (c.Y / c.X)
                 | _ -> raise (new System.Exception())
-            let freqResolution = audioOutCapture.SamplingRate / complex.Length
-
-            let mutable max_mag = mag complex.[0]
-            let mutable max_i = 0
-            for i = 1 to complex.Length / 2 do
-                let mag = mag complex.[i]
-                if mag > max_mag then
-                    max_mag <- mag
-                    max_i <- i
-            let c = complex.[max_i]
-            let sumRange s e =
-                let mutable r = 0.f
-                for i = s to min e (complex.Length / 2) do r <- r + mag complex.[i]
-                r
-            let bassSum = sumRange 1 (150 / freqResolution)
-            let highSum = sumRange (600 / freqResolution) (20_000 / freqResolution)
-            if max_mag > 0.001f then
-                if bassSum > 0.10f && bassSum > (highSum/1.5f) then
-                    blackHoleMass <- defaultMass * bassSum * 5.f
-                    mouseDown <- true
-                else if highSum > 0.07f then
-                    blackHoleMass <- -defaultMass * highSum * 9.f
-                    mouseDown <- true
-                else
-                    mouseDown <- false
-                //printfn "Max freq: %i, Max mag: %f, Max phase: %f" (max_i * freqResolution) max_mag 0.f
-                //mouseX <- 2.f * (sqrt (sqrt max_mag))  - 1.f
-                mouseX <- (min 2.f (log (float32 max_i) / log 2.f / 4.f)) - 1.f
-                mouseY <- (phase c) / float32 System.Math.PI
-    )
+            let detailedFreq i =
+                let flog = log (float32 (if i = 0 then 1 else i)) / log 1.5f
+                let ffrac = flog - float32 (int flog)
+                floor flog, ffrac
+            let freqResolution = samplingRate / complex.Length
+            let analyze (arr: NAudio.Dsp.Complex[]) =
+                let mutable max_mag = mag arr.[0]
+                let mutable max_i = 0
+                let mutable sum = 0.f
+                for i = 0 to (arr.Length / 2 - 1) do
+                    let m = mag arr.[i]
+                    sum <- sum + m
+                    if m > max_mag then
+                        max_mag <- m
+                        max_i <- i
+                let fl, ff = detailedFreq max_i
+                max_i, max_mag, sum, fl, ff
+            let bassEnd = 350 / freqResolution
+            let highStart = 600 / freqResolution
+            let highEnd = 15_000 / freqResolution
+            let bassMaxI, bassMaxMag, bassSum, bassFreqLog, bassFreqFrac = analyze (Array.sub complex 0 bassEnd)
+            let highMaxI, highMaxMag, highSum, highFreqLog, highFreqFrac = analyze (Array.sub complex highStart (highEnd - highStart))
+            if (bassMaxMag * float32 complex.Length) > 0.3f then
+                let X = (min 2.f (bassFreqLog / 1.75f)) - 1.f
+                let Y = phase complex.[bassMaxI] / float32 System.Math.PI
+                whiteHole.W <- -defaultMass * bassSum * 15.75f
+                whiteHole.Xyz <-
+                    if perspective then
+                        camera.ToWorldSpace X Y
+                    else
+                        new Vector3(X, Y, 0.f)
+            if (highMaxMag * float32 complex.Length) > 0.1f then
+                let X = (min 2.f (highFreqLog / 6.f)) - 1.f
+                let Y = 2.f * highFreqFrac - 1.f
+                blackHole.W <- defaultMass * highSum * 9.f
+                blackHole.Xyz <-
+                    if perspective then
+                        camera.ToWorldSpace X Y
+                    else
+                        new Vector3(X, Y, 0.f)
+    let onClose () =
+        blackHole.W <- 0.f
+        whiteHole.W <- 0.f
+    let audioOutCapture = new EzSound.AudioOutStreamer(onDataAvail, onClose)
 
     let deltaClock = new System.Diagnostics.Stopwatch ()
     let fpsClock = new System.Diagnostics.Stopwatch ()
@@ -102,8 +119,7 @@ let main _ =
         new GameWindow(
             1366, 768,
             new GraphicsMode(new ColorFormat(8, 8, 8, 8), 24, 8, 4),
-            //GraphicsMode.Default,
-            "Hello World", GameWindowFlags.FixedWindow) with
+            "Coloured Sugar", GameWindowFlags.FixedWindow) with
         override this.OnKeyDown e =
             match e.Key, (e.Alt, e.Shift, e.Control, e.Command), e.IsRepeat with
             // Escape
@@ -129,6 +145,9 @@ let main _ =
                 let velocities = Array.init (particleCount * 4) (fun i -> if i % 4 = 3 then 0.f else randNormF () * 0.01f)
                 GL.BindBuffer(BufferTarget.ShaderStorageBuffer, particleVelocityArray)
                 GL.BufferSubData(BufferTarget.ShaderStorageBuffer, nativeint 0, velocities.Length * sizeof<float32>, velocities)
+                let positions = Array.init (particleCount * 4) (fun i -> if i % 4 = 3 then 1.f else randNormF ())
+                GL.BindBuffer(BufferTarget.ShaderStorageBuffer, particleVBO)
+                GL.BufferSubData(BufferTarget.ShaderStorageBuffer, nativeint 0, positions.Length * sizeof<float32>, positions)
             // Movement keys
             | Key.A, _, false ->
                 camera.StrafeRight <- camera.StrafeRight - 1.f
@@ -157,19 +176,21 @@ let main _ =
             mouseY <- (float32 e.Y / float32 this.Height) * -2.f + 1.f
             base.OnMouseMove e
         override _.OnMouseWheel e =
-            blackHoleMass <- blackHoleMass * 1.45f**e.DeltaPrecise
+            //blackHoleMass <- blackHoleMass * 1.45f**e.DeltaPrecise
             base.OnMouseWheel e
         override _.OnMouseDown e =
             if e.Button = MouseButton.Left then
                 mouseDown <- true
             if e.Button = MouseButton.Right then
-                blackHoleMass <- -2.f * blackHoleMass
+                //blackHoleMass <- -2.f * blackHoleMass
+                ()
             base.OnMouseDown e
         override _.OnMouseUp e =
             if e.Button = MouseButton.Left then
                 mouseDown <- false
             if e.Button = MouseButton.Right then
-                blackHoleMass <- blackHoleMass / -2.f
+               // blackHoleMass <- blackHoleMass / -2.f
+               ()
             base.OnMouseUp e
         override _.OnLoad eventArgs =
             // Set default background
@@ -220,11 +241,8 @@ let main _ =
             GL.UseProgram particleCompShader
             GL.Uniform1(GL.GetUniformLocation(particleCompShader, "deltaTime"), deltaTime)
             GL.Uniform1(GL.GetUniformLocation(particleCompShader, "perspective"), if perspective then 1u else 0u)
-            GL.Uniform4(
-                GL.GetUniformLocation(particleCompShader, "blackHole"),
-                new Vector4(
-                    camera.ToWorldSpace mouseX mouseY,
-                    if mouseDown then blackHoleMass else 0.f))
+            GL.Uniform4(GL.GetUniformLocation(particleCompShader, "attractors[0]"), blackHole)
+            GL.Uniform4(GL.GetUniformLocation(particleCompShader, "attractors[1]"), whiteHole)
             GL.BindBufferBase(BufferRangeTarget.ShaderStorageBuffer, 0, particleVBO)
             GL.BindBufferBase(BufferRangeTarget.ShaderStorageBuffer, 1, particleVelocityArray)
             GL.DispatchCompute(particleCount / 128, 1, 1)
@@ -247,7 +265,7 @@ let main _ =
                 printfn "FPS: %f" (float fpsWait / ((float fpsClock.ElapsedMilliseconds) / 1000.))
                 fpsClock.Restart ()
 
-                // Occasionally check if audio out stopped
+                // Ccheck if audio out stopped
                 if audioOutCapture.Stopped () then
                     audioOutCapture.StartCapturing ()
 

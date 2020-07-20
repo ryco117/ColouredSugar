@@ -11,7 +11,7 @@ layout (binding = 1) buffer VelocityBuffer {
 
 // Delta time
 uniform float deltaTime;
-uniform vec4 blackHole;
+uniform vec4 attractors[2];
 uniform bool perspective;
 
 void main(void)
@@ -22,14 +22,22 @@ void main(void)
 	vec4 pos = positions[index];
 	vec4 vel = velocities[index];
 	
-	vec3 g;
+	vec3 g = vec3(0.0);
+	float min_length = 0.01;
 	if(perspective) {
-		g = blackHole.xyz - pos.xyz;
+		for(int i = 0; i < attractors.length(); i++) {
+			vec3 t = attractors[i].xyz - pos.xyz;
+			float r = max(length(t), min_length);
+			g += attractors[i].w * normalize(t) / (r*r);
+		}
 	} else {
-		g = vec3(blackHole.xy, pos.z) - pos.xyz;
+		for(int i = 0; i < attractors.length(); i++) {
+			vec3 t = vec3(attractors[i].xy, pos.z) - pos.xyz;
+			float r = max(length(t), min_length);
+			g += attractors[i].w * normalize(t) / (r*r);
+		}
 	}
-	float r = max(length(g), 0.008);
-	vel.xyz += blackHole.w * normalize(g) * deltaTime / (r*r);
+	vel.xyz += deltaTime * g;
 	
 	if(length(vel.xyz) > 10.0) {
 		vel.xyz = 10.0*normalize(vel.xyz);
@@ -37,24 +45,24 @@ void main(void)
 
 	pos += vel * deltaTime;
 	if(abs(pos.x) >= 0.95) {
-		vel.x = sign(pos.x) * (-0.725 * abs(vel.x) - 0.004);
+		vel.x = sign(pos.x) * (-0.9 * abs(vel.x) - 0.005);
 		if(abs(pos.x) >= 0.99) {
 			pos.x = sign(pos.x) * 0.98;
 		}
 	}
 	if(abs(pos.y) >= 0.95) {
-		vel.y = sign(pos.y) * (-0.725 * abs(vel.y) - 0.004);
+		vel.y = sign(pos.y) * (-0.9 * abs(vel.y) - 0.005);
 		if(abs(pos.y) >= 0.99) {
 			pos.y = sign(pos.y) * 0.98;
 		}
 	}
 	if(abs(pos.z) >= 0.95) {
-		vel.z = sign(pos.z) * (-0.725 * abs(vel.z) - 0.004);
+		vel.z = sign(pos.z) * (-0.9 * abs(vel.z) - 0.005);
 		if(abs(pos.z) >= 0.99) {
 			pos.z = sign(pos.z) * 0.98;
 		}
 	}
 
 	positions[index] = pos;
-	velocities[index] = 0.98 * vel;
+	velocities[index] = 0.9775 * vel;
 }
