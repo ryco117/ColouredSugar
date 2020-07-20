@@ -62,16 +62,22 @@ type AudioOutStreamer(onDataAvail, onClose) =
             | NAudio.CoreAudioApi.CaptureState.Capturing
             | NAudio.CoreAudioApi.CaptureState.Starting ->
                 capture.StopRecording()
-                onClose ()
             | _ -> ()
             capture.Dispose()
+            onClose ()
     member _.RecordingState = capture.CaptureState
     member _.SamplingRate = capture.WaveFormat.SampleRate
     member _.Stopped () = capture.CaptureState =  NAudio.CoreAudioApi.CaptureState.Stopped
+    member _.Capturing () = capture.CaptureState =  NAudio.CoreAudioApi.CaptureState.Capturing
     member _.StartCapturing () =
         match capture.CaptureState with
-        | NAudio.CoreAudioApi.CaptureState.Stopped ->
-            capture.StartRecording ()
+        | NAudio.CoreAudioApi.CaptureState.Stopped
         | NAudio.CoreAudioApi.CaptureState.Stopping ->
-            raise (new System.Exception())
+            capture.StartRecording ()
+        | _ -> ()
+    member _.StopCapturing () =
+        match capture.CaptureState with
+        | NAudio.CoreAudioApi.CaptureState.Starting
+        | NAudio.CoreAudioApi.CaptureState.Capturing ->
+            capture.StopRecording ()
         | _ -> ()

@@ -21,12 +21,12 @@ open System
 open OpenTK
 
 type EzCamera() =
-    let rotateSensitivity = 0.08f
+    let rotateSensitivity = 1.f
     let moveSensitivity = 1.0f
     let mutable position = Vector3(0.f, 0.f, 0.9f)
     let mutable pitch = 0.f
     let mutable yaw = 0.f
-    let mutable strafeRight = 1.f
+    let mutable strafeRight = 0.f
     let mutable strafeUp = 0.f
     let proj = Matrix4.CreatePerspectiveFieldOfView (float32 (Math.PI/2.), 16.f/9.f, 0.05f, 1000.f)
     member _.Pitch
@@ -49,8 +49,11 @@ type EzCamera() =
         position.Z <- position.Z - moveSensitivity*deltaTime*strafeUp
     member _.ProjView () =
         Matrix4.CreateRotationY(yaw) * Matrix4.CreateTranslation(-position) * proj
-    member _.ToWorldSpace x y =
-        new Vector3(
-            x * float32(System.Math.Cos (float yaw)),
-            y,
-            x * float32(System.Math.Sin(float yaw)))
+    member _.ToWorldSpace perspective x y =
+        if perspective then
+            new Vector3(
+                x * float32(System.Math.Cos (float yaw)),
+                y,
+                x * float32(System.Math.Sin(float yaw)))
+        else
+            new Vector3(x, y, 0.f)

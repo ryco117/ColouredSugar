@@ -25,6 +25,7 @@ open OpenTK.Input
 
 open EzCamera
 
+// Try to use same RNG source application-wide
 let random = new System.Random ()
 let randF () = float32 (random.NextDouble ())
 let randNormF () = (randF () - 0.5f) * 2.f
@@ -33,9 +34,15 @@ let randNormF () = (randF () - 0.5f) * 2.f
 let main _ =
     let camera = new EzCamera()
     let mutable perspective = true
-    let mutable wireframe = false
     let mutable tick = 0UL
     let fpsWait: uint64 = 300UL
+    let mutable mouseX = 0.f
+    let mutable mouseY = 0.f
+    let mutable mouseScroll = 0.f
+    let mutable mouseLeftDown = false
+    let mutable mouseRightDown = false
+    let mutable autoRotate = true
+    let mutable audioResponsive = true
 
     // Particle System
     let particleCount = 1024*1024
@@ -44,13 +51,11 @@ let main _ =
     let mutable particleVelocityArray = 0
     let mutable particleCompShader = 0
     let mutable particleRenderShader = 0
-    let mutable mouseX = 0.f
-    let mutable mouseY = 0.f
-    let mutable mouseDown = false
     let defaultMass = 0.005f
     let mutable blackHole = new Vector4()
     let mutable whiteHole = new Vector4()
 
+    // Audio handler funciton
     let onDataAvail samplingRate (complex: NAudio.Dsp.Complex[]) =
         blackHole.W <- 0.f
         whiteHole.W <- 0.f
@@ -68,46 +73,42 @@ let main _ =
                 | 1, -1 -> atan (c.Y / c.X)
                 | -1, -1 -> (float32 -System.Math.PI) + atan (c.Y / c.X)
                 | _ -> raise (new System.Exception())
-            let detailedFreq i =
-                let flog = log (float32 (if i = 0 then 1 else i)) / log 1.5f
+            let detailedFreq i len =
+                let flog =
+                    if i < 2 then
+                        log (1.1f)
+                    else
+                        log (float32 i)
                 let ffrac = flog - float32 (int flog)
-                floor flog, ffrac
+                floor flog / log (float32 len), ffrac
             let freqResolution = samplingRate / complex.Length
             let analyze (arr: NAudio.Dsp.Complex[]) =
                 let mutable max_mag = mag arr.[0]
                 let mutable max_i = 0
-                let mutable sum = 0.f
-                for i = 0 to (arr.Length / 2 - 1) do
+                let mutable sum = max_mag
+                for i = 1 to arr.Length - 1 do
                     let m = mag arr.[i]
                     sum <- sum + m
                     if m > max_mag then
                         max_mag <- m
                         max_i <- i
-                let fl, ff = detailedFreq max_i
+                let fl, ff = detailedFreq max_i arr.Length
                 max_i, max_mag, sum, fl, ff
             let bassEnd = 350 / freqResolution
-            let highStart = 600 / freqResolution
+            let highStart = 400 / freqResolution
             let highEnd = 15_000 / freqResolution
             let bassMaxI, bassMaxMag, bassSum, bassFreqLog, bassFreqFrac = analyze (Array.sub complex 0 bassEnd)
             let highMaxI, highMaxMag, highSum, highFreqLog, highFreqFrac = analyze (Array.sub complex highStart (highEnd - highStart))
             if (bassMaxMag * float32 complex.Length) > 0.3f then
-                let X = (min 2.f (bassFreqLog / 1.75f)) - 1.f
+                let X = 2.f * bassFreqLog - 1.f
                 let Y = phase complex.[bassMaxI] / float32 System.Math.PI
-                whiteHole.W <- -defaultMass * bassSum * 15.75f
-                whiteHole.Xyz <-
-                    if perspective then
-                        camera.ToWorldSpace X Y
-                    else
-                        new Vector3(X, Y, 0.f)
+                whiteHole.W <- -defaultMass * bassSum * 14.f
+                whiteHole.Xyz <- camera.ToWorldSpace perspective X Y
             if (highMaxMag * float32 complex.Length) > 0.1f then
-                let X = (min 2.f (highFreqLog / 6.f)) - 1.f
+                let X = (min 2.f (2.25f * highFreqLog)) - 1.f
                 let Y = 2.f * highFreqFrac - 1.f
-                blackHole.W <- defaultMass * highSum * 9.f
-                blackHole.Xyz <-
-                    if perspective then
-                        camera.ToWorldSpace X Y
-                    else
-                        new Vector3(X, Y, 0.f)
+                blackHole.W <- defaultMass * highSum * 8.75f
+                blackHole.Xyz <- camera.ToWorldSpace perspective X Y
     let onClose () =
         blackHole.W <- 0.f
         whiteHole.W <- 0.f
@@ -119,7 +120,7 @@ let main _ =
         new GameWindow(
             1366, 768,
             new GraphicsMode(new ColorFormat(8, 8, 8, 8), 24, 8, 4),
-            "Coloured Sugar", GameWindowFlags.FixedWindow) with
+            "Coloured Sugar", GameWindowFlags.Default) with
         override this.OnKeyDown e =
             match e.Key, (e.Alt, e.Shift, e.Control, e.Command), e.IsRepeat with
             // Escape
@@ -131,11 +132,7 @@ let main _ =
                     this.WindowState <- WindowState.Normal
                 else
                     this.WindowState <- WindowState.Fullscreen
-            // Toggle Wireframe
-            | Key.T, _, _ ->
-                wireframe <- not wireframe
-                GL.PolygonMode(MaterialFace.FrontAndBack, if wireframe then PolygonMode.Line else PolygonMode.Fill)
-            // Toggle alternative perspective
+            // Alternate perspectives
             | Key.P, (true, false, false, false), false ->
                 perspective <- not perspective
                 if not perspective then
@@ -157,6 +154,19 @@ let main _ =
                 camera.StrafeUp <- camera.StrafeUp + 1.f
             | Key.S, _, false ->
                 camera.StrafeUp <- camera.StrafeUp - 1.f
+            // Toggle auto rotate
+            | Key.Z, _, _ -> autoRotate <- not autoRotate
+            // Toggle responsive to audio-out
+            | Key.R, _, false ->
+                if audioResponsive then
+                    audioResponsive <- false
+                    if audioOutCapture.Capturing () then
+                        audioOutCapture.StopCapturing ()
+                else
+                    audioResponsive <- true
+                    if audioOutCapture.Stopped () then
+                        audioOutCapture.StartCapturing ()
+                    ()
             // Default handling
             | _ -> base.OnKeyDown e
         override _.OnKeyUp e =
@@ -176,21 +186,19 @@ let main _ =
             mouseY <- (float32 e.Y / float32 this.Height) * -2.f + 1.f
             base.OnMouseMove e
         override _.OnMouseWheel e =
-            //blackHoleMass <- blackHoleMass * 1.45f**e.DeltaPrecise
+            mouseScroll <- mouseScroll + e.DeltaPrecise
             base.OnMouseWheel e
         override _.OnMouseDown e =
             if e.Button = MouseButton.Left then
-                mouseDown <- true
+                mouseLeftDown <- true
             if e.Button = MouseButton.Right then
-                //blackHoleMass <- -2.f * blackHoleMass
-                ()
+                mouseRightDown <- true
             base.OnMouseDown e
         override _.OnMouseUp e =
             if e.Button = MouseButton.Left then
-                mouseDown <- false
+                mouseLeftDown <- false
             if e.Button = MouseButton.Right then
-               // blackHoleMass <- blackHoleMass / -2.f
-               ()
+               mouseRightDown <- false
             base.OnMouseUp e
         override _.OnLoad eventArgs =
             // Set default background
@@ -243,6 +251,17 @@ let main _ =
             GL.Uniform1(GL.GetUniformLocation(particleCompShader, "perspective"), if perspective then 1u else 0u)
             GL.Uniform4(GL.GetUniformLocation(particleCompShader, "attractors[0]"), blackHole)
             GL.Uniform4(GL.GetUniformLocation(particleCompShader, "attractors[1]"), whiteHole)
+            GL.Uniform4(
+                GL.GetUniformLocation(particleCompShader, "attractors[2]"),
+                new Vector4(
+                    camera.ToWorldSpace perspective mouseX mouseY,
+                    if mouseLeftDown then
+                        if mouseRightDown then
+                            1.5f * defaultMass * 1.4f**mouseScroll
+                        else
+                            -defaultMass * 1.4f**mouseScroll
+                    else
+                        0.f))
             GL.BindBufferBase(BufferRangeTarget.ShaderStorageBuffer, 0, particleVBO)
             GL.BindBufferBase(BufferRangeTarget.ShaderStorageBuffer, 1, particleVelocityArray)
             GL.DispatchCompute(particleCount / 128, 1, 1)
@@ -250,10 +269,12 @@ let main _ =
 
             GL.BindVertexArray particleRenderVAO
             GL.UseProgram particleRenderShader
-            let mutable test =
+            let mutable projViewMutable =
+                if autoRotate then
+                    camera.Yaw <- camera.Yaw - 0.08f * deltaTime
                 camera.Update deltaTime
                 camera.ProjView ()
-            GL.UniformMatrix4(GL.GetUniformLocation(particleRenderShader, "projViewMatrix"), false, &test)
+            GL.UniformMatrix4(GL.GetUniformLocation(particleRenderShader, "projViewMatrix"), false, &projViewMutable)
             GL.Uniform1(GL.GetUniformLocation(particleRenderShader, "perspective"), if perspective then 1u else 0u)
             GL.DrawArrays(PrimitiveType.Points, 0, particleCount)
 
@@ -266,7 +287,7 @@ let main _ =
                 fpsClock.Restart ()
 
                 // Ccheck if audio out stopped
-                if audioOutCapture.Stopped () then
+                if audioResponsive && audioOutCapture.Stopped () then
                     audioOutCapture.StartCapturing ()
 
             base.OnRenderFrame eventArgs
