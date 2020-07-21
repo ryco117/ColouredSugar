@@ -98,28 +98,28 @@ let main _ =
                 let fl, ff = detailedFreq max_i arr.Length
                 max_i, max_mag, sum, fl, ff
             let roundToInt f = int (round f)
-            let bassEnd = roundToInt (300. / freqResolution)
-            let midsStart = roundToInt (300. / freqResolution)
-            let midsEnd = roundToInt (3_000. / freqResolution)
-            let highStart = roundToInt (3_000. / freqResolution)
-            let highEnd = roundToInt (12_500. / freqResolution)
+            let bassEnd = roundToInt (275. / freqResolution)
+            let midsStart = roundToInt (275. / freqResolution)
+            let midsEnd = roundToInt (3_500. / freqResolution)
+            let highStart = roundToInt (3_500. / freqResolution)
+            let highEnd = roundToInt (17_500. / freqResolution)
             let bassMaxI, bassMaxMag, bassSum, bassFreqLog, _ = analyze (Array.sub complex 0 bassEnd)
             let _, midsMaxMag, midsSum, midsFreqLog, midsFreqFrac = analyze (Array.sub complex midsStart (midsEnd - midsStart))
             let _, highMaxMag, highSum, highFreqLog, highFreqFrac = analyze (Array.sub complex highStart (highEnd - highStart))
-            if (bassMaxMag * float32 complex.Length) > 0.32f then
+            if (bassMaxMag * float32 complex.Length) > 0.33f then
                 let X = 2.f * bassFreqLog - 1.f
                 let Y = phase complex.[bassMaxI] / float32 System.Math.PI
-                whiteHole.W <- -defaultMass * bassSum * 15.5f
+                whiteHole.W <- -defaultMass * bassSum * 16.f
                 whiteHole.Xyz <- camera.ToWorldSpace perspective X Y
             if (midsMaxMag * float32 complex.Length) > 0.1f then
                 let X = 2.f * midsFreqLog - 1.f
                 let Y = 2.f * midsFreqFrac - 1.f
-                blackHoleMids.W <- defaultMass * midsSum * 8.25f
+                blackHoleMids.W <- defaultMass * midsSum * 10.f
                 blackHoleMids.Xyz <- camera.ToWorldSpace perspective X Y
-            if (highMaxMag * float32 complex.Length) > 0.05f then
-                let X = (min 2.f (2.2f * highFreqLog)) - 1.f
+            if (highMaxMag * float32 complex.Length) > 0.025f then
+                let X = 2.f * highFreqLog - 1.f
                 let Y = 2.f * highFreqFrac - 1.f
-                blackHole.W <- defaultMass * highSum * 6.f
+                blackHole.W <- defaultMass * highSum * 8.25f
                 blackHole.Xyz <- camera.ToWorldSpace perspective X Y
     let onClose () =
         blackHole.W <- 0.f
@@ -273,7 +273,7 @@ let main _ =
                         0.f))
             GL.Uniform4(GL.GetUniformLocation(particleCompShader, "attractors[1]"), whiteHole)
             GL.Uniform4(GL.GetUniformLocation(particleCompShader, "attractors[2]"), blackHole)
-            GL.Uniform4(GL.GetUniformLocation(particleCompShader, "attractors[3]"), blackHoleMids)
+            GL.Uniform4(GL.GetUniformLocation(particleCompShader, "experimental"), blackHoleMids)
             GL.BindBufferBase(BufferRangeTarget.ShaderStorageBuffer, 0, particleVBO)
             GL.BindBufferBase(BufferRangeTarget.ShaderStorageBuffer, 1, particleVelocityArray)
             GL.DispatchCompute(particleCount / 128, 1, 1)

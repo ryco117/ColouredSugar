@@ -11,7 +11,8 @@ layout (binding = 1) buffer VelocityBuffer {
 
 // Delta time
 uniform float deltaTime;
-uniform vec4 attractors[4];
+uniform vec4 attractors[3];
+uniform vec4 experimental;
 uniform bool perspective;
 
 void main(void)
@@ -25,15 +26,21 @@ void main(void)
 	vec3 g = vec3(0.0);
 	float min_length = 0.01;
 	if(perspective) {
+		vec3 t = experimental.xyz - pos.xyz;
+		float r = max(length(t), min_length);
+		g += experimental.w * normalize(cross(t, pos.xyz)) / (r*r);
 		for(int i = 0; i < attractors.length(); i++) {
-			vec3 t = attractors[i].xyz - pos.xyz;
-			float r = max(length(t), min_length);
+			t = attractors[i].xyz - pos.xyz;
+			r = max(length(t), min_length);
 			g += attractors[i].w * normalize(t) / (r*r);
 		}
 	} else {
+		vec3 t = vec3(experimental.xy, pos.z) - pos.xyz;
+		float r = max(length(t), min_length);
+		g += experimental.w * normalize(cross(t, vel.xyz));
 		for(int i = 0; i < attractors.length(); i++) {
-			vec3 t = vec3(attractors[i].xy, pos.z) - pos.xyz;
-			float r = max(length(t), min_length);
+			t = vec3(attractors[i].xy, pos.z) - pos.xyz;
+			r = max(length(t), min_length);
 			g += attractors[i].w * normalize(t) / (r*r);
 		}
 	}

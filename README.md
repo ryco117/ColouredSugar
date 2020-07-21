@@ -8,7 +8,7 @@ because I could not determine a way to stream the current audio out as a capture
 NAudio also provides the Fast Fourier Transform I used.
 
 ### Example Video (YouTube)
-[![Coloured Sugar Demo](https://img.youtube.com/vi/pyM19LuC4Ns/0.jpg)](https://www.youtube.com/watch?v=pyM19LuC4Ns "Coloured Sugar Demo")
+[![Coloured Sugar Demo](https://img.youtube.com/vi/MySuzdh4YaA/0.jpg)](https://www.youtube.com/watch?v=MySuzdh4YaA "Coloured Sugar Demo")
 
 ### Controls
 | Button | Description |
