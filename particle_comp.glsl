@@ -11,7 +11,7 @@ layout (binding = 1) buffer VelocityBuffer {
 
 // Delta time
 uniform float deltaTime;
-uniform vec4 attractors[3];
+uniform vec4 attractors[4];
 uniform bool perspective;
 
 void main(void)
