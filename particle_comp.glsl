@@ -52,19 +52,19 @@ void main(void)
 
 	pos += vel * deltaTime;
 	if(abs(pos.x) >= 0.95) {
-		vel.x = sign(pos.x) * (-0.95 * abs(vel.x) - 0.005);
+		vel.x = sign(pos.x) * (-0.99 * abs(vel.x) - 0.005);
 		if(abs(pos.x) >= 0.99) {
 			pos.x = sign(pos.x) * 0.98;
 		}
 	}
 	if(abs(pos.y) >= 0.95) {
-		vel.y = sign(pos.y) * (-0.95 * abs(vel.y) - 0.005);
+		vel.y = sign(pos.y) * (-0.99 * abs(vel.y) - 0.005);
 		if(abs(pos.y) >= 0.99) {
 			pos.y = sign(pos.y) * 0.98;
 		}
 	}
 	if(abs(pos.z) >= 0.95) {
-		vel.z = sign(pos.z) * (-0.95 * abs(vel.z) - 0.005);
+		vel.z = sign(pos.z) * (-0.99 * abs(vel.z) - 0.005);
 		if(abs(pos.z) >= 0.99) {
 			pos.z = sign(pos.z) * 0.98;
 		}

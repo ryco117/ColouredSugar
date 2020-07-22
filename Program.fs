@@ -110,11 +110,11 @@ type ColouredSugar() =
             let bassMaxI, bassMaxMag, bassSum, bassFreqLog, bassFreqFrac = analyze (Array.sub complex 0 bassEnd)
             let midsMaxI, midsMaxMag, midsSum, midsFreqLog, midsFreqFrac = analyze (Array.sub complex midsStart (midsEnd - midsStart))
             let highMaxI, highMaxMag, highSum, highFreqLog, highFreqFrac = analyze (Array.sub complex highStart (highEnd - highStart))
-            if (bassMaxMag * float32 complex.Length) > 0.32f then
+            if (bassMaxMag * float32 complex.Length) > 0.25f then
                 let X = 2.f * bassFreqLog - 1.f
                 let Y = 2.f * bassFreqFrac - 1.f
                 //let Y = phase complex.[bassMaxI] / float32 System.Math.PI
-                whiteHole.W <- -defaultMass * bassSum * 16.f
+                whiteHole.W <- -defaultMass * bassSum * 13.5f
                 whiteHole.Xyz <- camera.ToWorldSpace X Y
             if (midsMaxMag * float32 complex.Length) > 0.05f then
                 let X = 2.f * midsFreqLog - 1.f
