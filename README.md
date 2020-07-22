@@ -24,3 +24,4 @@ NAudio also provides the Fast Fourier Transform I used.
 | `MOUSE-LEFT` | Hold to manually apply a point force attraction/repulsion at position guided by the mouse cursor |
 | `MOUSE-RIGHT` | Hold to inverse repulsion force to attraction at position guided by the mouse cursor. (Note: must hold both `MOUSE-LEFT` and `MOUSE-RIGHT` to apply and inverse the force respectively) |
 | `MOUSE-SCROLL` | Scroll up to increase intensity of manual point force. Scroll down to decrease strength |
+| `F12` | Save a screenshot to 'awesome.png'. If a file with that name already exists it will increment a counter until it finds a free file name |
