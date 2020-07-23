@@ -82,5 +82,5 @@ void main(void)
 	}
 
 	positions[index] = pos;
-	velocities[index] = 0.978 * vel;
+	velocities[index] = 0.9775 * vel;
 }

@@ -38,7 +38,7 @@ type ColouredSugar() =
         new GraphicsMode(new ColorFormat(8, 8, 8, 8), 24, 8, 1),
         "Coloured Sugar", GameWindowFlags.Default)
     let camera = new EzCamera()
-    let screenshotScale = 1
+    let screenshotScale = 1.5
     let mutable tick = 0UL
     let fpsWait: uint64 = 300UL
     let mutable mouseX = 0.f
@@ -104,8 +104,8 @@ type ColouredSugar() =
             let roundToInt f = int (round f)
             let bassEnd = roundToInt (300. / freqResolution)
             let midsStart = roundToInt (300. / freqResolution)
-            let midsEnd = roundToInt (2_750. / freqResolution)
-            let highStart = roundToInt (2_750. / freqResolution)
+            let midsEnd = roundToInt (2_500. / freqResolution)
+            let highStart = roundToInt (2_500. / freqResolution)
             let highEnd = roundToInt (17_500. / freqResolution)
             let bassMaxI, bassMaxMag, bassSum, bassFreqLog, bassFreqFrac = analyze (Array.sub complex 0 bassEnd)
             let midsMaxI, midsMaxMag, midsSum, midsFreqLog, midsFreqFrac = analyze (Array.sub complex midsStart (midsEnd - midsStart))
@@ -114,17 +114,17 @@ type ColouredSugar() =
                 let X = 2.f * bassFreqLog - 1.f
                 let Y = 2.f * bassFreqFrac - 1.f
                 //let Y = phase complex.[bassMaxI] / float32 System.Math.PI
-                whiteHole.W <- -defaultMass * bassSum * 1.85f
+                whiteHole.W <- -defaultMass * bassSum * 1.15f
                 whiteHole.Xyz <- camera.ToWorldSpace X Y
-            if midsMaxMag > 0.0007f then
+            if midsMaxMag > 0.00025f then
                 let X = 2.f * midsFreqLog - 1.f
                 let Y = 2.f * midsFreqFrac - 1.f
-                curlAttractor.W <- defaultMass * midsSum * 8.5f
+                curlAttractor.W <- defaultMass * midsSum * 8.25f
                 curlAttractor.Xyz <- camera.ToWorldSpace  X Y
-            if highMaxMag > 0.0007f then
+            if highMaxMag > 0.00025f then
                 let X = 2.f * highFreqLog - 1.f
                 let Y = 2.f * highFreqFrac - 1.f
-                blackHole.W <- defaultMass * highSum * 7.6f
+                blackHole.W <- defaultMass * highSum * 7.75f
                 blackHole.Xyz <- camera.ToWorldSpace X Y
     let onClose () =
         blackHole.W <- 0.f
@@ -181,8 +181,8 @@ type ColouredSugar() =
         | Key.F12, _ , false ->
             GL.ReadBuffer ReadBufferMode.Front
             GL.PixelStore(PixelStoreParameter.PackAlignment, 1)
-            let width = this.Width * screenshotScale
-            let height = this.Height * screenshotScale
+            let width = int (float this.Width * screenshotScale)
+            let height = int (float this.Height * screenshotScale)
             let framebufferId = GL.GenFramebuffer ()
             GL.BindFramebuffer(FramebufferTarget.DrawFramebuffer, framebufferId)
             let renderbufferId = GL.GenRenderbuffer ()
