@@ -34,28 +34,31 @@ let DualRealToComplex (samples: float32[]) =
             z)
 
 type AudioOutStreamer(onDataAvail, onClose) =
-    let capture = new WasapiLoopbackCapture()
-    do if capture.WaveFormat.Channels <> 2 then raise (new System.Exception())
-    do if capture.WaveFormat.Encoding <> WaveFormatEncoding.IeeeFloat then raise (new System.Exception())
-    let bytesPerSample = capture.WaveFormat.BitsPerSample / 8
-    do capture.DataAvailable.Add (
-        fun (eventArgs: WaveInEventArgs) ->
-            if eventArgs.BytesRecorded < 1 then
-                capture.StopRecording ()
-                onClose ()
-            else
-                let samplesReal = Array.zeroCreate<float32> (eventArgs.BytesRecorded / bytesPerSample)
-                System.Buffer.BlockCopy(eventArgs.Buffer, 0, samplesReal, 0, eventArgs.BytesRecorded)
-                let complex = DualRealToComplex samplesReal
-                let logSize =
-                    let rec log2 acc = function
-                    | 1 -> acc
-                    | n -> log2 (acc+1) (n/2)
-                    log2 0 complex.Length
-                let finalForm = Array.sub complex 0 (1 <<< logSize)
-                FastFourierTransform.FFT(true, logSize, finalForm)
-                onDataAvail capture.WaveFormat.SampleRate finalForm)
-    do capture.StartRecording ()
+    let mutable capture = new WasapiLoopbackCapture()
+    let mutable bytesPerSample = 0
+    let dataAvail (eventArgs: WaveInEventArgs) =
+        if eventArgs.BytesRecorded < 1 then
+            capture.StopRecording ()
+            onClose ()
+        else
+            let samplesReal = Array.zeroCreate<float32> (eventArgs.BytesRecorded / bytesPerSample)
+            System.Buffer.BlockCopy(eventArgs.Buffer, 0, samplesReal, 0, eventArgs.BytesRecorded)
+            let complex = DualRealToComplex samplesReal
+            let logSize =
+                let rec log2 acc = function
+                | 1 -> acc
+                | n -> log2 (acc+1) (n/2)
+                log2 0 complex.Length
+            let finalForm = Array.sub complex 0 (1 <<< logSize)
+            FastFourierTransform.FFT(true, logSize, finalForm)
+            onDataAvail capture.WaveFormat.SampleRate finalForm
+    let initCapture () =
+        if capture.WaveFormat.Channels <> 2 then raise (new System.Exception())
+        if capture.WaveFormat.Encoding <> WaveFormatEncoding.IeeeFloat then raise (new System.Exception())
+        bytesPerSample <- capture.WaveFormat.BitsPerSample / 8
+        capture.DataAvailable.Add dataAvail
+        capture.StartRecording ()
+    do initCapture ()
     interface System.IDisposable with
         member _.Dispose () =
             match capture.CaptureState with
@@ -81,3 +84,9 @@ type AudioOutStreamer(onDataAvail, onClose) =
         | NAudio.CoreAudioApi.CaptureState.Capturing ->
             capture.StopRecording ()
         | _ -> ()
+    member this.Reset () =
+        this.StopCapturing ()
+        (capture :> System.IDisposable).Dispose ()
+        capture <- new WasapiLoopbackCapture()
+        initCapture ()
+        

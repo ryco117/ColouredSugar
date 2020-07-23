@@ -10,7 +10,7 @@ out vec4 outColor;
 
 const float c1 = 0.05;
 const float c2 = 0.4;
-const float maxSpeed = 4.0;
+const float maxSpeed = 5.0;
 
 void main() {
 	float speed = min(length(velocity.xyz), maxSpeed);

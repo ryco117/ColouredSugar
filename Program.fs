@@ -35,10 +35,10 @@ let randNormF () = (randF () - 0.5f) * 2.f
 type ColouredSugar() =
     inherit GameWindow(
         1366, 768,
-        new GraphicsMode(new ColorFormat(8, 8, 8, 8), 24, 8, 4),
+        new GraphicsMode(new ColorFormat(8, 8, 8, 8), 24, 8, 1),
         "Coloured Sugar", GameWindowFlags.Default)
     let camera = new EzCamera()
-    let screenshotScale = 2
+    let screenshotScale = 1
     let mutable tick = 0UL
     let fpsWait: uint64 = 300UL
     let mutable mouseX = 0.f
@@ -58,13 +58,13 @@ type ColouredSugar() =
     let mutable particleRenderShader = 0
     let defaultMass = 0.005f
     let mutable blackHole = new Vector4()
-    let mutable blackHoleMids = new Vector4()
+    let mutable curlAttractor = new Vector4()
     let mutable whiteHole = new Vector4()
 
     // Audio handler funciton
     let onDataAvail samplingRate (complex: NAudio.Dsp.Complex[]) =
         blackHole.W <- 0.f
-        blackHoleMids.W <- 0.f
+        curlAttractor.W <- 0.f
         whiteHole.W <- 0.f
         if complex.Length > 0 then
             let mag (c: NAudio.Dsp.Complex) = sqrt(c.X*c.X + c.Y*c.Y)
@@ -102,29 +102,29 @@ type ColouredSugar() =
                 let fl, ff = detailedFreq max_i arr.Length
                 max_i, max_mag, sum, fl, ff
             let roundToInt f = int (round f)
-            let bassEnd = roundToInt (275. / freqResolution)
-            let midsStart = roundToInt (275. / freqResolution)
-            let midsEnd = roundToInt (3_000. / freqResolution)
-            let highStart = roundToInt (3_000. / freqResolution)
+            let bassEnd = roundToInt (300. / freqResolution)
+            let midsStart = roundToInt (300. / freqResolution)
+            let midsEnd = roundToInt (2_750. / freqResolution)
+            let highStart = roundToInt (2_750. / freqResolution)
             let highEnd = roundToInt (17_500. / freqResolution)
             let bassMaxI, bassMaxMag, bassSum, bassFreqLog, bassFreqFrac = analyze (Array.sub complex 0 bassEnd)
             let midsMaxI, midsMaxMag, midsSum, midsFreqLog, midsFreqFrac = analyze (Array.sub complex midsStart (midsEnd - midsStart))
             let highMaxI, highMaxMag, highSum, highFreqLog, highFreqFrac = analyze (Array.sub complex highStart (highEnd - highStart))
-            if (bassMaxMag * float32 complex.Length) > 0.25f then
+            if bassMaxMag > 0.0225f then
                 let X = 2.f * bassFreqLog - 1.f
                 let Y = 2.f * bassFreqFrac - 1.f
                 //let Y = phase complex.[bassMaxI] / float32 System.Math.PI
-                whiteHole.W <- -defaultMass * bassSum * 13.5f
+                whiteHole.W <- -defaultMass * bassSum * 1.85f
                 whiteHole.Xyz <- camera.ToWorldSpace X Y
-            if (midsMaxMag * float32 complex.Length) > 0.05f then
+            if midsMaxMag > 0.0007f then
                 let X = 2.f * midsFreqLog - 1.f
                 let Y = 2.f * midsFreqFrac - 1.f
-                blackHoleMids.W <- defaultMass * midsSum * 8.5f
-                blackHoleMids.Xyz <- camera.ToWorldSpace  X Y
-            if (highMaxMag * float32 complex.Length) > 0.0125f then
+                curlAttractor.W <- defaultMass * midsSum * 8.5f
+                curlAttractor.Xyz <- camera.ToWorldSpace  X Y
+            if highMaxMag > 0.0007f then
                 let X = 2.f * highFreqLog - 1.f
                 let Y = 2.f * highFreqFrac - 1.f
-                blackHole.W <- defaultMass * highSum * 9.15f
+                blackHole.W <- defaultMass * highSum * 7.6f
                 blackHole.Xyz <- camera.ToWorldSpace X Y
     let onClose () =
         blackHole.W <- 0.f
@@ -176,8 +176,7 @@ type ColouredSugar() =
                     audioOutCapture.StopCapturing ()
             else
                 audioResponsive <- true
-                if audioOutCapture.Stopped () then
-                    audioOutCapture.StartCapturing ()
+                audioOutCapture.Reset ()
         // Save screenshot
         | Key.F12, _ , false ->
             GL.ReadBuffer ReadBufferMode.Front
@@ -198,32 +197,34 @@ type ColouredSugar() =
             GL.ReadBuffer ReadBufferMode.ColorAttachment0
             let rawImage = Array.zeroCreate<uint8> (width * height * 3)
             GL.ReadPixels(0, 0, width, height, PixelFormat.Rgb, PixelType.UnsignedByte, &rawImage.[0])
-            let bytesPerRow = width * 3
-            let defaultName = "awesome"
-            let defaultPath = "awesome.png"
-            let filePath =
-                let rec newPath i =
-                    let path = defaultName + (string i) + ".png"
-                    if System.IO.File.Exists path then
-                        newPath (i+1)
+            Async.Start (async {
+                let bytesPerRow = width * 3
+                let defaultName = "awesome"
+                let defaultPath = "awesome.png"
+                let filePath =
+                    let rec newPath i =
+                        let path = defaultName + (string i) + ".png"
+                        if System.IO.File.Exists path then
+                            newPath (i+1)
+                        else
+                            path
+                    if System.IO.File.Exists defaultPath then
+                        newPath 1
                     else
-                        path
-                if System.IO.File.Exists defaultPath then
-                    newPath 1
-                else
-                    defaultPath
-            let managedImage = new Image<PixelFormats.Rgb24>(width, height)
-            for j = 0 to height - 1 do
-                for i = 0 to width - 1 do
-                    managedImage.[i, j] <-
-                        new PixelFormats.Rgb24 (
-                            rawImage.[bytesPerRow * (height - j - 1) + 3 * i],
-                            rawImage.[bytesPerRow * (height - j - 1) + 3 * i + 1],
-                            rawImage.[bytesPerRow * (height - j - 1) + 3 * i + 2])
-            let file = System.IO.File.OpenWrite filePath
-            managedImage.SaveAsPng file
-            printfn "Screenshot saved to '%s'" filePath
-            file.Close ()
+                        defaultPath
+                let managedImage = new Image<PixelFormats.Rgb24>(width, height)
+                for j = 0 to height - 1 do
+                    for i = 0 to width - 1 do
+                        managedImage.[i, j] <-
+                            new PixelFormats.Rgb24 (
+                                rawImage.[bytesPerRow * (height - j - 1) + 3 * i],
+                                rawImage.[bytesPerRow * (height - j - 1) + 3 * i + 1],
+                                rawImage.[bytesPerRow * (height - j - 1) + 3 * i + 2])
+                let file = System.IO.File.OpenWrite filePath
+                managedImage.SaveAsPng file
+                printfn "Screenshot saved to '%s'" filePath
+                file.Close ()
+            })
             GL.DeleteFramebuffer framebufferId
             GL.DeleteRenderbuffer renderbufferId
             GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0)
@@ -321,9 +322,9 @@ type ColouredSugar() =
                         -defaultMass * 1.4f**mouseScroll
                 else
                     0.f))
-        GL.Uniform4(GL.GetUniformLocation(particleCompShader, "attractors[1]"), whiteHole)
-        GL.Uniform4(GL.GetUniformLocation(particleCompShader, "attractors[2]"), blackHole)
-        GL.Uniform4(GL.GetUniformLocation(particleCompShader, "experimental"), blackHoleMids)
+        GL.Uniform4(GL.GetUniformLocation(particleCompShader, "attractors[1]"), blackHole)
+        GL.Uniform4(GL.GetUniformLocation(particleCompShader, "experimental"), whiteHole)
+        GL.Uniform4(GL.GetUniformLocation(particleCompShader, "curlAttractor"), curlAttractor)
         GL.BindBufferBase(BufferRangeTarget.ShaderStorageBuffer, 0, particleVBO)
         GL.BindBufferBase(BufferRangeTarget.ShaderStorageBuffer, 1, particleVelocityArray)
         GL.DispatchCompute(particleCount / 128, 1, 1)
