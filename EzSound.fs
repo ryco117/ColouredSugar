@@ -49,7 +49,10 @@ type AudioOutStreamer(onDataAvail, onClose) =
                 | 1 -> acc
                 | n -> log2 (acc+1) (n/2)
                 log2 0 complex.Length
-            let finalForm = Array.sub complex 0 (1 <<< logSize)
+            let finalLen = 1 <<< logSize
+            let scale = float (complex.Length - 1) / float (finalLen - 1)
+            let f x = int (float x * scale)
+            let finalForm = Array.init finalLen (fun i -> complex.[f i])
             FastFourierTransform.FFT(true, logSize, finalForm)
             onDataAvail capture.WaveFormat.SampleRate finalForm
     let initCapture () =

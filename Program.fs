@@ -68,18 +68,6 @@ type ColouredSugar() =
         whiteHole.W <- 0.f
         if complex.Length > 0 then
             let mag (c: NAudio.Dsp.Complex) = sqrt(c.X*c.X + c.Y*c.Y)
-            let phase (c: NAudio.Dsp.Complex) =
-                match sign c.X, sign c.Y with
-                | 0, 0 -> 0.f
-                | 0, 1 -> float32 System.Math.PI / 2.f
-                | 0, -1 -> float32 System.Math.PI / -2.f
-                | 1, 0 -> 0.f
-                | -1, 0 -> float32 System.Math.PI
-                | 1, 1 -> atan (c.Y / c.X)
-                | -1, 1 -> float32 System.Math.PI - atan (c.Y / abs c.X)
-                | 1, -1 -> atan (c.Y / c.X)
-                | -1, -1 -> (float32 -System.Math.PI) + atan (c.Y / c.X)
-                | _ -> raise (new System.Exception())
             let detailedFreq i len =
                 let flog =
                     if i < 2 then
@@ -106,28 +94,28 @@ type ColouredSugar() =
             let midsStart = roundToInt (300. / freqResolution)
             let midsEnd = roundToInt (2_500. / freqResolution)
             let highStart = roundToInt (2_500. / freqResolution)
-            let highEnd = roundToInt (17_500. / freqResolution)
-            let bassMaxI, bassMaxMag, bassSum, bassFreqLog, bassFreqFrac = analyze (Array.sub complex 0 bassEnd)
+            let highEnd = roundToInt (16_000. / freqResolution)
+            let bassMaxI, bassMaxMag, bassSum, bassFreqLog, bassFreqFrac = analyze (Array.sub complex 1 bassEnd)
             let midsMaxI, midsMaxMag, midsSum, midsFreqLog, midsFreqFrac = analyze (Array.sub complex midsStart (midsEnd - midsStart))
             let highMaxI, highMaxMag, highSum, highFreqLog, highFreqFrac = analyze (Array.sub complex highStart (highEnd - highStart))
-            if bassMaxMag > 0.0225f then
+            if bassMaxMag > 0.02f then
                 let X = 2.f * bassFreqLog - 1.f
                 let Y = 2.f * bassFreqFrac - 1.f
-                //let Y = phase complex.[bassMaxI] / float32 System.Math.PI
                 whiteHole.W <- -defaultMass * bassSum * 1.15f
                 whiteHole.Xyz <- camera.ToWorldSpace X Y
-            if midsMaxMag > 0.00025f then
+            if midsMaxMag > 0.00015f then
                 let X = 2.f * midsFreqLog - 1.f
                 let Y = 2.f * midsFreqFrac - 1.f
-                curlAttractor.W <- defaultMass * midsSum * 8.25f
+                curlAttractor.W <- defaultMass * midsSum * 8.f
                 curlAttractor.Xyz <- camera.ToWorldSpace  X Y
-            if highMaxMag > 0.00025f then
+            if highMaxMag > 0.0001f then
                 let X = 2.f * highFreqLog - 1.f
                 let Y = 2.f * highFreqFrac - 1.f
                 blackHole.W <- defaultMass * highSum * 7.75f
                 blackHole.Xyz <- camera.ToWorldSpace X Y
     let onClose () =
         blackHole.W <- 0.f
+        curlAttractor.W <- 0.f
         whiteHole.W <- 0.f
     let audioOutCapture = new EzSound.AudioOutStreamer(onDataAvail, onClose)
 
@@ -349,7 +337,7 @@ type ColouredSugar() =
             printfn "FPS: %f" (float fpsWait / ((float fpsClock.ElapsedMilliseconds) / 1000.))
             fpsClock.Restart ()
 
-            // Ccheck if audio out stopped
+            // Check if audio out stopped
             if audioResponsive && audioOutCapture.Stopped () then
                 audioOutCapture.StartCapturing ()
 
