@@ -13,8 +13,9 @@ layout (binding = 1) buffer VelocityBuffer {
 uniform float deltaTime;
 uniform vec4 attractors[2];
 uniform vec4 curlAttractor;
-uniform vec4 experimental;
+uniform vec4 bigBoomer;
 uniform bool perspective;
+uniform vec4 musicalSphere;
 
 void main(void)
 {
@@ -31,9 +32,9 @@ void main(void)
 		float r = max(length(t), min_length);
 		g += curlAttractor.w * (normalize(cross(t, pos.xyz)) + normalize(t)/1.4) / (r*r);
 
-		t = experimental.xyz - pos.xyz;
+		t = bigBoomer.xyz - pos.xyz;
 		r = max(length(t), min_length);
-		g += experimental.w * normalize(t) / (r*r*r*r);
+		g -= bigBoomer.w * normalize(t) / (r*r*r*r);
 
 		for(int i = 0; i < attractors.length(); i++) {
 			t = attractors[i].xyz - pos.xyz;
@@ -45,9 +46,9 @@ void main(void)
 		float r = max(length(t), min_length);
 		g += curlAttractor.w * (normalize(cross(t, pos.xyz)) + normalize(t)/1.4) / (r*r);
 
-		t = vec3(experimental.xy, pos.z) - pos.xyz;
+		t = vec3(bigBoomer.xy, pos.z) - pos.xyz;
 		r = max(length(t), min_length);
-		g += experimental.w * normalize(t) / (r*r*r*r);
+		g -= bigBoomer.w * normalize(t) / (r*r*r*r);
 
 		for(int i = 0; i < attractors.length(); i++) {
 			t = vec3(attractors[i].xy, pos.z) - pos.xyz;
@@ -79,6 +80,14 @@ void main(void)
 		if(abs(pos.z) >= 0.99) {
 			pos.z = sign(pos.z) * 0.98;
 		}
+	}
+
+	// Musical Spheres
+	vec3 d = pos.xyz - musicalSphere.xyz;
+	float mag = length(d);
+	if(mag <= musicalSphere.w) {
+		pos.xyz = musicalSphere.xyz + (musicalSphere.w/mag)*d;
+		vel.xyz += 25.0 * (musicalSphere.w - mag) * normalize(d);
 	}
 
 	positions[index] = pos;

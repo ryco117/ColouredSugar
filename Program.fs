@@ -39,6 +39,7 @@ type ColouredSugar() =
         "Coloured Sugar", GameWindowFlags.Default)
     let camera = new EzCamera()
     let screenshotScale = 1.5
+    let screenshotsDir = "./screenshots"
     let mutable tick = 0UL
     let fpsWait: uint64 = 300UL
     let mutable mouseX = 0.f
@@ -48,6 +49,10 @@ type ColouredSugar() =
     let mutable mouseRightDown = false
     let mutable autoRotate = true
     let mutable audioResponsive = true
+
+    let sphere = new EzObjects.ColouredSphere(Vector3(0.8f, 0.8f, 0.8f))
+    let mutable sphereVelocity = new Vector3(0.25f, 0.25f, 0.35f)
+    do sphere.Scale <- new Vector3(0.125f)
 
     // Particle System
     let particleCount = 1024*1024
@@ -69,14 +74,10 @@ type ColouredSugar() =
         if complex.Length > 0 then
             let mag (c: NAudio.Dsp.Complex) = sqrt(c.X*c.X + c.Y*c.Y)
             let detailedFreq i len =
-                let flog =
-                    if i < 2 then
-                        log (1.1f)
-                    else
-                        log (float32 i)
+                let flog = log (float32 i + 1.f)
                 let ffrac = flog - float32 (int flog)
                 floor flog / log (float32 len), ffrac
-            let freqResolution = float samplingRate / float complex.Length
+            let freqResolution = samplingRate / float complex.Length
             let analyze (arr: NAudio.Dsp.Complex[]) =
                 let mutable max_mag = mag arr.[0]
                 let mutable max_i = 0
@@ -101,7 +102,7 @@ type ColouredSugar() =
             if bassMaxMag > 0.02f then
                 let X = 2.f * bassFreqLog - 1.f
                 let Y = 2.f * bassFreqFrac - 1.f
-                whiteHole.W <- -defaultMass * bassSum * 1.15f
+                whiteHole.W <- defaultMass * bassSum * 1.15f
                 whiteHole.Xyz <- camera.ToWorldSpace X Y
             if midsMaxMag > 0.00015f then
                 let X = 2.f * midsFreqLog - 1.f
@@ -124,6 +125,7 @@ type ColouredSugar() =
     override this.OnKeyDown e =
         match e.Key, (e.Alt, e.Shift, e.Control, e.Command), e.IsRepeat with
         // Escape
+        | Key.F4, (true, false, false, false), _
         | Key.Escape, _, _ -> this.Exit ()
         // Fullscreen
         | Key.Enter, (true, false, false, false), false
@@ -137,14 +139,22 @@ type ColouredSugar() =
             camera.Perspective <- not camera.Perspective
             if not camera.Perspective then
                 camera.Yaw <- 0.f
-        // Kill particle velocity
-        | Key.K, _, false ->
+        // Toggle sphere
+        | Key.X, _, false ->
+            if sphere.Scale.X > 0.f then
+                sphere.Scale <- Vector3 0.f
+            else
+                sphere.Scale <- Vector3 0.125f
+        // Reset states of objects
+        | Key.F5, _, false ->
             let velocities = Array.init (particleCount * 4) (fun i -> if i % 4 = 3 then 0.f else randNormF () * 0.01f)
             GL.BindBuffer(BufferTarget.ShaderStorageBuffer, particleVelocityArray)
             GL.BufferSubData(BufferTarget.ShaderStorageBuffer, nativeint 0, velocities.Length * sizeof<float32>, velocities)
             let positions = Array.init (particleCount * 4) (fun i -> if i % 4 = 3 then 1.f else randNormF ())
             GL.BindBuffer(BufferTarget.ShaderStorageBuffer, particleVBO)
             GL.BufferSubData(BufferTarget.ShaderStorageBuffer, nativeint 0, positions.Length * sizeof<float32>, positions)
+            sphereVelocity <- new Vector3(0.25f, 0.25f, 0.35f)
+            sphere.Position <- new Vector3(0.f)
         // Movement keys
         | Key.A, _, false ->
             camera.StrafeRight <- camera.StrafeRight - 1.f
@@ -177,18 +187,25 @@ type ColouredSugar() =
             GL.BindRenderbuffer(RenderbufferTarget.Renderbuffer, renderbufferId)
             GL.RenderbufferStorage(RenderbufferTarget.Renderbuffer, RenderbufferStorage.Rgb8, width, height)
             GL.FramebufferRenderbuffer(FramebufferTarget.DrawFramebuffer, FramebufferAttachment.ColorAttachment0, RenderbufferTarget.Renderbuffer, renderbufferId)
+            let depthBufferId = GL.GenRenderbuffer ()
+            GL.BindRenderbuffer(RenderbufferTarget.Renderbuffer, depthBufferId)
+            GL.RenderbufferStorage(RenderbufferTarget.Renderbuffer, RenderbufferStorage.DepthComponent, width, height)
+            GL.FramebufferRenderbuffer(FramebufferTarget.DrawFramebuffer, FramebufferAttachment.DepthAttachment, RenderbufferTarget.Renderbuffer, depthBufferId)
+            GL.Clear (ClearBufferMask.ColorBufferBit ||| ClearBufferMask.DepthBufferBit)
             GL.Viewport(0, 0, width, height)
             GL.BindVertexArray particleRenderVAO
             GL.UseProgram particleRenderShader
             GL.DrawArrays(PrimitiveType.Points, 0, particleCount)
+            let mutable projView = camera.ProjView ()
+            sphere.Draw projView
             GL.BindFramebuffer(FramebufferTarget.ReadFramebuffer, framebufferId)
             GL.ReadBuffer ReadBufferMode.ColorAttachment0
             let rawImage = Array.zeroCreate<uint8> (width * height * 3)
             GL.ReadPixels(0, 0, width, height, PixelFormat.Rgb, PixelType.UnsignedByte, &rawImage.[0])
             Async.Start (async {
                 let bytesPerRow = width * 3
-                let defaultName = "awesome"
-                let defaultPath = "awesome.png"
+                let defaultName = screenshotsDir + "/awesome"
+                let defaultPath = screenshotsDir + "/awesome.png"
                 let filePath =
                     let rec newPath i =
                         let path = defaultName + (string i) + ".png"
@@ -251,9 +268,13 @@ type ColouredSugar() =
             mouseRightDown <- false
         base.OnMouseUp e
     override _.OnLoad eventArgs =
+        // Create screenshots directory
+        System.IO.Directory.CreateDirectory screenshotsDir |> ignore
+
         // Set default background
         GL.ClearColor (0.f, 0.f, 0.f, 1.f)
         GL.CullFace CullFaceMode.Back
+        GL.Enable EnableCap.CullFace
         GL.DepthFunc DepthFunction.Less
         GL.Enable EnableCap.DepthTest
         GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha)
@@ -295,7 +316,22 @@ type ColouredSugar() =
         deltaClock.Restart ()
         GL.Clear (ClearBufferMask.ColorBufferBit ||| ClearBufferMask.DepthBufferBit)
 
-        // Particle tests
+        if sphere.Scale.X > 0.f then
+            // Update sphere
+            sphereVelocity.Y <- sphereVelocity.Y - deltaTime
+            let mutable pos = sphere.Position + deltaTime*sphereVelocity
+            if abs pos.X > 0.9f then
+                sphereVelocity.X <- -sphereVelocity.X
+                pos.X <- pos.X + deltaTime*sphereVelocity.X
+            if abs pos.Y > 0.9f then
+                sphereVelocity.Y <- -sphereVelocity.Y
+                pos.Y <- pos.Y + deltaTime*sphereVelocity.Y
+            if abs pos.Z > 0.9f then
+                sphereVelocity.Z <- -sphereVelocity.Z
+                pos.Z <- pos.Z + deltaTime*sphereVelocity.Z
+            sphere.Position <- pos
+
+        // Particle computation
         GL.UseProgram particleCompShader
         GL.Uniform1(GL.GetUniformLocation(particleCompShader, "deltaTime"), deltaTime)
         GL.Uniform1(GL.GetUniformLocation(particleCompShader, "perspective"), if camera.Perspective then 1u else 0u)
@@ -311,13 +347,19 @@ type ColouredSugar() =
                 else
                     0.f))
         GL.Uniform4(GL.GetUniformLocation(particleCompShader, "attractors[1]"), blackHole)
-        GL.Uniform4(GL.GetUniformLocation(particleCompShader, "experimental"), whiteHole)
+        GL.Uniform4(GL.GetUniformLocation(particleCompShader, "bigBoomer"), whiteHole)
         GL.Uniform4(GL.GetUniformLocation(particleCompShader, "curlAttractor"), curlAttractor)
+        GL.Uniform4(
+            GL.GetUniformLocation(particleCompShader, "musicalSphere"),
+            new Vector4(
+                sphere.Position,
+                (sphere.Scale.X + sphere.Scale.Y + sphere.Scale.Z)/3.f))
         GL.BindBufferBase(BufferRangeTarget.ShaderStorageBuffer, 0, particleVBO)
         GL.BindBufferBase(BufferRangeTarget.ShaderStorageBuffer, 1, particleVelocityArray)
         GL.DispatchCompute(particleCount / 128, 1, 1)
         GL.MemoryBarrier (MemoryBarrierFlags.ShaderStorageBarrierBit)
 
+        // Draw particles
         GL.BindVertexArray particleRenderVAO
         GL.UseProgram particleRenderShader
         let mutable projViewMutable =
@@ -329,7 +371,11 @@ type ColouredSugar() =
         GL.Uniform1(GL.GetUniformLocation(particleRenderShader, "perspective"), if camera.Perspective then 1u else 0u)
         GL.DrawArrays(PrimitiveType.Points, 0, particleCount)
 
-        this.Context.SwapBuffers()
+        if sphere.Scale.X > 0.f then
+            // Draw sphere
+            sphere.Draw (if camera.Perspective then projViewMutable else Matrix4.Identity)
+
+        this.Context.SwapBuffers ()
 
         // Tick management and occasional operations
         tick <- tick + 1UL

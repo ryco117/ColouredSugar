@@ -54,7 +54,7 @@ type AudioOutStreamer(onDataAvail, onClose) =
             let f x = int (float x * scale)
             let finalForm = Array.init finalLen (fun i -> complex.[f i])
             FastFourierTransform.FFT(true, logSize, finalForm)
-            onDataAvail (int (float capture.WaveFormat.SampleRate / scale)) finalForm
+            onDataAvail (float capture.WaveFormat.SampleRate / scale) finalForm
     let initCapture () =
         if capture.WaveFormat.Channels <> 2 then raise (new System.Exception())
         if capture.WaveFormat.Encoding <> WaveFormatEncoding.IeeeFloat then raise (new System.Exception())
