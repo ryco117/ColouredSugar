@@ -14,7 +14,7 @@
     <UseStandardResourceNames>true</UseStandardResourceNames>
     <WarningsAsErrors>3239;$(WarningsAsErrors)</WarningsAsErrors>
     <Name>ColouredSugar</Name>
-    <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
+    <RunPostBuildEvent>Always</RunPostBuildEvent>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -57,7 +57,8 @@
     <WarningLevel>3</WarningLevel>
     <DocumentationFile>bin\$(Configuration)\$(AssemblyName).XML</DocumentationFile>
     <Prefer32Bit>true</Prefer32Bit>
-    <StartWorkingDirectory>../../</StartWorkingDirectory>
+    <StartWorkingDirectory>
+    </StartWorkingDirectory>
     <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' ">
@@ -97,6 +98,7 @@
     <None Include="shaders\solid_colour_sphere_frag.glsl" />
     <None Include="shaders\solid_colour_sphere_vert.glsl" />
     <None Include="shaders\textured_billboard_frag.glsl" />
+    <None Include="HelpMenu.png" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FSharp.Core">
@@ -134,7 +136,9 @@
     <Reference Include="System.Windows.Forms" />
   </ItemGroup>
   <PropertyGroup>
-    <PostBuildEvent>XCOPY $(ProjectDir)\shaders\ $(TargetDir)\shaders\ /y /s</PostBuildEvent>
+    <PostBuildEvent>robocopy "$(ProjectDir)\shaders" "$(TargetDir)\shaders"
+robocopy $(ProjectDir) $(TargetDir) "HelpMenu.png"
+if %errorlevel% leq 1 exit 0 else exit %errorlevel%</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

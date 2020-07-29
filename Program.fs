@@ -55,14 +55,15 @@ type ColouredSugar() =
     do sphere.Scale <- new Vector3 0.125f
 
     let mutable overlay = true
-    //let texture = EzTexture.ReadFileToTexture "./screenshots/awesome.png"
-    let overlayString = "Hello There World!!!!\nPress 'F1' to open/close this help menu"
-    let texture = EzTexture.StringToTexture overlayString (new System.Drawing.Font(System.Drawing.FontFamily.GenericMonospace, 20.f))
+    let texture = EzTexture.ReadFileToTexture "./HelpMenu.png"
+    (*let overlayString = "Hello There World!!!!\nPress 'F1' to open/close this help menu"
+    let texture = EzTexture.StringToTexture overlayString (new System.Drawing.Font(System.Drawing.FontFamily.GenericMonospace, 20.f))*)
     let textureWidth, textureHeight =
         match texture with
         | {Width = width; Height = height; Data = _} -> float32 width / 960.f, float32 height / 540.f
-    let billboard = new EzObjects.TexturedBillboard(Vector3(-0.9f, 0.5f, 0.f), Vector3(1.f * textureWidth, 1.f * textureHeight, 1.f), 0.f, texture)
-    let backBillboard = new EzObjects.ColouredBillboard(Vector3(-0.9f, 0.5f, 0.f), Vector3(1.f * textureWidth, 1.f * textureHeight, 1.f), 0.f, Vector4(0.1f, 0.1f, 0.1f, 0.8f))
+    (*let billboard = new EzObjects.TexturedBillboard(Vector3(-0.9f, 0.5f, 0.f), Vector3(1.f * textureWidth, 1.f * textureHeight, 1.f), 0.f, texture)
+    let backBillboard = new EzObjects.ColouredBillboard(Vector3(-0.9f, 0.5f, 0.f), Vector3(1.f * textureWidth, 1.f * textureHeight, 1.f), 0.f, Vector4(0.1f, 0.1f, 0.1f, 0.8f))*)
+    let billboard = new EzObjects.TexturedBillboard(Vector3(-0.95f, 0.95f - textureHeight, 0.f), Vector3(textureWidth, textureHeight, 1.f), 0.f, texture)
 
     // Particle System
     let particleCount = 1024*1024
@@ -420,7 +421,7 @@ type ColouredSugar() =
             GL.PolygonMode(MaterialFace.Front, PolygonMode.Fill)
 
         if overlay then
-            backBillboard.Draw ()
+            //backBillboard.Draw ()
             billboard.Draw ()
 
         this.Context.SwapBuffers ()
