@@ -36,6 +36,9 @@ type Object3D(objectMesh: float32[]*uint32[], vertPath, fragPath) =
     member _.Scale
         with get () = scale
         and set scale' = scale <- scale'
+    member _.Rotation
+        with get () = rotation
+        and set rotation' = rotation <- rotation'
     // Cleanup
     member this.Dispose () = (this :> System.IDisposable).Dispose ()
     interface System.IDisposable with
@@ -48,12 +51,13 @@ type Object3D(objectMesh: float32[]*uint32[], vertPath, fragPath) =
             GL.DeleteVertexArray VAO
             GL.DeleteProgram shaderProgram
     member _.GetRenderShader () = shaderProgram
+    member  _.GetVAO () = VAO
     member _.Draw projView =
         GL.UseProgram shaderProgram
         GL.BindVertexArray VAO
         let mutable (projViewModel: Matrix4) =
             rotation * Matrix4.CreateScale(scale) * Matrix4.CreateTranslation(position) * projView
-        GL.UniformMatrix4(GL.GetUniformLocation(shaderProgram, "projViewModel"), false, &projViewModel)
+        GL.UniformMatrix4(GL.GetUniformLocation(shaderProgram, "projViewModel"), true, &projViewModel)
         GL.DrawElements(PrimitiveType.Triangles, indexLength, DrawElementsType.UnsignedInt, 0)
 
 let GenSphere n =
@@ -110,8 +114,68 @@ let GenSphere n =
         a
     vertices, indices
 
-type ColouredSphere(color: Vector3) as this =
-    inherit Object3D(GenSphere 6, "solidcolor_vert.glsl", "solidcolor_frag.glsl")
+type ColouredSphere(color: Vector3, n) as this =
+    inherit Object3D(GenSphere n, "solid_colour_sphere_vert.glsl", "solid_colour_sphere_frag.glsl")
     do GL.Uniform3(GL.GetUniformLocation(this.GetRenderShader (), "triColor"), color)
     do GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 0, 0)
     do GL.EnableVertexAttribArray 0
+
+let GenQuad () =
+    let v = [|
+        0.f; 0.f; 0.f;
+        1.f; 0.f; 0.f;
+        1.f; 1.f; 0.f;
+        0.f; 1.f; 0.f
+    |]
+    let i = [|0u; 1u; 2u; 3u|]
+    v, i
+
+type Billboard(position, scale, rotation, vert, frag) as this =
+    inherit Object3D(GenQuad (), vert, frag)
+    do
+        this.Position <- position
+        this.Scale <- scale
+        this.Rotation <- Matrix4.CreateRotationZ rotation
+        GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 0, 0)
+        GL.EnableVertexAttribArray 0
+    member this.Draw () =
+        GL.Disable EnableCap.DepthTest
+        GL.UseProgram (this.GetRenderShader ())
+        GL.BindVertexArray(this.GetVAO ())
+        let mutable (modelMatrix: Matrix4) = this.Rotation * Matrix4.CreateScale this.Scale * Matrix4.CreateTranslation this.Position
+        GL.UniformMatrix4(GL.GetUniformLocation(this.GetRenderShader (), "model"), true, &modelMatrix)
+        GL.DrawElements(PrimitiveType.Quads, 4, DrawElementsType.UnsignedInt, 0)
+        GL.Enable EnableCap.DepthTest
+
+type TexturedBillboard(position, scale, rotation, texture: EzTexture.Texture) =
+    inherit Billboard(position, scale, rotation, "textured_billboard_vert.glsl", "textured_billboard_frag.glsl")
+    let texCoordBufferId = GL.GenBuffer ()
+    let textureId = GL.GenTexture ()
+    do
+        let texCoords = [|
+            0.f; 0.f;
+            1.f; 0.f;
+            1.f; 1.f;
+            0.f; 1.f
+        |]
+        GL.BindBuffer(BufferTarget.ArrayBuffer, texCoordBufferId)
+        GL.BufferData(BufferTarget.ArrayBuffer, texCoords.Length * sizeof<float32>, texCoords, BufferUsageHint.StaticDraw)
+        GL.VertexAttribPointer(1, 2, VertexAttribPointerType.Float, false, 0, 0)
+        GL.EnableVertexAttribArray 1
+        GL.BindTexture(TextureTarget.Texture2D, textureId)
+        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, int TextureWrapMode.Repeat)
+        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, int TextureWrapMode.Repeat)
+        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, int TextureMinFilter.Linear)
+        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, int TextureMagFilter.Linear)
+
+        match texture with
+        | {Width = width; Height = height; Data = data} ->
+            GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, width, height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, data)
+    member _.Dispose () =
+        GL.DeleteBuffer texCoordBufferId
+        GL.DeleteTexture textureId
+        base.Dispose ()
+
+type ColouredBillboard(position, scale, rotation, colour: Vector4) as this =
+    inherit Billboard(position, scale, rotation, "solid_colour_billboard_vert.glsl", "solid_colour_billboard_frag.glsl")
+    do GL.Uniform4(GL.GetUniformLocation(this.GetRenderShader (), "quadColor"), colour)

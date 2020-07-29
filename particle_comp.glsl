@@ -30,7 +30,7 @@ void main(void)
 	if(perspective) {
 		vec3 t = curlAttractor.xyz - pos.xyz;
 		float r = max(length(t), min_length);
-		g += curlAttractor.w * (normalize(cross(t, pos.xyz)) + normalize(t)/1.4) / (r*r);
+		g += curlAttractor.w * (normalize(cross(t, pos.xyz)) + normalize(t)/1.5) / (r*r);
 
 		t = bigBoomer.xyz - pos.xyz;
 		r = max(length(t), min_length);
@@ -44,7 +44,7 @@ void main(void)
 	} else {
 		vec3 t = vec3(curlAttractor.xy, pos.z) - pos.xyz;
 		float r = max(length(t), min_length);
-		g += curlAttractor.w * (normalize(cross(t, pos.xyz)) + normalize(t)/1.4) / (r*r);
+		g += curlAttractor.w * (normalize(cross(t, pos.xyz)) + normalize(t)/1.5) / (r*r);
 
 		t = vec3(bigBoomer.xy, pos.z) - pos.xyz;
 		r = max(length(t), min_length);
@@ -87,7 +87,7 @@ void main(void)
 	float mag = length(d);
 	if(mag <= musicalSphere.w) {
 		pos.xyz = musicalSphere.xyz + (musicalSphere.w/mag)*d;
-		vel.xyz += 25.0 * (musicalSphere.w - mag) * normalize(d);
+		vel.xyz += 20.0 * (musicalSphere.w - mag) * normalize(d);
 	}
 
 	positions[index] = pos;

@@ -31,12 +31,13 @@ determined bin from the domain of `bass`, `mids`, and `highs` respectively. The 
 ### Controls
 | Button | Description |
 | ------ | ----------- |
+| `F1`   | Toggle help overlay *(in development)* |
 | `ESC`  | Exit the application |
 | `ALT-F4`  | Exit the application (alternative to `ESC`) |
-| `F5`  | Reset object positions and velocities |
+| `F5`  | Reset the visualizer |
 | `F11`  | Toggle fullscreen (default: `false`) |
 | `ALT-ENTER`  | Toggle fullscreen (alternative to `F11`) |
-| `F12` | Save a screenshot to 'awesome.png' at 1.5X current window resolution. If a file with that name already exists it will increment a counter until it finds an available file name |
+| `F12` | Save a screenshot to 'awesome.png' at current window resolution. If a file with that name already exists it will increment a counter until it finds an available file name |
 | `ALT-P`  | Toggle between `3D` and `2`D perspectives (default: `3D`) |
 | `W,A,S,D` | Manually rotate the cube (if in `3D` perspective) |
 | `Z` | Toggle auto-rotation of cube (if in `3D` perspective, default: `true`) |

@@ -23,13 +23,13 @@ open OpenTK
 type EzCamera() =
     let rotateSensitivity = 1.f
     let moveSensitivity = 1.0f
-    let mutable position = Vector3(0.f, 0.f, 0.95f)
+    let mutable position = new Vector3(0.f, 0.f, 0.975f)
     let mutable perspective = true
     let mutable pitch = 0.f
     let mutable yaw = 0.f
     let mutable strafeRight = 0.f
     let mutable strafeUp = 0.f
-    let proj = Matrix4.CreatePerspectiveFieldOfView (float32 (Math.PI/2.), 16.f/9.f, 0.05f, 1000.f)
+    let proj = Matrix4.CreatePerspectiveFieldOfView (float32 (Math.PI/2.), 16.f/9.f, 0.01f, 100.f)
     member _.Pitch
         with get () = pitch
         and set p = pitch <- p

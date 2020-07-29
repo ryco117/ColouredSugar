@@ -7,5 +7,5 @@ uniform mat4 projViewModel;
 void main()
 {
 	normal = normalize(position);
-	gl_Position = projViewModel * vec4(position, 1.0);
+	gl_Position = vec4(position, 1.0) * projViewModel;
 }

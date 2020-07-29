@@ -9,21 +9,27 @@ uniform bool perspective;
 out vec4 outColor;
 
 const float c1 = 0.05;
-const float c2 = 0.375;
-const float maxSpeed = 7.5;
+const vec3 endC1 = vec3(0.0, 1.0, 0.66);
+const float c2 = 0.3;
+const vec3 endC2 = vec3(0.66, 1.0, 0.0);
+const float c3 = 3.0;
+const vec3 endC3 = vec3(0.88, 0.0, 1.0);
+const float maxSpeed = 8.0;
 
 void main() {
 	float speed = min(length(velocity.xyz), maxSpeed);
 	if(speed < c1) {
 		outColor = vec4(mix(0.2*position.xyz+vec3(0.2, 0.2, 0.2), vec3(0.0, speed/c1, 0.66), speed / c1), 1.0);
 	} else if(speed < c2) {
-		outColor = vec4(mix(vec3(0.0, 1.0, 0.66), vec3(0.66, 1.0, 0.0), (speed - c1)/(c2 - c1)), 1.0);
+		outColor = vec4(mix(endC1, endC2, (speed - c1)/(c2 - c1)), 1.0);
+	} else if(speed < c3) {
+		outColor = vec4(mix(endC2, endC3, (speed - c2)/(c3 - c2)), 1.0);
 	} else {
-		outColor = vec4(mix(vec3(0.66, 1.0, 0.0), vec3(1.0, 0.0, 0.0), (speed - c2)/(maxSpeed - c2)), 1.0);
+		outColor = vec4(mix(endC3, vec3(1.0, 0.0, 0.0), (speed - c3)/(maxSpeed - c3)), 1.0);
 	}
 
 	if(perspective) {
-		gl_Position = projViewMatrix * vec4(position.xyz, 1.0);
+		gl_Position = vec4(position.xyz, 1.0) * projViewMatrix;
 	} else {
 		gl_Position = vec4(position.xyz, 1.0);
 	}

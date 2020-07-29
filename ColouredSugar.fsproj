@@ -75,6 +75,7 @@
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
     <Compile Include="GrowingArray.fs" />
+    <Compile Include="EzTexture.fs" />
     <Compile Include="EzSound.fs" />
     <Compile Include="EzShader.fs" />
     <Compile Include="EzCamera.fs" />
@@ -83,10 +84,14 @@
     <None Include="App.config" />
     <Content Include="packages.config" />
     <None Include="particle_comp.glsl" />
-    <None Include="particle_vert.glsl" />
     <None Include="particle_frag.glsl" />
-    <None Include="solidcolor_vert.glsl" />
-    <None Include="solidcolor_frag.glsl" />
+    <None Include="particle_vert.glsl" />
+    <None Include="solid_colour_billboard_frag.glsl" />
+    <None Include="solid_colour_billboard_vert.glsl" />
+    <None Include="solid_colour_sphere_frag.glsl" />
+    <None Include="solid_colour_sphere_vert.glsl" />
+    <None Include="textured_billboard_frag.glsl" />
+    <None Include="textured_billboard_vert.glsl" />
     <Content Include="OpenTK.dll.config" />
     <None Include="README.md" />
     <None Include="COPYING" />

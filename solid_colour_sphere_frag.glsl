@@ -4,7 +4,7 @@ out vec4 FragColor;
 
 uniform vec3 triColor;
 
-const float ambientStrength = 0.2;
+const float ambientStrength = 0.5;
 const vec3 lightDir = normalize(vec3(0.0, -1.0, 1.0));
 const vec3 lightColour = vec3(1.0);
 
