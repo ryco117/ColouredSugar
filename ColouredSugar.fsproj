@@ -14,6 +14,7 @@
     <UseStandardResourceNames>true</UseStandardResourceNames>
     <WarningsAsErrors>3239;$(WarningsAsErrors)</WarningsAsErrors>
     <Name>ColouredSugar</Name>
+    <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -68,7 +69,8 @@
     <WarningLevel>3</WarningLevel>
     <DocumentationFile>bin\$(Configuration)\$(AssemblyName).XML</DocumentationFile>
     <Prefer32Bit>true</Prefer32Bit>
-    <StartWorkingDirectory>../../</StartWorkingDirectory>
+    <StartWorkingDirectory>
+    </StartWorkingDirectory>
     <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
   <Import Project="$(FSharpTargetsPath)" />
@@ -83,18 +85,18 @@
     <Compile Include="Program.fs" />
     <None Include="App.config" />
     <Content Include="packages.config" />
-    <None Include="particle_comp.glsl" />
-    <None Include="particle_frag.glsl" />
-    <None Include="particle_vert.glsl" />
-    <None Include="solid_colour_billboard_frag.glsl" />
-    <None Include="solid_colour_billboard_vert.glsl" />
-    <None Include="solid_colour_sphere_frag.glsl" />
-    <None Include="solid_colour_sphere_vert.glsl" />
-    <None Include="textured_billboard_frag.glsl" />
-    <None Include="textured_billboard_vert.glsl" />
     <Content Include="OpenTK.dll.config" />
     <None Include="README.md" />
     <None Include="COPYING" />
+    <None Include="shaders\textured_billboard_vert.glsl" />
+    <None Include="shaders\particle_comp.glsl" />
+    <None Include="shaders\particle_frag.glsl" />
+    <None Include="shaders\particle_vert.glsl" />
+    <None Include="shaders\solid_colour_billboard_frag.glsl" />
+    <None Include="shaders\solid_colour_billboard_vert.glsl" />
+    <None Include="shaders\solid_colour_sphere_frag.glsl" />
+    <None Include="shaders\solid_colour_sphere_vert.glsl" />
+    <None Include="shaders\textured_billboard_frag.glsl" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FSharp.Core">
@@ -131,6 +133,9 @@
     </Reference>
     <Reference Include="System.Windows.Forms" />
   </ItemGroup>
+  <PropertyGroup>
+    <PostBuildEvent>XCOPY $(ProjectDir)\shaders\ $(TargetDir)\shaders\ /y /s</PostBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

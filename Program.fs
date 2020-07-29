@@ -321,8 +321,8 @@ type ColouredSugar() =
         GL.Enable EnableCap.Blend
 
         // Load particle system
-        particleCompShader <- EzShader.CreateComputeShader "particle_comp.glsl"
-        particleRenderShader <- EzShader.CreateShaderProgram "particle_vert.glsl" "particle_frag.glsl"
+        particleCompShader <- EzShader.CreateComputeShader "shaders/particle_comp.glsl"
+        particleRenderShader <- EzShader.CreateShaderProgram "shaders/particle_vert.glsl" "shaders/particle_frag.glsl"
         let particlePos = Array.init (particleCount * 4) (fun i -> if i % 4 = 3 then 1.f else randNormF ())
         particleVBO <- GL.GenBuffer ()
         GL.BindBuffer(BufferTarget.ShaderStorageBuffer, particleVBO)
@@ -431,9 +431,9 @@ type ColouredSugar() =
             printfn "FPS: %f" (float fpsWait / ((float fpsClock.ElapsedMilliseconds) / 1000.))
             fpsClock.Restart ()
 
-            // Check if audio out stopped
-            if audioResponsive && audioOutCapture.Stopped () then
-                audioOutCapture.StartCapturing ()
+        // Occasionally check if audio out stopped
+        if audioResponsive && tick % 100UL = 0UL && audioOutCapture.Stopped () then
+            audioOutCapture.StartCapturing ()
 
         base.OnRenderFrame eventArgs
 

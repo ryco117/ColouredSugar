@@ -18,15 +18,15 @@ determined bin from the domain of `bass`, `mids`, and `highs` respectively. The 
 `curl-attractor`s apply a force determined by the cross-product of their positions relative to the origin and to the attractor, 
 `blackhole`s apply a force towards their location following an inverse square law.
 
-### Example Videos (Click for links)
-[![Coloured Sugar Demo 1](https://img.youtube.com/vi/p_YMFBeia4w/0.jpg)](https://www.youtube.com/watch?v=p_YMFBeia4w "Coloured Sugar Demo 1")
-[![Coloured Sugar Demo 2](https://img.youtube.com/vi/tWfhWh-3q38/0.jpg)](https://www.youtube.com/watch?v=tWfhWh-3q38 "Coloured Sugar Demo 2")
-
 ### Easy Installation (Precompiled)
 - Go to the [releases page](https://github.com/ryco117/ColouredSugar/releases) and determine the latest release/version
 - Download the compressed archive containing the **precompiled** executable
 - Extract the folder within
 - Run the application `ColouredSugar.exe`
+
+### Example Videos (Click for links)
+[![Coloured Sugar Demo 1](https://img.youtube.com/vi/p_YMFBeia4w/0.jpg)](https://www.youtube.com/watch?v=p_YMFBeia4w "Coloured Sugar Demo 1")
+[![Coloured Sugar Demo 2](https://img.youtube.com/vi/tWfhWh-3q38/0.jpg)](https://www.youtube.com/watch?v=tWfhWh-3q38 "Coloured Sugar Demo 2")
 
 ### Controls
 | Button | Description |
@@ -37,7 +37,7 @@ determined bin from the domain of `bass`, `mids`, and `highs` respectively. The 
 | `F5`  | Reset the visualizer |
 | `F11`  | Toggle fullscreen (default: `false`) |
 | `ALT-ENTER`  | Toggle fullscreen (alternative to `F11`) |
-| `F12` | Save a screenshot to 'awesome.png' at current window resolution. If a file with that name already exists it will increment a counter until it finds an available file name |
+| `F12` | Save a screenshot to `screenshots/awesome.png` at current window resolution. If a file with that name already exists it will increment a counter until it finds an available file name |
 | `ALT-P`  | Toggle between `3D` and `2`D perspectives (default: `3D`) |
 | `W,A,S,D` | Manually rotate the cube (if in `3D` perspective) |
 | `Z` | Toggle auto-rotation of cube (if in `3D` perspective, default: `true`) |

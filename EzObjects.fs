@@ -115,7 +115,7 @@ let GenSphere n =
     vertices, indices
 
 type ColouredSphere(color: Vector3, n) as this =
-    inherit Object3D(GenSphere n, "solid_colour_sphere_vert.glsl", "solid_colour_sphere_frag.glsl")
+    inherit Object3D(GenSphere n, "shaders/solid_colour_sphere_vert.glsl", "shaders/solid_colour_sphere_frag.glsl")
     do GL.Uniform3(GL.GetUniformLocation(this.GetRenderShader (), "triColor"), color)
     do GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 0, 0)
     do GL.EnableVertexAttribArray 0
@@ -148,7 +148,7 @@ type Billboard(position, scale, rotation, vert, frag) as this =
         GL.Enable EnableCap.DepthTest
 
 type TexturedBillboard(position, scale, rotation, texture: EzTexture.Texture) =
-    inherit Billboard(position, scale, rotation, "textured_billboard_vert.glsl", "textured_billboard_frag.glsl")
+    inherit Billboard(position, scale, rotation, "shaders/textured_billboard_vert.glsl", "shaders/textured_billboard_frag.glsl")
     let texCoordBufferId = GL.GenBuffer ()
     let textureId = GL.GenTexture ()
     do
@@ -177,5 +177,5 @@ type TexturedBillboard(position, scale, rotation, texture: EzTexture.Texture) =
         base.Dispose ()
 
 type ColouredBillboard(position, scale, rotation, colour: Vector4) as this =
-    inherit Billboard(position, scale, rotation, "solid_colour_billboard_vert.glsl", "solid_colour_billboard_frag.glsl")
+    inherit Billboard(position, scale, rotation, "shaders/solid_colour_billboard_vert.glsl", "shaders/solid_colour_billboard_frag.glsl")
     do GL.Uniform4(GL.GetUniformLocation(this.GetRenderShader (), "quadColor"), colour)
