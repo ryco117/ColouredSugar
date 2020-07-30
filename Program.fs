@@ -219,7 +219,7 @@ type ColouredSugar() =
                 // Draw sphere
                 GL.Disable EnableCap.CullFace
                 GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line)
-                sphere.Draw (if camera.Perspective then projView else Matrix4.Identity)
+                sphere.Draw projView
                 GL.Enable EnableCap.CullFace
                 GL.PolygonMode(MaterialFace.Front, PolygonMode.Fill)
 
@@ -405,7 +405,7 @@ type ColouredSugar() =
         GL.UseProgram particleRenderShader
         let mutable projViewMutable =
             if autoRotate then
-                camera.Yaw <- camera.Yaw - 0.08f * deltaTime
+                camera.Yaw <- camera.Yaw + 0.08f * deltaTime
             camera.Update deltaTime
             camera.ProjView ()
         GL.UniformMatrix4(GL.GetUniformLocation(particleRenderShader, "projViewMatrix"), true, &projViewMutable)
@@ -416,7 +416,7 @@ type ColouredSugar() =
             // Draw sphere
             GL.Disable EnableCap.CullFace
             GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line)
-            sphere.Draw (if camera.Perspective then projViewMutable else Matrix4.Identity)
+            sphere.Draw projViewMutable
             GL.Enable EnableCap.CullFace
             GL.PolygonMode(MaterialFace.Front, PolygonMode.Fill)
 

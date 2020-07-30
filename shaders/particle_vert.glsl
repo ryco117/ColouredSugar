@@ -28,9 +28,5 @@ void main() {
 		outColor = vec4(mix(endC3, vec3(1.0, 0.0, 0.0), (speed - c3)/(maxSpeed - c3)), 1.0);
 	}
 
-	if(perspective) {
-		gl_Position = vec4(position.xyz, 1.0) * projViewMatrix;
-	} else {
-		gl_Position = vec4(position.xyz, 1.0);
-	}
+	gl_Position = vec4(position.xyz, 1.0) * projViewMatrix;
 }

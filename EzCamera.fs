@@ -29,7 +29,10 @@ type EzCamera() =
     let mutable yaw = 0.f
     let mutable strafeRight = 0.f
     let mutable strafeUp = 0.f
-    let proj = Matrix4.CreatePerspectiveFieldOfView (float32 (Math.PI/2.), 16.f/9.f, 0.01f, 100.f)
+    let proj = Matrix4.CreatePerspectiveFieldOfView (float32 (Math.PI/2.), 16.f/9.f, 0.01f, 50.f)
+    let projInv = proj.Inverted ()
+    let orth = Matrix4.CreateOrthographic (2.f, 2.f, -1.f, 1.f)
+    let orthInv = orth.Inverted ()
     member _.Pitch
         with get () = pitch
         and set p = pitch <- p
@@ -46,18 +49,22 @@ type EzCamera() =
         with get () = strafeUp
         and set u = strafeUp <- u
     member _.Update deltaTime =
-        yaw <- yaw - rotateSensitivity*deltaTime*strafeRight
+        yaw <- yaw + rotateSensitivity*deltaTime*strafeRight
         position.Z <- position.Z - moveSensitivity*deltaTime*strafeUp
     member _.Perspective
         with get () = perspective
         and set p = perspective <- p
     member _.ProjView () =
-        Matrix4.CreateRotationY(yaw) * Matrix4.CreateTranslation(-position) * proj
+        if perspective then
+            Matrix4.CreateRotationY(-yaw) * Matrix4.CreateTranslation(-position) * proj
+        else
+            orth
     member _.ToWorldSpace x y =
         if perspective then
-            new Vector3(
-                x * float32(System.Math.Cos (float yaw)),
-                y,
-                x * float32(System.Math.Sin(float yaw)))
+            let p =
+                let v = projInv * Vector4(x, y, -0.99f, 0.02f)
+                let r = v.Xyz / v.W
+                Vector4(r + position, 0.f)
+            (Matrix4.CreateRotationY(-yaw) * p).Xyz
         else
-            new Vector3(x, y, 0.f)
+            (orthInv * Vector4(x, y, -1.f, 0.f)).Xyz

@@ -86,6 +86,7 @@ type AudioOutStreamer(onDataAvail, onClose) =
         | NAudio.CoreAudioApi.CaptureState.Starting
         | NAudio.CoreAudioApi.CaptureState.Capturing ->
             capture.StopRecording ()
+            onClose ()
         | _ -> ()
     member this.Reset () =
         this.StopCapturing ()

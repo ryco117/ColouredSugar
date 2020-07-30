@@ -31,18 +31,18 @@ determined bin from the domain of `bass`, `mids`, and `highs` respectively. The 
 ### Controls
 | Button | Description |
 | ------ | ----------- |
-| `F1`   | Toggle help overlay *(in development)* |
+| `F1`   | Toggle help overlay |
 | `ESC`  | Exit the application |
 | `ALT-F4`  | Exit the application (alternative to `ESC`) |
 | `F5`  | Reset the visualizer |
 | `F11`  | Toggle fullscreen (default: `false`) |
 | `ALT-ENTER`  | Toggle fullscreen (alternative to `F11`) |
 | `F12` | Save a screenshot to `screenshots/awesome.png` at current window resolution. If a file with that name already exists it will increment a counter until it finds an available file name |
-| `ALT-P`  | Toggle between `3D` and `2`D perspectives (default: `3D`) |
+| `ALT-P`  | Toggle between `3D` and `2D` perspectives (default: `3D`) |
 | `W,A,S,D` | Manually rotate the cube (if in `3D` perspective) |
 | `Z` | Toggle auto-rotation of cube (if in `3D` perspective, default: `true`) |
 | `X` | Toggle presence of bouncing ball (default: `true`) |
-| `R` | Toggle audio-output responsiveness (Note: framerate may jitter if there is not system audio-out present while set to `true`, default: `true`) |
-| `MOUSE-LEFT` | Hold to manually apply a point force attraction/repulsion at position guided by the mouse cursor |
-| `MOUSE-RIGHT` | Hold to inverse repulsion force to attraction at position guided by the mouse cursor. (Note: must hold both `MOUSE-LEFT` and `MOUSE-RIGHT` to apply and inverse the force respectively) |
+| `R` | Toggle audio-output responsiveness (Note: framerate may jitter if there is no system audio-out present while set to `true`, default: `true`) |
+| `MOUSE-LEFT` | Hold to manually apply a point force attraction/repulsion at the mouse cursor |
+| `MOUSE-RIGHT` | Hold to inverse repulsion force to attraction at the mouse cursor. (Note: must hold both `MOUSE-RIGHT` and `MOUSE-LEFT` to apply an inverted force) |
 | `MOUSE-SCROLL` | Scroll up to increase intensity of manual point force. Scroll down to decrease strength |

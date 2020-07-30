@@ -48,13 +48,16 @@ void main(void)
 
 		t = vec3(bigBoomer.xy, pos.z) - pos.xyz;
 		r = max(length(t), min_length);
-		g -= bigBoomer.w * normalize(t) / (r*r*r*r);
+		g -= bigBoomer.w * normalize(t) / (r*r*r);
 
 		for(int i = 0; i < attractors.length(); i++) {
 			t = vec3(attractors[i].xy, pos.z) - pos.xyz;
 			r = max(length(t), min_length);
 			g += attractors[i].w * normalize(t) / (r*r);
 		}
+
+		// Scale 2D forces down (to account for smaller distances)
+		g *= 0.75;
 	}
 	vel.xyz += deltaTime * g;
 	
