@@ -83,7 +83,7 @@ void main(void)
 	}
 
 	// Musical Spheres
-	vec3 d = pos.xyz - musicalSphere.xyz;
+	vec3 d = perspective ? pos.xyz - musicalSphere.xyz : vec3(pos.xy - musicalSphere.xy, 0.0);
 	float mag = length(d);
 	if(mag <= musicalSphere.w) {
 		pos.xyz = musicalSphere.xyz + (musicalSphere.w/mag)*d;

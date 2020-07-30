@@ -115,12 +115,12 @@ type ColouredSugar() =
                 let Y = 2.f * bassFreqFrac - 1.f
                 whiteHole.W <- defaultMass * bassSum * 1.15f
                 whiteHole.Xyz <- camera.ToWorldSpace X Y
-            if midsMaxMag > 0.000125f then
+            if midsMaxMag > 0.000_115f then
                 let X = 2.f * midsFreqLog - 1.f
                 let Y = 2.f * midsFreqFrac - 1.f
                 curlAttractor.W <- defaultMass * midsSum * 7.5f
                 curlAttractor.Xyz <- camera.ToWorldSpace  X Y
-            if highMaxMag > 0.0001f then
+            if highMaxMag > 0.000_09f then
                 let X = 2.f * highFreqLog - 1.f
                 let Y = 2.f * highFreqFrac - 1.f
                 blackHole.W <- defaultMass * highSum * 7.5f
