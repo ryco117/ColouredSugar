@@ -40,8 +40,9 @@ determined bin from the domain of `bass`, `mids`, and `highs` respectively. The 
 | `F12` | Save a screenshot to `screenshots/awesome.png` at current window resolution. If a file with that name already exists it will increment a counter until it finds an available file name |
 | `ALT-P`  | Toggle between `3D` and `2D` perspectives (default: `3D`) |
 | `W,A,S,D` | Manually rotate the cube (if in `3D` perspective) |
+| `LEFT-SHIFT` | Hold to reduce movement speed of the camera |
 | `Z` | Toggle auto-rotation of cube (if in `3D` perspective, default: `true`) |
-| `X` | Toggle presence of bouncing ball (default: `true`) |
+| `X` | Toggle presence of bouncing ball (default: `false`) |
 | `R` | Toggle audio-output responsiveness (Note: framerate may jitter if there is no system audio-out present while set to `true`, default: `true`) |
 | `MOUSE-LEFT` | Hold to manually apply a point force attraction/repulsion at the mouse cursor |
 | `MOUSE-RIGHT` | Hold to inverse repulsion force to attraction at the mouse cursor. (Note: must hold both `MOUSE-RIGHT` and `MOUSE-LEFT` to apply an inverted force) |

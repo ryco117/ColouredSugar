@@ -32,7 +32,7 @@ let random = new System.Random ()
 let randF () = float32 (random.NextDouble ())
 let randNormF () = (randF () - 0.5f) * 2.f
 
-type ColouredSugar() =
+type ColouredSugar() as world =
     inherit GameWindow(
         1366, 768,
         new GraphicsMode(new ColorFormat(8, 8, 8, 8), 24, 8, 1),
@@ -47,23 +47,29 @@ type ColouredSugar() =
     let mutable mouseScroll = 0.f
     let mutable mouseLeftDown = false
     let mutable mouseRightDown = false
+    let mutable targetCameraVelocity = Vector3.Zero
+    let mutable holdShift = false
     let mutable autoRotate = true
     let mutable audioResponsive = true
 
     let sphere = new EzObjects.ColouredSphere(Vector3(0.75f, 0.75f, 0.75f), 3)
     let mutable sphereVelocity = new Vector3(-0.4f, 0.4f, -0.3f)
-    do sphere.Scale <- new Vector3 0.125f
+    let defaultSphereScale = new Vector3 0.125f
+    do sphere.Scale <- Vector3.Zero
 
     let mutable overlay = true
     let texture = EzTexture.ReadFileToTexture "./HelpMenu.png"
-    (*let overlayString = "Hello There World!!!!\nPress 'F1' to open/close this help menu"
-    let texture = EzTexture.StringToTexture overlayString (new System.Drawing.Font(System.Drawing.FontFamily.GenericMonospace, 20.f))*)
-    let textureWidth, textureHeight =
-        match texture with
-        | {Width = width; Height = height; Data = _} -> float32 width / 960.f, float32 height / 540.f
-    (*let billboard = new EzObjects.TexturedBillboard(Vector3(-0.9f, 0.5f, 0.f), Vector3(1.f * textureWidth, 1.f * textureHeight, 1.f), 0.f, texture)
-    let backBillboard = new EzObjects.ColouredBillboard(Vector3(-0.9f, 0.5f, 0.f), Vector3(1.f * textureWidth, 1.f * textureHeight, 1.f), 0.f, Vector4(0.1f, 0.1f, 0.1f, 0.8f))*)
-    let billboard = new EzObjects.TexturedBillboard(Vector3(-0.95f, 0.95f - textureHeight, 0.f), Vector3(textureWidth, textureHeight, 1.f), 0.f, texture)
+    let billboard = {
+        new EzObjects.TexturedBillboard(Vector3.Zero, Vector3.One, 0.f, texture) with
+        override this.Update _ =
+            let textureWidth, textureHeight =
+                match texture with
+                | {Width = width; Height = height; Data = _} ->
+                    2.f * min (float32 width / float32 world.Width) 0.95f,
+                    2.f * min (float32 height / float32 world.Height) 0.95f
+            this.Position <- Vector3(-0.95f, 0.95f - textureHeight, 0.f)
+            this.Scale <- Vector3(textureWidth, textureHeight, 1.f)
+     }
 
     // Particle System
     let particleCount = 1024*1024
@@ -110,22 +116,26 @@ type ColouredSugar() =
             let bassMaxI, bassMaxMag, bassSum, bassFreqLog, bassFreqFrac = analyze (Array.sub complex 1 bassEnd)
             let midsMaxI, midsMaxMag, midsSum, midsFreqLog, midsFreqFrac = analyze (Array.sub complex midsStart (midsEnd - midsStart))
             let highMaxI, highMaxMag, highSum, highFreqLog, highFreqFrac = analyze (Array.sub complex highStart (highEnd - highStart))
+            let negYaw = -camera.Yaw
             let toWorldSpace x y =
-                Vector3(x * float32(System.Math.Cos (float camera.Yaw)), y, x * float32(System.Math.Sin(float camera.Yaw)))
-            if bassMaxMag > 0.02f then
+                if camera.Perspective then
+                    Vector3(x * cos negYaw, y, x * sin negYaw)
+                else
+                    Vector3(x, y, 0.f)
+            if bassMaxMag > 0.0175f then
                 let X = 2.f * bassFreqLog - 1.f
                 let Y = 2.f * bassFreqFrac - 1.f
                 whiteHole.W <- defaultMass * bassSum * 1.15f
                 whiteHole.Xyz <- toWorldSpace X Y
-            if midsMaxMag > 0.000_115f then
+            if midsMaxMag > 0.000_125f then
                 let X = 2.f * midsFreqLog - 1.f
                 let Y = 2.f * midsFreqFrac - 1.f
-                curlAttractor.W <- defaultMass * midsSum * 7.5f
+                curlAttractor.W <- defaultMass * (sqrt midsSum) * 5.f
                 curlAttractor.Xyz <- toWorldSpace  X Y
             if highMaxMag > 0.000_09f then
                 let X = 2.f * highFreqLog - 1.f
                 let Y = 2.f * highFreqFrac - 1.f
-                blackHole.W <- defaultMass * highSum * 7.5f
+                blackHole.W <- defaultMass * (sqrt highSum) * 4.75f
                 blackHole.Xyz <- toWorldSpace X Y
     let onClose () =
         blackHole.W <- 0.f
@@ -157,9 +167,9 @@ type ColouredSugar() =
         // Toggle sphere
         | Key.X, _, false ->
             if sphere.Scale.X > 0.f then
-                sphere.Scale <- Vector3 0.f
+                sphere.Scale <- Vector3.Zero
             else
-                sphere.Scale <- Vector3 0.125f
+                sphere.Scale <- defaultSphereScale
         // Reset states of objects
         | Key.F5, _, false ->
             let velocities = Array.init (particleCount * 4) (fun i -> if i % 4 = 3 then 0.f else randNormF () * 0.01f)
@@ -172,15 +182,6 @@ type ColouredSugar() =
             sphere.Position <- new Vector3(0.f)
             camera.Position <- new Vector3(0.f, 0.f, 0.975f)
             mouseScroll <- 0.f
-        // Movement keys
-        | Key.A, _, false ->
-            camera.StrafeRight <- camera.StrafeRight - 1.f
-        | Key.D, _, false ->
-            camera.StrafeRight <- camera.StrafeRight + 1.f
-        | Key.W, _, false ->
-            camera.StrafeUp <- camera.StrafeUp + 1.f
-        | Key.S, _, false ->
-            camera.StrafeUp <- camera.StrafeUp - 1.f
         // Toggle auto rotate
         | Key.Z, _, false -> autoRotate <- not autoRotate
         // Toggle responsive to audio-out
@@ -192,6 +193,18 @@ type ColouredSugar() =
             else
                 audioResponsive <- true
                 audioOutCapture.Reset ()
+        // Movement keys
+        | Key.A, _, false ->
+            targetCameraVelocity.X <- targetCameraVelocity.X - 1.f
+        | Key.D, _, false ->
+            targetCameraVelocity.X <- targetCameraVelocity.X + 1.f
+        | Key.W, _, false ->
+            targetCameraVelocity.Z <- targetCameraVelocity.Z + 1.f
+        | Key.S, _, false ->
+            targetCameraVelocity.Z <- targetCameraVelocity.Z - 1.f
+        // Note use of LEFT-SHIFT
+        | Key.ShiftLeft, _, false ->
+            holdShift <- true
         // Save screenshot
         | Key.F12, _ , false ->
             GL.Enable EnableCap.Multisample
@@ -282,13 +295,15 @@ type ColouredSugar() =
         match e.Key with
         // Movement keys
         | Key.A ->
-            camera.StrafeRight <- camera.StrafeRight + 1.f
+            targetCameraVelocity.X <- targetCameraVelocity.X + 1.f
         | Key.D ->
-            camera.StrafeRight <- camera.StrafeRight - 1.f
+            targetCameraVelocity.X <- targetCameraVelocity.X - 1.f
         | Key.W ->
-            camera.StrafeUp <- camera.StrafeUp - 1.f
+            targetCameraVelocity.Z <- targetCameraVelocity.Z - 1.f
         | Key.S ->
-            camera.StrafeUp <- camera.StrafeUp + 1.f
+            targetCameraVelocity.Z <- targetCameraVelocity.Z + 1.f
+        | Key.ShiftLeft ->
+            holdShift <- false
         | _ -> base.OnKeyUp e
     override this.OnMouseMove e =
         mouseX <- (float32 e.X / float32 this.Width) * 2.f - 1.f
@@ -408,6 +423,9 @@ type ColouredSugar() =
         let mutable projViewMutable =
             if autoRotate then
                 camera.Yaw <- camera.Yaw + 0.08f * deltaTime
+            let t = deltaTime / 0.2f
+            camera.ForwardVelocity <- (1.f - t) * camera.ForwardVelocity + t * targetCameraVelocity.Z * if holdShift then 0.33f else 1.f
+            camera.StrafeRight <- (1.f - t) * camera.StrafeRight + t * targetCameraVelocity.X * if holdShift then 0.33f else 1.f
             camera.Update deltaTime
             camera.ProjView ()
         GL.UniformMatrix4(GL.GetUniformLocation(particleRenderShader, "projViewMatrix"), true, &projViewMutable)
@@ -423,7 +441,7 @@ type ColouredSugar() =
             GL.PolygonMode(MaterialFace.Front, PolygonMode.Fill)
 
         if overlay then
-            //backBillboard.Draw ()
+            billboard.Update deltaTime
             billboard.Draw ()
 
         this.Context.SwapBuffers ()

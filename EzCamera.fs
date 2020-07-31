@@ -28,7 +28,7 @@ type EzCamera() =
     let mutable pitch = 0.f
     let mutable yaw = 0.f
     let mutable strafeRight = 0.f
-    let mutable strafeUp = 0.f
+    let mutable forwardVelocity = 0.f
     let proj = Matrix4.CreatePerspectiveFieldOfView (float32 (Math.PI/2.), 16.f/9.f, 0.01f, 50.f)
     let projInv = proj.Inverted ()
     let orth = Matrix4.CreateOrthographic (2.f, 2.f, -1.f, 1.f)
@@ -45,12 +45,12 @@ type EzCamera() =
     member _.StrafeRight
         with get() = strafeRight
         and set r = strafeRight <- r
-    member _.StrafeUp
-        with get () = strafeUp
-        and set u = strafeUp <- u
+    member _.ForwardVelocity
+        with get () = forwardVelocity
+        and set u = forwardVelocity <- u
     member _.Update deltaTime =
         yaw <- yaw + rotateSensitivity*deltaTime*strafeRight
-        position.Z <- position.Z - moveSensitivity*deltaTime*strafeUp
+        position.Z <- position.Z - moveSensitivity*deltaTime*forwardVelocity
     member _.Perspective
         with get () = perspective
         and set p = perspective <- p

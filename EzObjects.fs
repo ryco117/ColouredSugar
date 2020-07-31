@@ -59,6 +59,8 @@ type Object3D(objectMesh: float32[]*uint32[], vertPath, fragPath) =
             rotation * Matrix4.CreateScale(scale) * Matrix4.CreateTranslation(position) * projView
         GL.UniformMatrix4(GL.GetUniformLocation(shaderProgram, "projViewModel"), true, &projViewModel)
         GL.DrawElements(PrimitiveType.Triangles, indexLength, DrawElementsType.UnsignedInt, 0)
+    abstract member Update: float32 -> unit
+    default this.Update _ = ()
 
 let GenSphere n =
     let top = 0.f, 1.f, 0.f         // top 0
