@@ -34,9 +34,15 @@ let randNormF () = (randF () - 0.5f) * 2.f
 
 type ColouredSugar() as world =
     inherit GameWindow(
-        1366, 768,
+        1280, 720,
         new GraphicsMode(new ColorFormat(8, 8, 8, 8), 24, 8, 1),
         "Coloured Sugar", GameWindowFlags.Default)
+    do world.VSync <- VSyncMode.On
+    do world.Icon <-new System.Drawing.Icon "images/ColouredSugar.ico"
+    let console = new ConsoleControls.Controller ()
+    do console.Show false
+    let mutable preFullscreenSize = System.Drawing.Size(1, 1)
+
     let camera = new EzCamera()
     let screenshotScale = 1.
     let screenshotsDir = "./screenshots"
@@ -58,7 +64,7 @@ type ColouredSugar() as world =
     do sphere.Scale <- Vector3.Zero
 
     let mutable overlay = true
-    let texture = EzTexture.ReadFileToTexture "./HelpMenu.png"
+    let texture = EzTexture.ReadFileToTexture "images/HelpMenu.png"
     let billboard = {
         new EzObjects.TexturedBillboard(Vector3.Zero, Vector3.One, 0.f, texture) with
         override this.Update _ =
@@ -149,8 +155,6 @@ type ColouredSugar() as world =
         whiteHole.W <- 0.f
     let audioOutCapture = new EzSound.AudioOutStreamer(onDataAvail, onClose)
 
-    let deltaClock = new System.Diagnostics.Stopwatch ()
-    let fpsClock = new System.Diagnostics.Stopwatch ()
     override this.OnKeyDown e =
         match e.Key, (e.Alt, e.Shift, e.Control, e.Command), e.IsRepeat with
         // Toggle Overlay/Help
@@ -161,9 +165,31 @@ type ColouredSugar() as world =
         // Fullscreen
         | Key.Enter, (true, false, false, false), false
         | Key.F11, (false, false, false, false), false ->
-            if this.WindowState = WindowState.Fullscreen then
+            (*if this.WindowBorder = WindowBorder.Hidden then
+                this.WindowBorder <- WindowBorder.Resizable
                 this.WindowState <- WindowState.Normal
+                this.ClientSize <- preFullscreenSize
             else
+                preFullscreenSize <- this.ClientSize
+                this.WindowBorder <- WindowBorder.Hidden
+                let device =
+                    let x = this.X
+                    let y = this.Y
+                    DisplayDevice.GetDisplay (
+                        Array.find
+                            (fun e -> (DisplayDevice.GetDisplay e).Bounds.Contains(x, y))
+                            (System.Enum.GetValues(typeof<DisplayIndex>) :?> DisplayIndex[]))
+                this.X <- device.Bounds.Left
+                this.Y <- device.Bounds.Top
+                //this.Size <- System.Drawing.Size(device.Width, device.Height - 1)   // NOTE : A resize seems to be needed in order for changes to border visibility to always be noticed
+                this.ClientSize <- System.Drawing.Size(device.Width, device.Height)*)
+            if this.WindowState = WindowState.Fullscreen then
+                this.WindowBorder <- WindowBorder.Resizable
+                this.WindowState <- WindowState.Normal
+                this.ClientSize <- preFullscreenSize
+            else
+                preFullscreenSize <- this.ClientSize
+                this.WindowBorder <- WindowBorder.Hidden
                 this.WindowState <- WindowState.Fullscreen
         // Alternate perspectives
         | Key.P, (true, false, false, false), false ->
@@ -208,9 +234,11 @@ type ColouredSugar() as world =
             targetCameraVelocity.Z <- targetCameraVelocity.Z + 1.f
         | Key.S, _, false ->
             targetCameraVelocity.Z <- targetCameraVelocity.Z - 1.f
-        // Note use of LEFT-SHIFT
+        // Hold LEFT-SHIFT to reduce walk speed
         | Key.ShiftLeft, _, false ->
             holdShift <- true
+        // Toggle debug console
+        | Key.Tilde, _, false -> console.Show(not (console.Visible()))
         // Save screenshot
         | Key.F12, _ , false ->
             GL.Enable EnableCap.Multisample
@@ -364,20 +392,15 @@ type ColouredSugar() as world =
         GL.VertexAttribPointer(1, 4, VertexAttribPointerType.Float, false, 0, 0)
         GL.EnableVertexAttribArray 1
 
-        deltaClock.Start ()
-        fpsClock.Start ()
         base.OnLoad eventArgs
     override _.OnUnload eventArgs =
-        deltaClock.Stop ()
-        fpsClock.Stop ()
         (audioOutCapture :> System.IDisposable).Dispose ()
         base.OnUnload eventArgs
     override this.OnResize eventArgs =
         GL.Viewport (0, 0, this.Width, this.Height)
         base.OnResize eventArgs
     override this.OnRenderFrame eventArgs =
-        let deltaTime = float32 deltaClock.Elapsed.TotalSeconds
-        deltaClock.Restart ()
+        let deltaTime = float32 eventArgs.Time
         GL.Clear (ClearBufferMask.ColorBufferBit ||| ClearBufferMask.DepthBufferBit)
 
         if sphere.Scale.X > 0.f then
@@ -455,8 +478,7 @@ type ColouredSugar() as world =
         // Tick management and occasional operations
         tick <- tick + 1UL
         if tick % fpsWait = 0UL then
-            printfn "FPS: %f" (float fpsWait / ((float fpsClock.ElapsedMilliseconds) / 1000.))
-            fpsClock.Restart ()
+            printfn "FPS: %f" this.RenderFrequency
 
         // Occasionally check if audio out stopped
         if audioResponsive && tick % 100UL = 0UL && audioOutCapture.Stopped () then
@@ -466,6 +488,11 @@ type ColouredSugar() as world =
 
 [<EntryPoint>]
 let main _ =
+    let options = ToolkitOptions.Default
+    options.Backend <- PlatformBackend.PreferNative
+    let toolkit = Toolkit.Init options
     let game = new ColouredSugar()
     game.Run ()
+    game.Dispose ()
+    toolkit.Dispose ()
     0

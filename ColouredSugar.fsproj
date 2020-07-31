@@ -77,6 +77,7 @@
   <Import Project="$(FSharpTargetsPath)" />
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
+    <Compile Include="ConsoleControls.fs" />
     <Compile Include="GrowingArray.fs" />
     <Compile Include="EzTexture.fs" />
     <Compile Include="EzSound.fs" />
@@ -98,7 +99,7 @@
     <None Include="shaders\solid_colour_sphere_frag.glsl" />
     <None Include="shaders\solid_colour_sphere_vert.glsl" />
     <None Include="shaders\textured_billboard_frag.glsl" />
-    <None Include="HelpMenu.png" />
+    <None Include="images\HelpMenu.png" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FSharp.Core">
@@ -137,7 +138,7 @@
   </ItemGroup>
   <PropertyGroup>
     <PostBuildEvent>robocopy "$(ProjectDir)\shaders" "$(TargetDir)\shaders"
-robocopy $(ProjectDir) $(TargetDir) "HelpMenu.png"
+robocopy "$(ProjectDir)\images" "$(TargetDir)\images"
 if %errorlevel% leq 1 exit 0 else exit %errorlevel%</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
