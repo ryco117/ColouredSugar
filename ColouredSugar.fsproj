@@ -140,6 +140,7 @@
   <PropertyGroup>
     <PostBuildEvent>robocopy "$(ProjectDir)\shaders" "$(TargetDir)\shaders"
 robocopy "$(ProjectDir)\images" "$(TargetDir)\images"
+robocopy "$(ProjectDir)" "$(TargetDir)" "README.md"
 del "$(TargetDir)\*.xml"
 if %errorlevel% leq 1 exit 0 else exit %errorlevel%</PostBuildEvent>
   </PropertyGroup>

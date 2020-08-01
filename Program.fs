@@ -73,14 +73,14 @@ type ColouredSugar() as world =
                 match texture with
                 | {Width = width; Height = height; Data = _} ->
                     let aspect = (float32 width * float32 world.Height) / (float32 height * float32 world.Width)
-                    let f x = 2.f * min x 0.95f
+                    let f x = 2.f * min x 0.98f
                     let w = f (float32 width / float32 world.Width)
                     let h = f (float32 height / float32 world.Height)
                     if (w / h - aspect) / (aspect + w / h) > 0.01f then
                         aspect * h, h
                     else
                         w, w/aspect
-            this.Position <- Vector3(-0.95f, 0.95f - textureHeight, 0.f)
+            this.Position <- Vector3(-0.98f, 0.98f - textureHeight, 0.f)
             this.Scale <- Vector3(textureWidth, textureHeight, 1.f)
      }
 
