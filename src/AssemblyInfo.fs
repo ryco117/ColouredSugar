@@ -1,14 +1,13 @@
 ﻿namespace ColouredSugar.AssemblyInfo
 
 open System.Reflection
-open System.Runtime.CompilerServices
 open System.Runtime.InteropServices
 
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [<assembly: AssemblyTitle("ColouredSugar")>]
-[<assembly: AssemblyDescription("")>]
+[<assembly: AssemblyDescription("Experimental audio-visualizer written in F# using OpenGL compute shaders")>]
 [<assembly: AssemblyConfiguration("")>]
 [<assembly: AssemblyCompany("")>]
 [<assembly: AssemblyProduct("ColouredSugar")>]

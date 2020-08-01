@@ -77,15 +77,6 @@
   </PropertyGroup>
   <Import Project="$(FSharpTargetsPath)" />
   <ItemGroup>
-    <Compile Include="AssemblyInfo.fs" />
-    <Compile Include="ConsoleControls.fs" />
-    <Compile Include="GrowingArray.fs" />
-    <Compile Include="EzTexture.fs" />
-    <Compile Include="EzSound.fs" />
-    <Compile Include="EzShader.fs" />
-    <Compile Include="EzCamera.fs" />
-    <Compile Include="EzObjects.fs" />
-    <Compile Include="Program.fs" />
     <None Include="App.config" />
     <Content Include="packages.config" />
     <Content Include="OpenTK.dll.config" />
@@ -101,6 +92,15 @@
     <None Include="shaders\solid_colour_sphere_vert.glsl" />
     <None Include="shaders\textured_billboard_frag.glsl" />
     <None Include="images\HelpMenu.png" />
+    <Compile Include="src\AssemblyInfo.fs" />
+    <Compile Include="src\ConsoleControls.fs" />
+    <Compile Include="src\GrowingArray.fs" />
+    <Compile Include="src\EzTexture.fs" />
+    <Compile Include="src\EzSound.fs" />
+    <Compile Include="src\EzShader.fs" />
+    <Compile Include="src\EzCamera.fs" />
+    <Compile Include="src\EzObjects.fs" />
+    <Compile Include="src\Program.fs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FSharp.Core">
