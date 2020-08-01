@@ -26,25 +26,26 @@ open OpenTK.Input
 open SixLabors.ImageSharp
 
 open EzCamera
+open ColouredSugarConfig
 
 // Try to use same RNG source application-wide
 let random = new System.Random ()
 let randF () = float32 (random.NextDouble ())
 let randNormF () = (randF () - 0.5f) * 2.f
 
-type ColouredSugar() as world =
+type ColouredSugar(config: Config) as world =
     inherit GameWindow(
         1280, 720,
         new GraphicsMode(new ColorFormat(8, 8, 8, 8), 24, 8, 1),
         "Coloured Sugar", GameWindowFlags.Default)
-    do world.VSync <- VSyncMode.On
-    do world.Icon <-new System.Drawing.Icon "images/ColouredSugar.ico"
+    do world.VSync <- if config.EnableVSync then VSyncMode.On else VSyncMode.Off
+    do world.Icon <-new System.Drawing.Icon "res/ColouredSugar.ico"
     let console = new ConsoleControls.Controller ()
     do console.Show false
     let mutable preFullscreenSize = System.Drawing.Size(1, 1)
 
-    let camera = new EzCamera()
-    let screenshotScale = 1.
+    let camera = new EzCamera(float32 config.CameraOrbitSpeed, float32 config.CameraMoveSpeed, 16.f/9.f)
+    let screenshotScale = float config.ScreenshotScale
     let screenshotsDir = "./screenshots"
     let mutable tick = 0UL
     let fpsWait: uint64 = 300UL
@@ -53,19 +54,26 @@ type ColouredSugar() as world =
     let mutable mouseScroll = 0.f
     let mutable mouseLeftDown = false
     let mutable mouseRightDown = false
+    let cursorForceInverseFactor = float32 config.CursorForceInverseFactor
+    let cursorForceScrollFactor = float32 config.CursorForceScrollIncrease
     let mutable targetCameraVelocity = Vector3.Zero
     let mutable holdShift = false
     let mutable autoRotate = true
-    let autoRotateSpeed = 0.075f
+    let autoRotateSpeed = float32 config.AutoOrbitSpeed
     let mutable audioResponsive = true
 
     let sphere = new EzObjects.ColouredSphere(Vector3(0.75f, 0.75f, 0.75f), 3)
-    let mutable sphereVelocity = new Vector3(-0.4f, 0.4f, -0.3f)
-    let defaultSphereScale = new Vector3 0.125f
+    let defaultSphereVelocity =
+        new Vector3(
+            float32 config.BouncingBallVelocity.X,
+            float32 config.BouncingBallVelocity.Y,
+            float32 config.BouncingBallVelocity.Z)
+    let mutable sphereVelocity = defaultSphereVelocity
+    let defaultSphereScale = new Vector3 (float32 config.BouncingBallSize)
     do sphere.Scale <- Vector3.Zero
 
     let mutable overlay = true
-    let texture = EzTexture.ReadFileToTexture "images/HelpMenu.png"
+    let texture = EzTexture.ReadFileToTexture "res/HelpMenu.png"
     let billboard = {
         new EzObjects.TexturedBillboard(Vector3.Zero, Vector3.One, 0.f, texture) with
         override this.Update _ =
@@ -85,7 +93,7 @@ type ColouredSugar() as world =
      }
 
     // Particle System
-    let particleCount = 1024*1024
+    let particleCount = config.ParticleCount
     let mutable particleRenderVAO = 0
     let mutable particleVBO = 0
     let mutable particleVelocityArray = 0
@@ -121,34 +129,35 @@ type ColouredSugar() as world =
                 let fl, ff = detailedFreq max_i arr.Length
                 max_i, max_mag, sum, fl, ff
             let roundToInt f = int (round f)
-            let bassEnd = roundToInt (300. / freqResolution)
-            let midsStart = roundToInt (300. / freqResolution)
-            let midsEnd = roundToInt (2_500. / freqResolution)
-            let highStart = roundToInt (2_500. / freqResolution)
-            let highEnd = roundToInt (16_000. / freqResolution)
-            let bassMaxI, bassMaxMag, bassSum, bassFreqLog, bassFreqFrac = analyze (Array.sub complex 1 bassEnd)
+            let bassStart = roundToInt (float config.BassStartFreq / freqResolution)
+            let bassEnd = roundToInt (float config.BassEndFreq / freqResolution)
+            let midsStart = roundToInt (float config.MidsStartFreq / freqResolution)
+            let midsEnd = roundToInt (float config.MidsEndFreq / freqResolution)
+            let highStart = roundToInt (float config.HighStartFreq / freqResolution)
+            let highEnd = roundToInt (float config.HighEndFreq / freqResolution)
+            let bassMaxI, bassMaxMag, bassSum, bassFreqLog, bassFreqFrac = analyze (Array.sub complex bassStart bassEnd)
             let midsMaxI, midsMaxMag, midsSum, midsFreqLog, midsFreqFrac = analyze (Array.sub complex midsStart (midsEnd - midsStart))
             let highMaxI, highMaxMag, highSum, highFreqLog, highFreqFrac = analyze (Array.sub complex highStart (highEnd - highStart))
             let negYaw = -camera.Yaw
             let toWorldSpace x y =
-                if camera.Perspective then
+                if camera.UsePerspective then
                     Vector3(x * cos negYaw, y, x * sin negYaw)
                 else
                     Vector3(x, y, 0.f)
-            if bassMaxMag > 0.0175f then
+            if bassMaxMag > float32 config.MinimumBass then
                 let X = 2.f * bassFreqLog - 1.f
                 let Y = 2.f * bassFreqFrac - 1.f
-                whiteHole.W <- defaultMass * bassSum * 1.15f
+                whiteHole.W <- defaultMass * bassSum * float32 config.WhiteHoleStrength
                 whiteHole.Xyz <- toWorldSpace X Y
-            if midsMaxMag > 0.000_125f then
+            if midsMaxMag > float32 config.MinimumMids then
                 let X = 2.f * midsFreqLog - 1.f
                 let Y = 2.f * midsFreqFrac - 1.f
-                curlAttractor.W <- defaultMass * (sqrt midsSum) * 5.f
+                curlAttractor.W <- defaultMass * (sqrt midsSum) * float32 config.CurlAttractorStrength
                 curlAttractor.Xyz <- toWorldSpace  X Y
-            if highMaxMag > 0.000_09f then
+            if highMaxMag > float32 config.MinimumHigh then
                 let X = 2.f * highFreqLog - 1.f
                 let Y = 2.f * highFreqFrac - 1.f
-                blackHole.W <- defaultMass * (sqrt highSum) * 4.75f
+                blackHole.W <- defaultMass * (sqrt highSum) * float32 config.BlackHoleStrength
                 blackHole.Xyz <- toWorldSpace X Y
     let onClose () =
         blackHole.W <- 0.f
@@ -194,8 +203,8 @@ type ColouredSugar() as world =
                 this.WindowState <- WindowState.Fullscreen
         // Alternate perspectives
         | Key.P, (true, false, false, false), false ->
-            camera.Perspective <- not camera.Perspective
-            if not camera.Perspective then
+            camera.UsePerspective <- not camera.UsePerspective
+            if not camera.UsePerspective then
                 camera.Yaw <- 0.f
         // Toggle sphere
         | Key.X, _, false ->
@@ -211,8 +220,8 @@ type ColouredSugar() as world =
             let positions = Array.init (particleCount * 4) (fun i -> if i % 4 = 3 then 1.f else randNormF ())
             GL.BindBuffer(BufferTarget.ShaderStorageBuffer, particleVBO)
             GL.BufferSubData(BufferTarget.ShaderStorageBuffer, nativeint 0, positions.Length * sizeof<float32>, positions)
-            sphereVelocity <- new Vector3(0.25f, 0.5f, 0.4f)
-            sphere.Position <- new Vector3(0.f)
+            sphereVelocity <- defaultSphereVelocity
+            sphere.Position <- Vector3.Zero
             camera.Position <- new Vector3(0.f, 0.f, 0.975f)
             mouseScroll <- 0.f
         // Toggle auto rotate
@@ -398,6 +407,7 @@ type ColouredSugar() as world =
         (audioOutCapture :> System.IDisposable).Dispose ()
         base.OnUnload eventArgs
     override this.OnResize eventArgs =
+        camera.SetProjection this.Aspect
         GL.Viewport (0, 0, this.Width, this.Height)
         base.OnResize eventArgs
     override this.OnRenderFrame eventArgs =
@@ -422,16 +432,16 @@ type ColouredSugar() as world =
         // Particle computation
         GL.UseProgram particleCompShader
         GL.Uniform1(GL.GetUniformLocation(particleCompShader, "deltaTime"), deltaTime)
-        GL.Uniform1(GL.GetUniformLocation(particleCompShader, "perspective"), if camera.Perspective then 1u else 0u)
+        GL.Uniform1(GL.GetUniformLocation(particleCompShader, "perspective"), if camera.UsePerspective then 1u else 0u)
         GL.Uniform4(
             GL.GetUniformLocation(particleCompShader, "attractors[0]"),
             new Vector4(
                 camera.ToWorldSpace mouseX mouseY,
                 if mouseLeftDown then
                     if mouseRightDown then
-                        1.5f * defaultMass * 1.4f**mouseScroll
+                        cursorForceInverseFactor * defaultMass * cursorForceScrollFactor**mouseScroll
                     else
-                        -defaultMass * 1.4f**mouseScroll
+                        -defaultMass * cursorForceScrollFactor**mouseScroll
                 else
                     0.f))
         GL.Uniform4(GL.GetUniformLocation(particleCompShader, "attractors[1]"), blackHole)
@@ -439,9 +449,7 @@ type ColouredSugar() as world =
         GL.Uniform4(GL.GetUniformLocation(particleCompShader, "curlAttractor"), curlAttractor)
         GL.Uniform4(
             GL.GetUniformLocation(particleCompShader, "musicalSphere"),
-            new Vector4(
-                sphere.Position,
-                (sphere.Scale.X + sphere.Scale.Y + sphere.Scale.Z)/3.f))
+            new Vector4(sphere.Position, sphere.Scale.X))
         GL.BindBufferBase(BufferRangeTarget.ShaderStorageBuffer, 0, particleVBO)
         GL.BindBufferBase(BufferRangeTarget.ShaderStorageBuffer, 1, particleVelocityArray)
         GL.DispatchCompute(particleCount / 128, 1, 1)
@@ -453,13 +461,13 @@ type ColouredSugar() as world =
         let mutable projViewMutable =
             if autoRotate then
                 camera.Yaw <- camera.Yaw + autoRotateSpeed * deltaTime
-            let t = deltaTime / 0.2f
-            camera.ForwardVelocity <- (1.f - t) * camera.ForwardVelocity + t * targetCameraVelocity.Z * if holdShift then 0.33f else 1.f
-            camera.StrafeRight <- (1.f - t) * camera.StrafeRight + t * targetCameraVelocity.X * if holdShift then 0.33f else 1.f
+            let t = deltaTime / float32 config.CameraInertia
+            camera.ForwardVelocity <- (1.f - t) * camera.ForwardVelocity + t * targetCameraVelocity.Z * if holdShift then float32 config.ShiftFactorMove else 1.f
+            camera.StrafeRight <- (1.f - t) * camera.StrafeRight + t * targetCameraVelocity.X * if holdShift then float32 config.ShiftFactorOrbit else 1.f
             camera.Update deltaTime
             camera.ProjView ()
         GL.UniformMatrix4(GL.GetUniformLocation(particleRenderShader, "projViewMatrix"), true, &projViewMutable)
-        GL.Uniform1(GL.GetUniformLocation(particleRenderShader, "perspective"), if camera.Perspective then 1u else 0u)
+        GL.Uniform1(GL.GetUniformLocation(particleRenderShader, "perspective"), if camera.UsePerspective then 1u else 0u)
         GL.DrawArrays(PrimitiveType.Points, 0, particleCount)
 
         if sphere.Scale.X > 0.f then
@@ -486,13 +494,15 @@ type ColouredSugar() as world =
             audioOutCapture.StartCapturing ()
 
         base.OnRenderFrame eventArgs
+    member this.Aspect =
+        float32 this.Width / float32 this.Height
 
 [<EntryPoint>]
 let main _ =
     let options = ToolkitOptions.Default
     options.Backend <- PlatformBackend.PreferNative
     let toolkit = Toolkit.Init options
-    let game = new ColouredSugar()
+    let game = new ColouredSugar(ConfigFormat.Load "config.json")
     game.Run ()
     game.Dispose ()
     toolkit.Dispose ()

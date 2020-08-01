@@ -80,6 +80,7 @@
     <None Include="App.config" />
     <Content Include="packages.config" />
     <Content Include="OpenTK.dll.config" />
+    <None Include="config.json" />
     <None Include="README.md" />
     <None Include="COPYING" />
     <None Include="shaders\textured_billboard_vert.glsl" />
@@ -91,8 +92,9 @@
     <None Include="shaders\solid_colour_sphere_frag.glsl" />
     <None Include="shaders\solid_colour_sphere_vert.glsl" />
     <None Include="shaders\textured_billboard_frag.glsl" />
-    <None Include="images\HelpMenu.png" />
+    <None Include="res\HelpMenu.png" />
     <Compile Include="src\AssemblyInfo.fs" />
+    <Compile Include="src\ColouredSugarConfig.fs" />
     <Compile Include="src\ConsoleControls.fs" />
     <Compile Include="src\GrowingArray.fs" />
     <Compile Include="src\EzTexture.fs" />
@@ -105,6 +107,9 @@
   <ItemGroup>
     <Reference Include="FSharp.Core">
       <HintPath>packages\FSharp.Core.4.7.1\lib\net45\FSharp.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="FSharp.Data">
+      <HintPath>packages\FSharp.Data.3.3.3\lib\net45\FSharp.Data.dll</HintPath>
     </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="NAudio">
@@ -136,11 +141,12 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <PropertyGroup>
     <PostBuildEvent>robocopy "$(ProjectDir)\shaders" "$(TargetDir)\shaders"
-robocopy "$(ProjectDir)\images" "$(TargetDir)\images"
-robocopy "$(ProjectDir)\." "$(TargetDir)\." README.md
+robocopy "$(ProjectDir)\res" "$(TargetDir)\res"
+robocopy "$(ProjectDir)\." "$(TargetDir)\." README.md config.json
 del "$(TargetDir)\*.xml"
 if %errorlevel% leq 1 exit 0 else exit %errorlevel%</PostBuildEvent>
   </PropertyGroup>

@@ -1,4 +1,4 @@
-﻿![ColouredSugar](images/ColouredSugar.ico)
+﻿![ColouredSugar](res/ColouredSugar.ico)
 # ColouredSugar
 
 ### About the project

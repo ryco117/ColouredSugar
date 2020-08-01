@@ -20,19 +20,17 @@ module EzCamera
 open System
 open OpenTK
 
-type EzCamera() =
-    let rotateSensitivity = 1.f
-    let moveSensitivity = 1.0f
+type EzCamera(rotateSensitivity, moveSensitivity, aspect) =
     let mutable position = new Vector3(0.f, 0.f, 0.975f)
     let mutable perspective = true
     let mutable pitch = 0.f
     let mutable yaw = 0.f
     let mutable strafeRight = 0.f
     let mutable forwardVelocity = 0.f
-    let proj = Matrix4.CreatePerspectiveFieldOfView (float32 (Math.PI/2.), 16.f/9.f, 0.01f, 50.f)
-    let projInv = proj.Inverted ()
-    let orth = Matrix4.CreateOrthographic (2.f, 2.f, -1.f, 1.f)
-    let orthInv = orth.Inverted ()
+    let mutable proj = Matrix4.CreatePerspectiveFieldOfView (float32 (Math.PI/2.), aspect, 0.01f, 50.f)
+    let mutable projInv = proj.Inverted ()
+    let orth = Matrix4.Identity
+    let orthInv = orth
     member _.Pitch
         with get () = pitch
         and set p = pitch <- p
@@ -51,9 +49,12 @@ type EzCamera() =
     member _.Update deltaTime =
         yaw <- yaw + rotateSensitivity*deltaTime*strafeRight
         position.Z <- position.Z - moveSensitivity*deltaTime*forwardVelocity
-    member _.Perspective
+    member _.UsePerspective
         with get () = perspective
         and set p = perspective <- p
+    member _.SetProjection aspect =
+        proj <- Matrix4.CreatePerspectiveFieldOfView (float32 (Math.PI/2.), aspect, 0.01f, 50.f)
+        projInv <- proj.Inverted ()
     member _.ProjView () =
         if perspective then
             Matrix4.CreateRotationY(-yaw) * Matrix4.CreateTranslation(-position) * proj

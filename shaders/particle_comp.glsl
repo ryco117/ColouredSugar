@@ -94,5 +94,5 @@ void main(void)
 	}
 
 	positions[index] = pos;
-	velocities[index] = 0.9775 * vel;
+	velocities[index] =  vel * (1 - 1.35 * min(deltaTime, 0.74));
 }
