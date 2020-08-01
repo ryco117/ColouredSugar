@@ -11,7 +11,7 @@ NAudio also provides the Fast Fourier Transform I used.
 ColouredSugar uses the [WASAPI loopback](https://docs.microsoft.com/en-us/windows/win32/coreaudio/loopback-recording) 
 feature to capture the current audio out stream. The audio is then read in chunks as they become available 
 and a fast fourier transform is applied to the sampled audio stream. The resulting frequency domain is partitioned into three unequal parts, 
-`bass`, `mids`, and `highs`. For each of these sub domains, the discrete frequency bin with the largest magnitude is determined \
+`bass`, `mids`, and `highs`. For each of these sub domains, the discrete frequency bin with the largest magnitude is determined 
 (ie. the tone most present in the sound wave is determined). 
 Then a corresponding `whitehole`, `curl-attractor`, or `blackhole` is created with parameters determined by the magnitude and frequency of the 
 determined bin from the domain of `bass`, `mids`, and `highs` respectively. The `whitehole`s apply a force outward from their location, 
@@ -33,17 +33,18 @@ determined bin from the domain of `bass`, `mids`, and `highs` respectively. The 
 | ------ | ----------- |
 | `F1`   | Toggle help overlay |
 | `ESC`  | Exit the application |
-| `ALT-F4`  | Exit the application (alternative to `ESC`) |
+| `ALT+F4`  | Exit the application (alternative to `ESC`) |
 | `F5`  | Reset the visualizer |
 | `F11`  | Toggle fullscreen (default: `false`) |
-| `ALT-ENTER`  | Toggle fullscreen (alternative to `F11`) |
+| `ALT+ENTER`  | Toggle fullscreen (alternative to `F11`) |
 | `F12` | Save a screenshot to `screenshots/awesome.png` at current window resolution. If a file with that name already exists it will increment a counter until it finds an available file name |
-| `ALT-P`  | Toggle between `3D` and `2D` perspectives (default: `3D`) |
+| `ALT+P`  | Toggle between `3D` and `2D` perspectives (default: `3D`) |
 | `W,A,S,D` | Manually direct the camera (if in `3D` perspective) |
 | `LEFT-SHIFT` | Hold to reduce manual movement speed of the camera |
-| `Z` | Toggle auto-rotation of cube (if in `3D` perspective, default: `true`) |
+| `Z` | Toggle auto-rotation of camera (if in `3D` perspective, default: `true`) |
 | `X` | Toggle presence of bouncing ball (default: `false`) |
 | `R` | Toggle audio-output responsiveness (Note: framerate may jitter if there is no system audio-out present while set to `true`, default: `true`) |
 | `MOUSE-LEFT` | Hold to manually apply a point force attraction/repulsion at the mouse cursor |
 | `MOUSE-RIGHT` | Hold to inverse repulsion force to attraction at the mouse cursor. (Note: must hold both `MOUSE-RIGHT` and `MOUSE-LEFT` to apply an inverted force) |
 | `MOUSE-SCROLL` | Scroll up to increase intensity of manual point force. Scroll down to decrease strength |
+| `~` | Press to toggle visibility of the debug console (Note: console is output only) |
