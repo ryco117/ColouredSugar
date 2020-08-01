@@ -56,6 +56,7 @@ type ColouredSugar() as world =
     let mutable targetCameraVelocity = Vector3.Zero
     let mutable holdShift = false
     let mutable autoRotate = true
+    let autoRotateSpeed = 0.075f
     let mutable audioResponsive = true
 
     let sphere = new EzObjects.ColouredSphere(Vector3(0.75f, 0.75f, 0.75f), 3)
@@ -183,9 +184,9 @@ type ColouredSugar() as world =
                 this.Y <- device.Bounds.Top
                 //this.Size <- System.Drawing.Size(device.Width, device.Height - 1)   // NOTE : A resize seems to be needed in order for changes to border visibility to always be noticed
                 this.ClientSize <- System.Drawing.Size(device.Width, device.Height)*)
-            if this.WindowState = WindowState.Fullscreen then
-                this.WindowBorder <- WindowBorder.Resizable
+            if this.WindowBorder = WindowBorder.Hidden then
                 this.WindowState <- WindowState.Normal
+                this.WindowBorder <- WindowBorder.Resizable
                 this.ClientSize <- preFullscreenSize
             else
                 preFullscreenSize <- this.ClientSize
@@ -451,7 +452,7 @@ type ColouredSugar() as world =
         GL.UseProgram particleRenderShader
         let mutable projViewMutable =
             if autoRotate then
-                camera.Yaw <- camera.Yaw + 0.08f * deltaTime
+                camera.Yaw <- camera.Yaw + autoRotateSpeed * deltaTime
             let t = deltaTime / 0.2f
             camera.ForwardVelocity <- (1.f - t) * camera.ForwardVelocity + t * targetCameraVelocity.Z * if holdShift then 0.33f else 1.f
             camera.StrafeRight <- (1.f - t) * camera.StrafeRight + t * targetCameraVelocity.X * if holdShift then 0.33f else 1.f

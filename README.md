@@ -39,12 +39,12 @@ determined bin from the domain of `bass`, `mids`, and `highs` respectively. The 
 | `ALT+ENTER`  | Toggle fullscreen (alternative to `F11`) |
 | `F12` | Save a screenshot to `screenshots/awesome.png` at current window resolution. If a file with that name already exists it will increment a counter until it finds an available file name |
 | `ALT+P`  | Toggle between `3D` and `2D` perspectives (default: `3D`) |
-| `W,A,S,D` | Manually direct the camera (if in `3D` perspective) |
+| `W,A,S,D` | Manually direct the camera (Note: only affects `3D` perspective) |
 | `LEFT-SHIFT` | Hold to reduce manual movement speed of the camera |
-| `Z` | Toggle auto-rotation of camera (if in `3D` perspective, default: `true`) |
+| `Z` | Toggle auto-rotation of camera (Note: only affects `3D` perspective; default: `true`) |
 | `X` | Toggle presence of bouncing ball (default: `false`) |
-| `R` | Toggle audio-output responsiveness (Note: framerate may jitter if there is no system audio-out present while set to `true`, default: `true`) |
+| `R` | Toggle audio-output responsiveness (Note: framerate may jitter if there is no system audio-out present while set to `true`; default: `true`) |
 | `MOUSE-LEFT` | Hold to manually apply a point force attraction/repulsion at the mouse cursor |
 | `MOUSE-RIGHT` | Hold to inverse repulsion force to attraction at the mouse cursor. (Note: must hold both `MOUSE-RIGHT` and `MOUSE-LEFT` to apply an inverted force) |
 | `MOUSE-SCROLL` | Scroll up to increase intensity of manual point force. Scroll down to decrease strength |
-| `~` | Press to toggle visibility of the debug console (Note: console is output only) |
+| `~` | Toggle visibility of the debug console (Note: console is output only) |
