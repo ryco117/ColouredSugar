@@ -1,4 +1,5 @@
-﻿# ColouredSugar
+﻿![ColouredSugar](images/ColouredSugar.ico)
+# ColouredSugar
 
 ### About the project
 An experimental audio visualizer and graphics engine written in F# and using the library [OpenTK](https://github.com/opentk/opentk) as a wrapper for the OpenGL API.
