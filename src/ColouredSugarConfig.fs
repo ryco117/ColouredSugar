@@ -43,9 +43,11 @@ let sample = """
   "shiftFactorOrbit": 0.33,
   "shiftFactorMove": 0.33,
 
-  "cameraInertia": 0.2
+  "cameraInertia": 0.3
 }
 """
 
 type ConfigFormat = JsonProvider<sample>
 type Config = JsonProvider<sample>.Root
+
+let GetDefaultConfig () = ConfigFormat.Parse sample

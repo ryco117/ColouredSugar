@@ -175,24 +175,6 @@ type ColouredSugar(config: Config) as world =
         // Fullscreen
         | Key.Enter, (true, false, false, false), false
         | Key.F11, (false, false, false, false), false ->
-            (*if this.WindowBorder = WindowBorder.Hidden then
-                this.WindowBorder <- WindowBorder.Resizable
-                this.WindowState <- WindowState.Normal
-                this.ClientSize <- preFullscreenSize
-            else
-                preFullscreenSize <- this.ClientSize
-                this.WindowBorder <- WindowBorder.Hidden
-                let device =
-                    let x = this.X
-                    let y = this.Y
-                    DisplayDevice.GetDisplay (
-                        Array.find
-                            (fun e -> (DisplayDevice.GetDisplay e).Bounds.Contains(x, y))
-                            (System.Enum.GetValues(typeof<DisplayIndex>) :?> DisplayIndex[]))
-                this.X <- device.Bounds.Left
-                this.Y <- device.Bounds.Top
-                //this.Size <- System.Drawing.Size(device.Width, device.Height - 1)   // NOTE : A resize seems to be needed in order for changes to border visibility to always be noticed
-                this.ClientSize <- System.Drawing.Size(device.Width, device.Height)*)
             if this.WindowBorder = WindowBorder.Hidden then
                 this.WindowState <- WindowState.Normal
                 this.WindowBorder <- WindowBorder.Resizable
@@ -502,7 +484,13 @@ let main _ =
     let options = ToolkitOptions.Default
     options.Backend <- PlatformBackend.PreferNative
     let toolkit = Toolkit.Init options
-    let game = new ColouredSugar(ConfigFormat.Load "config.json")
+    let config =
+        let defaultPath = "config.json"
+        if  System.IO.File.Exists defaultPath then
+            ConfigFormat.Load "config.json"
+        else
+            GetDefaultConfig ()
+    let game = new ColouredSugar(config)
     game.Run ()
     game.Dispose ()
     toolkit.Dispose ()
