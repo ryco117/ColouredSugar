@@ -63,4 +63,4 @@ For an even more customized experience, one must edit the shader programs. The s
 [particle_comp.glsl](shaders/particle_comp.glsl) and [particle_vert.glsl](shaders/particle_vert.glsl). 
 These files are compiled on the GPU at runtime and respectively dictate the behaviour and colouring of the particles. 
 While some programming literacy may be required to fully edit these files, they provide a powerful mechanism to 
-customize one's experience
+customize one's experience.
