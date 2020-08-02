@@ -33,6 +33,9 @@ let random = new System.Random ()
 let randF () = float32 (random.NextDouble ())
 let randNormF () = (randF () - 0.5f) * 2.f
 
+// Grab handle to console window
+let console = new ConsoleControls.Controller ()
+
 type ColouredSugar(config: Config) as world =
     inherit GameWindow(
         1280, 720,
@@ -40,7 +43,6 @@ type ColouredSugar(config: Config) as world =
         "ColouredSugar", GameWindowFlags.Default)
     do world.VSync <- if config.EnableVSync then VSyncMode.On else VSyncMode.Off
     do world.Icon <-new System.Drawing.Icon "res/ColouredSugar.ico"
-    let console = new ConsoleControls.Controller ()
     do console.Show false
     let mutable preFullscreenSize = System.Drawing.Size(1, 1)
 
@@ -487,7 +489,15 @@ let main _ =
     let config =
         let defaultPath = "config.json"
         if  System.IO.File.Exists defaultPath then
-            ConfigFormat.Load "config.json"
+            try
+                ConfigFormat.Load defaultPath
+            with
+            | e ->
+                console.Maximize ()
+                printfn "ERRROR: could not parse '%s': %s" defaultPath e.Message
+                printf "Press ENTER to use the exe-baked '%s' and continue anyway: " defaultPath
+                System.Console.ReadLine () |> ignore
+                GetDefaultConfig ()
         else
             GetDefaultConfig ()
     let game = new ColouredSugar(config)
