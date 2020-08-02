@@ -49,3 +49,18 @@ determined bin from the domain of `bass`, `mids`, and `highs` respectively. The 
 | `MOUSE-RIGHT` | Hold to inverse repulsion force to attraction at the mouse cursor. (Note: must hold both `MOUSE-RIGHT` and `MOUSE-LEFT` to apply an inverted force) |
 | `MOUSE-SCROLL` | Scroll up to increase intensity of manual point force. Scroll down to decrease strength |
 | `~` | Toggle visibility of the debug console (Note: console is output only) |
+
+### Beyond Controls
+*(Note: it is recommended to make a backup of any file before modifying it)*
+
+
+ColouredSugar can be highly customized by an end user, without the need for re-compiling, 
+through several methods. The simplest way is to edit the values in the [configuration file](config.json), 
+which are loaded each time the application starts. These constants define various features of the visualizer, 
+but most notably the rate, speed, and strength of various operations. 
+
+For an even more customized experience, one must edit the shader programs. The shader files of most interest are 
+[particle_comp.glsl](shaders/particle_comp.glsl) and [particle_vert.glsl](shaders/particle_vert.glsl). 
+These files are compiled on the GPU at runtime and respectively dictate the behaviour and colouring of the particles. 
+While some programming literacy may be required to fully edit these files, they provide a powerful mechanism to 
+customize one's experience

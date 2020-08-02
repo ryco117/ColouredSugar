@@ -37,7 +37,7 @@ type ColouredSugar(config: Config) as world =
     inherit GameWindow(
         1280, 720,
         new GraphicsMode(new ColorFormat(8, 8, 8, 8), 24, 8, 1),
-        "Coloured Sugar", GameWindowFlags.Default)
+        "ColouredSugar", GameWindowFlags.Default)
     do world.VSync <- if config.EnableVSync then VSyncMode.On else VSyncMode.Off
     do world.Icon <-new System.Drawing.Icon "res/ColouredSugar.ico"
     let console = new ConsoleControls.Controller ()
