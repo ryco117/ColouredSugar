@@ -53,7 +53,6 @@ determined bin from the domain of `bass`, `mids`, and `highs` respectively. The 
 ### Beyond Controls
 *(Note: it is recommended to make a backup of any file before modifying it)*
 
-
 ColouredSugar can be highly customized by an end user, without the need for re-compiling, 
 through several methods. The simplest way is to edit the values in the [configuration file](config.json), 
 which are loaded each time the application starts. These constants define various features of the visualizer, 
