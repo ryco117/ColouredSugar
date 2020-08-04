@@ -46,7 +46,6 @@ type ColouredSugar(config: Config) as world =
         "ColouredSugar", GameWindowFlags.Default)
     do world.VSync <- if config.EnableVSync then VSyncMode.On else VSyncMode.Off
     do world.Icon <-new System.Drawing.Icon "res/ColouredSugar.ico"
-    do console.Show false
     let mutable preFullscreenSize = System.Drawing.Size(1, 1)
     let camera = new EzCamera(float32 config.CameraOrbitSpeed, float32 config.CameraMoveSpeed, 16.f/9.f)
     let screenshotScale = float config.ScreenshotScale
@@ -480,7 +479,11 @@ type ColouredSugar(config: Config) as world =
         float32 this.Width / float32 this.Height
 
 [<EntryPoint>]
-let main _ =
+let main args =
+    // Allow passing args to disable hiding the console on launch (useful for debugging)
+    if args.Length = 0 then
+        console.Show false
+
     // Set OpenTK options
     let options = ToolkitOptions.Default
     options.Backend <- PlatformBackend.PreferNative

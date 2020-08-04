@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <!-- Define common constants -->
+  <?define Description = "Experimental audio-visualizer written in F# using OpenGL compute shaders" ?>
+  
 	<Product Id="{33E1F8A6-EC42-424D-8C55-1115620DC797}"
            Name="ColouredSugar"
            Language="1033"
@@ -8,30 +11,45 @@
            UpgradeCode="2ad9fb39-4965-4d74-956c-f221da23127c">
     <Package InstallerVersion="200"
              Compressed="yes"
-             InstallScope="perMachine"
              Platform="x64"
              Manufacturer="Ryan Andersen"
-             Description="Experimental audio-visualizer written in F# using OpenGL compute shaders" />
+             Description="$(var.Description)" />
 
-		<MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+    <!-- Display error on downgrade -->
+		<MajorUpgrade AllowSameVersionUpgrades="yes"
+                  DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
     
-		<MediaTemplate 
-      EmbedCab = "yes"
-      />
+    <!-- Embed cabinet file in installer -->
+		<MediaTemplate EmbedCab = "yes" />
 
+    <!-- Fetch project icon from resources -->
     <Icon Id="ColouredSugar.ico" SourceFile="$(var.ColouredSugar.ProjectDir)\res\ColouredSugar.ico"/>
 
     <!-- Add properties to Add/Remove programs list -->
     <Property Id="ARPPRODUCTICON">ColouredSugar.ico</Property>
     <Property Id="ARPURLINFOABOUT">https://github.com/ryco117/ColouredSugar</Property>
 
-    <UIRef Id="WixUI_Minimal" />
+    <!-- Create minimal UI -->
+    <UI>
+      <UIRef Id="WixUI_Minimal" />
+      <Publish Dialog="ExitDialog"
+               Control="Finish"
+               Event="DoAction"
+               Value="LaunchApplication">WIXUI_EXITDIALOGOPTIONALCHECKBOX = 1 and not Installed and not REMOVE</Publish>
+    </UI>
     <WixVariable Id="WixUIBannerBmp" Value="$(var.ProjectDir)\res\Banner.bmp"/>
     <WixVariable Id="WixUIDialogBmp" Value="$(var.ProjectDir)\res\Background.bmp"/>
     <WixVariable Id="WixUILicenseRtf" Value="$(var.ProjectDir)\res\License.rtf"/>
 
+    <!-- Add optional immediate-launch -->
+    <Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOX" Value="1" />
+    <Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOXTEXT" Value="Launch ColouredSugar" />
+    <CustomAction Id="LaunchApplication" Return="asyncNoWait" Impersonate="yes" Directory="APPLICATIONFOLDER" ExeCommand="[APPLICATIONFOLDER]\ColouredSugar.exe" />
+
+    <!-- Install components -->
 		<Feature Id="ProductFeature" Title="Installer" Level="1">
-			<ComponentGroupRef Id="ProductComponents" />
+			<ComponentRef Id="ColouredSugarShortcut" />
+      <ComponentRef Id="ColouredSugarShortcutDesktop" />
 			<ComponentGroupRef Id="GeneratedComponents" />
 		</Feature>
 	</Product>
@@ -41,36 +59,47 @@
       
       <!-- Start menu folder -->
       <Directory Id="ProgramMenuFolder">
-        <Directory Id="InstallProgramMenuFolder" Name="ColouredSugar" />
-      </Directory>  
-      
+        <Directory Id="InstallProgramMenuFolder" Name="ColouredSugar">
+          <Component Id="ColouredSugarShortcut" Guid="{2A429F29-DC48-451B-9CC2-105133EB9EBD}">
+            <Shortcut Id="ColouredSugarShortcut"
+                      Name="ColouredSugar"
+                      Description="$(var.Description)"
+                      Target="[APPLICATIONFOLDER]\ColouredSugar.exe"
+                      Directory="InstallProgramMenuFolder"
+                      WorkingDirectory="APPLICATIONFOLDER"
+                      Icon="ColouredSugar.ico" />
+
+            <!-- Remove start menu entry -->
+            <RemoveFolder Id="RemoveStartMenuFolder" Directory="InstallProgramMenuFolder" On="uninstall" />
+            
+            <!-- Unique key required for components in WiX, shortcut not unique... -->
+            <RegistryValue Id="RegShortcutKey" Root="HKCU" Key="SOFTWARE\ColouredSugar" Name="StartMenuShortcut" Value="1" Type="integer" KeyPath="yes" />
+          </Component>
+        </Directory>
+      </Directory>
+
+      <!-- Desktop folder -->
+      <Directory Id="DesktopFolder" Name="Desktop">
+        <Component Id="ColouredSugarShortcutDesktop" Guid="{80DB32B8-5088-4046-9E03-3E69F3D35D00}">
+          <Shortcut Id="ColouredSugarShortcutDesktop"
+                    Name="ColouredSugar"
+                    Description="$(var.Description)"
+                    Target="[APPLICATIONFOLDER]\ColouredSugar.exe"
+                    WorkingDirectory="APPLICATIONFOLDER"
+                    Icon="ColouredSugar.ico"/>
+
+          <!-- Remove desktop shortcut -->
+          <RemoveFolder Id="RemoveDesktopShortcut" On="uninstall"/>
+
+          <!-- Unique key required for components in WiX, shortcut not unique... -->
+          <RegistryValue Id="RegDesktopShortcutKey" Root="HKCU" Key="SOFTWARE/ColouredSugar" Name="DesktopShortcut" Type="integer" Value="1" KeyPath="yes" />
+        </Component>
+      </Directory>
+
+      <!-- Install directory -->
 			<Directory Id="ProgramFiles64Folder">
-				<Directory Id="INSTALLFOLDER" Name="ColouredSugar" />
+        <Directory Id="APPLICATIONFOLDER" Name="ColouredSugar" />
 			</Directory>
 		</Directory>
 	</Fragment>
-
-	<Fragment>
-    <!-- Create shortcut component -->
-    <ComponentGroup Id="ProductComponents">
-      <ComponentRef Id="ColouredSugarShortcut" />
-		</ComponentGroup>
-
-    <DirectoryRef Id="INSTALLFOLDER">
-      <Component Id="ColouredSugarShortcut" Guid="{2A429F29-DC48-451B-9CC2-105133EB9EBD}">
-        <Shortcut Id="ColouredSugarShortcut"
-                   Name="ColouredSugar"
-                   Target="[INSTALLFOLDER]\ColouredSugar.exe"
-                   Directory="InstallProgramMenuFolder"
-                   WorkingDirectory="INSTALLFOLDER"
-                   Icon="ColouredSugar.ico" />
-
-        <!-- Unique key required for components in WiX, shortcut not unique... -->
-        <RegistryValue Id="RegShortcutKey" Root="HKCU" Key="SOFTWARE\ColouredSugar" Name="Shortcut" Value="1" Type="integer" KeyPath="yes" />
-
-        <!-- Remove start menu entry -->
-        <RemoveFolder Id="RemoveStartMenuFolder" Directory="InstallProgramMenuFolder" On="uninstall" />
-      </Component>
-    </DirectoryRef>
-  </Fragment>
 </Wix>
