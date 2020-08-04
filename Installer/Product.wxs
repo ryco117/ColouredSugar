@@ -3,7 +3,7 @@
 	<Product Id="{33E1F8A6-EC42-424D-8C55-1115620DC797}"
            Name="ColouredSugar"
            Language="1033"
-           Version="0.2.3"
+           Version="0.2.4"
            Manufacturer="Ryan Andersen"
            UpgradeCode="2ad9fb39-4965-4d74-956c-f221da23127c">
     <Package InstallerVersion="200"

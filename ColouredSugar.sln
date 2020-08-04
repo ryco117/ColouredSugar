@@ -35,6 +35,7 @@ Global
 		{3FE21C13-3BBA-4542-9F51-CA14CFA0D62F}.Debug|x86.Build.0 = Debug|x86
 		{3FE21C13-3BBA-4542-9F51-CA14CFA0D62F}.Release|Any CPU.ActiveCfg = Release|x86
 		{3FE21C13-3BBA-4542-9F51-CA14CFA0D62F}.Release|x64.ActiveCfg = Release|x86
+		{3FE21C13-3BBA-4542-9F51-CA14CFA0D62F}.Release|x64.Build.0 = Release|x86
 		{3FE21C13-3BBA-4542-9F51-CA14CFA0D62F}.Release|x86.ActiveCfg = Release|x86
 		{3FE21C13-3BBA-4542-9F51-CA14CFA0D62F}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
