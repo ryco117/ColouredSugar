@@ -36,6 +36,9 @@ let randNormF () = (randF () - 0.5f) * 2.f
 // Grab handle to console window
 let console = new ConsoleControls.Controller ()
 
+// Get default path for ColouredSugar screenshots
+let screenshotsDir = System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyPictures) + """\ColouredSugar\""";
+
 type ColouredSugar(config: Config) as world =
     inherit GameWindow(
         1280, 720,
@@ -45,10 +48,8 @@ type ColouredSugar(config: Config) as world =
     do world.Icon <-new System.Drawing.Icon "res/ColouredSugar.ico"
     do console.Show false
     let mutable preFullscreenSize = System.Drawing.Size(1, 1)
-
     let camera = new EzCamera(float32 config.CameraOrbitSpeed, float32 config.CameraMoveSpeed, 16.f/9.f)
     let screenshotScale = float config.ScreenshotScale
-    let screenshotsDir = "./screenshots"
     let mutable tick = 0UL
     let fpsWait: uint64 = 300UL
     let mutable mouseX = 0.f
@@ -353,9 +354,6 @@ type ColouredSugar(config: Config) as world =
             mouseRightDown <- false
         base.OnMouseUp e
     override _.OnLoad eventArgs =
-        // Create screenshots directory
-        System.IO.Directory.CreateDirectory screenshotsDir |> ignore
-
         // Set default values
         GL.ClearColor (0.f, 0.f, 0.f, 1.f)
         GL.CullFace CullFaceMode.Back
@@ -483,9 +481,15 @@ type ColouredSugar(config: Config) as world =
 
 [<EntryPoint>]
 let main _ =
+    // Set OpenTK options
     let options = ToolkitOptions.Default
     options.Backend <- PlatformBackend.PreferNative
     let toolkit = Toolkit.Init options
+
+    // Create screenshots directory (if non-existant)
+    System.IO.Directory.CreateDirectory screenshotsDir |> ignore
+
+    // Load JSON configuration
     let config =
         let defaultPath = "config.json"
         if  System.IO.File.Exists defaultPath then
@@ -500,8 +504,12 @@ let main _ =
                 GetDefaultConfig ()
         else
             GetDefaultConfig ()
+
+    // Run
     let game = new ColouredSugar(config)
     game.Run ()
+
+    // Cleanup
     game.Dispose ()
     toolkit.Dispose ()
     0

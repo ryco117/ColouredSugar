@@ -93,6 +93,7 @@
     <None Include="shaders\solid_colour_sphere_vert.glsl" />
     <None Include="shaders\textured_billboard_frag.glsl" />
     <None Include="res\HelpMenu.png" />
+    <Content Include="res\ColouredSugar.ico" />
     <Compile Include="src\AssemblyInfo.fs" />
     <Compile Include="src\ColouredSugarConfig.fs" />
     <Compile Include="src\ConsoleControls.fs" />
@@ -147,7 +148,6 @@
     <PostBuildEvent>robocopy "$(ProjectDir)\shaders" "$(TargetDir)\shaders"
 robocopy "$(ProjectDir)\res" "$(TargetDir)\res"
 robocopy "$(ProjectDir)\." "$(TargetDir)\." README.md config.json
-del "$(TargetDir)\*.xml"
 if %errorlevel% leq 1 exit 0 else exit %errorlevel%</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

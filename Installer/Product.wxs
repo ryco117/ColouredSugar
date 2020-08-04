@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+	<Product Id="{33E1F8A6-EC42-424D-8C55-1115620DC797}"
+           Name="ColouredSugar"
+           Language="1033"
+           Version="0.2.3"
+           Manufacturer="Ryan Andersen"
+           UpgradeCode="2ad9fb39-4965-4d74-956c-f221da23127c">
+    <Package InstallerVersion="200"
+             Compressed="yes"
+             InstallScope="perMachine"
+             Platform="x64"
+             Manufacturer="Ryan Andersen"
+             Description="Experimental audio-visualizer written in F# using OpenGL compute shaders" />
+
+		<MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+    
+		<MediaTemplate 
+      EmbedCab = "yes"
+      />
+
+    <Icon Id="ColouredSugar.ico" SourceFile="$(var.ColouredSugar.ProjectDir)\res\ColouredSugar.ico"/>
+
+    <!-- Add properties to Add/Remove programs list -->
+    <Property Id="ARPPRODUCTICON">ColouredSugar.ico</Property>
+    <Property Id="ARPURLINFOABOUT">https://github.com/ryco117/ColouredSugar</Property>
+
+    <UIRef Id="WixUI_Minimal" />
+    <WixVariable Id="WixUIBannerBmp" Value="$(var.ProjectDir)\res\Banner.bmp"/>
+    <WixVariable Id="WixUIDialogBmp" Value="$(var.ProjectDir)\res\Background.bmp"/>
+    <WixVariable Id="WixUILicenseRtf" Value="$(var.ProjectDir)\res\License.rtf"/>
+
+		<Feature Id="ProductFeature" Title="Installer" Level="1">
+			<ComponentGroupRef Id="ProductComponents" />
+			<ComponentGroupRef Id="GeneratedComponents" />
+		</Feature>
+	</Product>
+
+	<Fragment>
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      
+      <!-- Start menu folder -->
+      <Directory Id="ProgramMenuFolder">
+        <Directory Id="InstallProgramMenuFolder" Name="ColouredSugar" />
+      </Directory>  
+      
+			<Directory Id="ProgramFiles64Folder">
+				<Directory Id="INSTALLFOLDER" Name="ColouredSugar" />
+			</Directory>
+		</Directory>
+	</Fragment>
+
+	<Fragment>
+    <!-- Create shortcut component -->
+    <ComponentGroup Id="ProductComponents">
+      <ComponentRef Id="ColouredSugarShortcut" />
+		</ComponentGroup>
+
+    <DirectoryRef Id="INSTALLFOLDER">
+      <Component Id="ColouredSugarShortcut" Guid="{2A429F29-DC48-451B-9CC2-105133EB9EBD}">
+        <Shortcut Id="ColouredSugarShortcut"
+                   Name="ColouredSugar"
+                   Target="[INSTALLFOLDER]\ColouredSugar.exe"
+                   Directory="InstallProgramMenuFolder"
+                   WorkingDirectory="INSTALLFOLDER"
+                   Icon="ColouredSugar.ico" />
+
+        <!-- Unique key required for components in WiX, shortcut not unique... -->
+        <RegistryValue Id="RegShortcutKey" Root="HKCU" Key="SOFTWARE\ColouredSugar" Name="Shortcut" Value="1" Type="integer" KeyPath="yes" />
+
+        <!-- Remove start menu entry -->
+        <RemoveFolder Id="RemoveStartMenuFolder" Directory="InstallProgramMenuFolder" On="uninstall" />
+      </Component>
+    </DirectoryRef>
+  </Fragment>
+</Wix>
