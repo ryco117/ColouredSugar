@@ -19,11 +19,13 @@ determined bin from the domain of `bass`, `mids`, and `highs` respectively. The 
 `curl-attractor`s apply a force determined by the cross-product of their positions relative to the origin and to the attractor, 
 `blackhole`s apply a force towards their location following an inverse square law.
 
-### Easy Installation (Precompiled)
+### Easy Installation (Windows)
 - Go to the [releases page](https://github.com/ryco117/ColouredSugar/releases) and determine the latest release/version
-- Download the compressed archive containing the **precompiled** executable
-- Extract the folder within
-- Run the application `ColouredSugar.exe`
+- Download the `ColouredSugar-Installer-Win64.msi` installer file
+- Run the installer (Note: Windows may complain that the installer is not certified/known. Simply pess `More Info` and `Run Anyway`)
+- Read and agree to the copyleft license agreement to begin the installation
+- By default, after the installation finishes ColouredSugar will be launched. But this can be disabled at the last screen of the install
+- ColouredSugar is now installed alongside your other 64-bit program files and shortcuts were created on the `Desktop` and `Start Menu`
 
 ### Example Videos (Click for links)
 [![Coloured Sugar Demo 1](https://img.youtube.com/vi/p_YMFBeia4w/0.jpg)](https://www.youtube.com/watch?v=p_YMFBeia4w "Coloured Sugar Demo 1")

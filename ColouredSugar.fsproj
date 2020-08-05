@@ -147,7 +147,7 @@
   <PropertyGroup>
     <PostBuildEvent>robocopy "$(ProjectDir)\shaders" "$(TargetDir)\shaders"
 robocopy "$(ProjectDir)\res" "$(TargetDir)\res"
-robocopy "$(ProjectDir)\." "$(TargetDir)\." README.md config.json
+robocopy "$(ProjectDir)\." "$(TargetDir)\." README.md config.json COPYING
 if %errorlevel% leq 1 exit 0 else exit %errorlevel%</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
