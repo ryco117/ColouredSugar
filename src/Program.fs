@@ -509,10 +509,15 @@ let main args =
             GetDefaultConfig ()
 
     // Run
-    let game = new ColouredSugar(config)
-    game.Run ()
-
-    // Cleanup
-    game.Dispose ()
+    try
+        let game = new ColouredSugar(config)
+        game.Run ()
+        game.Dispose ()
+    with
+    | e ->
+        console.Maximize ()
+        printfn "ColouredSugar failed with the following error:\n %s" e.Message
+        printf "Press ENTER to safely close..."
+        System.Console.ReadLine () |> ignore
     toolkit.Dispose ()
     0

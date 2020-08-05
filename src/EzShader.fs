@@ -34,7 +34,8 @@ let CreateShaderProgram vertPath fragPath =
     // Compile shaders
     let checkErr hndl =
         let infoLog = GL.GetShaderInfoLog hndl
-        if infoLog.Length <> 0 then System.Console.WriteLine infoLog
+        if infoLog.Length <> 0 then
+            raise (new System.Exception(infoLog))
     GL.CompileShader vertHndl
     checkErr vertHndl
     GL.CompileShader fragHndl
@@ -63,7 +64,8 @@ let CreateComputeShader (compPath: string) =
     // Compile shaders
     let checkErr hndl =
         let infoLog = GL.GetShaderInfoLog hndl
-        if infoLog.Length <> 0 then System.Console.WriteLine infoLog
+        if infoLog.Length <> 0 then
+            raise (new System.Exception(infoLog))
     GL.CompileShader compHndl
     checkErr compHndl
     // Link shaders into a shader program
