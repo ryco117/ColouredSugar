@@ -43,7 +43,9 @@ let sample = """
   "shiftFactorOrbit": 0.33,
   "shiftFactorMove": 0.33,
 
-  "cameraInertia": 0.3
+  "cameraInertia": 0.3,
+
+  "audioDisconnectCheckWait": 100
 }
 """
 

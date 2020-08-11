@@ -62,6 +62,7 @@ type ColouredSugar(config: Config) as world =
     let mutable holdShift = false
     let mutable autoRotate = true
     let autoRotateSpeed = float32 config.AutoOrbitSpeed
+    let audioDisconnectCheckRate = uint64 config.AudioDisconnectCheckWait
     let mutable audioResponsive = true
 
     let sphere = new EzObjects.ColouredSphere(Vector3(0.75f, 0.75f, 0.75f), 3)
@@ -471,7 +472,7 @@ type ColouredSugar(config: Config) as world =
             printfn "FPS: %f" this.RenderFrequency
 
         // Occasionally check if audio out stopped
-        if audioResponsive && tick % 100UL = 0UL && audioOutCapture.Stopped () then
+        if audioResponsive && tick % audioDisconnectCheckRate = 0UL && audioOutCapture.Stopped () then
             audioOutCapture.StartCapturing ()
 
         base.OnRenderFrame eventArgs
