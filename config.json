@@ -32,7 +32,7 @@
 
   "cameraOrbitSpeed": 1.0,
   "cameraMoveSpeed": 1.0,
-  "autoOrbitSpeed": 0.075,
+  "autoOrbitSpeed": 0.05,
 
   "shiftFactorOrbit": 0.33,
   "shiftFactorMove": 0.33,

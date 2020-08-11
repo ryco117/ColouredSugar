@@ -8,18 +8,18 @@ uniform bool perspective;
 
 out vec4 outColor;
 
-const float c1 = 0.075;
-const vec3 endC1 = vec3(0.0, 0.6, 0.5);
-const float c2 = 0.3;
-const vec3 endC2 = vec3(0.6, 0.75, 0.0);
+const float c1 = 0.08;
+const vec3 endC1 = vec3(0.0, 0.5, 0.5);
+const float c2 = 0.35;
+const vec3 endC2 = vec3(0.5, 0.75, 0.0);
 const float c3 = 3.0;
-const vec3 endC3 = vec3(0.75, 0.0, 1.0);
-const float maxSpeed = 8.0;
+const vec3 endC3 = vec3(0.66, 0.0, 1.0);
+const float maxSpeed = 6.0;
 
 void main() {
 	float speed = min(length(velocity.xyz), maxSpeed);
 	if(speed < c1) {
-		outColor = vec4(mix(0.2*position.xyz+vec3(0.2, 0.2, 0.2), vec3(endC1.x, endC1.y * speed/c1, endC1.z), speed / c1), 1.0);
+		outColor = vec4(mix(0.15*position.xyz+vec3(0.15), vec3(endC1.x, endC1.y * speed/c1, endC1.z), speed / c1), 1.0);
 	} else if(speed < c2) {
 		outColor = vec4(mix(endC1, endC2, (speed - c1)/(c2 - c1)), 1.0);
 	} else if(speed < c3) {

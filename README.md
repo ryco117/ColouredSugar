@@ -83,7 +83,7 @@ but most notably the rate, speed, and strength of various operations.
 | blackHoleStrength | 4.75 | Factor to adjust strength of blackholes |
 | cameraOrbitSpeed | 1.01 | Factor to adjust speed of camera rotations/orbits |
 | cameraMoveSpeed | 1.01 | Factor to adjust speed of camera movement |
-| autoOrbitSpeed | 0.075 | Factor to adjust speed of auto orbit |
+| autoOrbitSpeed | 0.05 | Factor to adjust speed of auto orbit |
 | shiftFactorOrbit | 0.33 | Factor to multiply camera orbit speed by when holding `LEFT-SHIFT` |
 | shiftFactorMove | 0.33 | Factor to multiply camera movement speed by when holding `LEFT-SHIFT` |
 | cameraInertia | 0.3 | Camera's resistance to user inputs on movement |

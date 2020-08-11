@@ -17,6 +17,8 @@ uniform vec4 bigBoomer;
 uniform bool perspective;
 uniform vec4 musicalSphere;
 
+const float maxSpeed = 10.0;
+
 void main(void)
 {
 	uint index = gl_GlobalInvocationID.x;
@@ -61,8 +63,8 @@ void main(void)
 	}
 	vel.xyz += deltaTime * g;
 	
-	if(length(vel.xyz) > 10.0) {
-		vel.xyz = 10.0*normalize(vel.xyz);
+	if(length(vel.xyz) > maxSpeed) {
+		vel.xyz = maxSpeed*normalize(vel.xyz);
 	}
 
 	pos += vel * deltaTime;
@@ -94,5 +96,5 @@ void main(void)
 	}
 
 	positions[index] = pos;
-	velocities[index] =  vel * (1 - 1.35 * min(deltaTime, 0.74));
+	velocities[index] =  vel * (1 - 1.375 * min(deltaTime, 0.73));
 }
