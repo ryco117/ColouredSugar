@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
+<!-- A large thanks to AngelSix for this video demonstration of proper WiX setup https://www.youtube.com/watch?v=6Yf-eDsRrnM -->
+
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
   <!-- Define common constants -->
   <?define Description = "Experimental audio-visualizer written in F# using OpenGL compute shaders" ?>
@@ -6,7 +9,7 @@
 	<Product Id="{33E1F8A6-EC42-424D-8C55-1115620DC797}"
            Name="ColouredSugar"
            Language="1033"
-           Version="0.2.4"
+           Version="$(var.BuildVersion)"
            Manufacturer="Ryan Andersen"
            UpgradeCode="2ad9fb39-4965-4d74-956c-f221da23127c">
     <Package InstallerVersion="200"

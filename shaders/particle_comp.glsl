@@ -18,6 +18,9 @@ uniform bool perspective;
 uniform vec4 musicalSphere;
 
 const float maxSpeed = 10.0;
+const float min_length = 0.01;
+const float friction = 1.4;
+const float invfriction = 1 / friction;
 
 void main(void)
 {
@@ -28,7 +31,6 @@ void main(void)
 	vec4 vel = velocities[index];
 	
 	vec3 g = vec3(0.0);
-	float min_length = 0.0125;
 	if(perspective) {
 		vec3 t = curlAttractor.xyz - pos.xyz;
 		float r = max(length(t), min_length);
@@ -36,7 +38,7 @@ void main(void)
 
 		t = bigBoomer.xyz - pos.xyz;
 		r = max(length(t), min_length);
-		g -= bigBoomer.w * normalize(t) / (r*r*r*r);
+		g -= bigBoomer.w * normalize(t) / (r*r*r*r*r);
 
 		for(int i = 0; i < attractors.length(); i++) {
 			t = attractors[i].xyz - pos.xyz;
@@ -96,5 +98,5 @@ void main(void)
 	}
 
 	positions[index] = pos;
-	velocities[index] =  vel * (1 - 1.375 * min(deltaTime, 0.73));
+	velocities[index] =  vel * (1 - friction * min(deltaTime, invfriction));
 }

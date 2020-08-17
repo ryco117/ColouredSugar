@@ -18,6 +18,7 @@ along with ColouredSugar. If not, see <https://www.gnu.org/licenses/>.
 module EzSound
 
 open NAudio.Wave
+open NAudio.CoreAudioApi
 open NAudio.Dsp
 
 let DualRealToComplex (samples: float32[]) =
@@ -33,8 +34,13 @@ let DualRealToComplex (samples: float32[]) =
             //z.X <- samples.[2 * i + 1]
             z)
 
+type CustomCapture() =
+    // WasapiCapture(MMDevice captureDevice, bool useEventSync, int audioBufferMillisecondsLength)
+    inherit WasapiCapture(WasapiLoopbackCapture.GetDefaultLoopbackCaptureDevice (), false, 100) with
+    member _.GetAudioClientStreamFlags = AudioClientStreamFlags.Loopback
+
 type AudioOutStreamer(onDataAvail, onClose) =
-    let mutable capture = new WasapiLoopbackCapture()
+    let mutable capture = new CustomCapture()
     let mutable bytesPerSample = 0
     let dataAvail (eventArgs: WaveInEventArgs) =
         if eventArgs.BytesRecorded < 1 then
@@ -65,32 +71,32 @@ type AudioOutStreamer(onDataAvail, onClose) =
     interface System.IDisposable with
         member _.Dispose () =
             match capture.CaptureState with
-            | NAudio.CoreAudioApi.CaptureState.Capturing
-            | NAudio.CoreAudioApi.CaptureState.Starting ->
+            | CaptureState.Capturing
+            | CaptureState.Starting ->
                 capture.StopRecording()
             | _ -> ()
             capture.Dispose()
             onClose ()
     member _.RecordingState = capture.CaptureState
     member _.SamplingRate = capture.WaveFormat.SampleRate
-    member _.Stopped () = capture.CaptureState =  NAudio.CoreAudioApi.CaptureState.Stopped
-    member _.Capturing () = capture.CaptureState =  NAudio.CoreAudioApi.CaptureState.Capturing
+    member _.Stopped () = capture.CaptureState =  CaptureState.Stopped
+    member _.Capturing () = capture.CaptureState =  CaptureState.Capturing
     member _.StartCapturing () =
         match capture.CaptureState with
-        | NAudio.CoreAudioApi.CaptureState.Stopped
-        | NAudio.CoreAudioApi.CaptureState.Stopping ->
+        | CaptureState.Stopped
+        | CaptureState.Stopping ->
             capture.StartRecording ()
         | _ -> ()
     member _.StopCapturing () =
         match capture.CaptureState with
-        | NAudio.CoreAudioApi.CaptureState.Starting
-        | NAudio.CoreAudioApi.CaptureState.Capturing ->
+        | CaptureState.Starting
+        | CaptureState.Capturing ->
             capture.StopRecording ()
             onClose ()
         | _ -> ()
     member this.Reset () =
         this.StopCapturing ()
         (capture :> System.IDisposable).Dispose ()
-        capture <- new WasapiLoopbackCapture()
+        capture <- new CustomCapture()
         initCapture ()
         

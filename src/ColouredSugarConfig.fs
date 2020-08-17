@@ -28,11 +28,11 @@ let sample = """
   "highStartFreq": 2500.01,
   "highEndFreq": 16000.01,
 
-  "minimumBass": 0.0175,
+  "minimumBass": 0.005,
   "minimumMids": 0.000125,
   "minimumHigh": 0.00009,
 
-  "whiteHoleStrength": 1.15,
+  "whiteHoleStrength": 0.9,
   "curlAttractorStrength": 5.01,
   "blackHoleStrength": 4.75,
 

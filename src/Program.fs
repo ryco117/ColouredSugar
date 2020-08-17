@@ -108,6 +108,11 @@ type ColouredSugar(config: Config) as world =
     let mutable whiteHole = new Vector4()
 
     // Audio handler funciton
+    let mutable complexZero = NAudio.Dsp.Complex ()
+    do complexZero.X <- 0.f
+    do complexZero.Y <- 0.f
+    let mutable previousBass = Array.create 5 [|complexZero|]
+    let mutable previousBassIndex = 0
     let onDataAvail samplingRate (complex: NAudio.Dsp.Complex[]) =
         blackHole.W <- 0.f
         curlAttractor.W <- 0.f
@@ -138,16 +143,26 @@ type ColouredSugar(config: Config) as world =
             let midsEnd = roundToInt (float config.MidsEndFreq / freqResolution)
             let highStart = roundToInt (float config.HighStartFreq / freqResolution)
             let highEnd = roundToInt (float config.HighEndFreq / freqResolution)
-            let bassMaxI, bassMaxMag, bassSum, bassFreqLog, bassFreqFrac = analyze (Array.sub complex bassStart bassEnd)
-            let midsMaxI, midsMaxMag, midsSum, midsFreqLog, midsFreqFrac = analyze (Array.sub complex midsStart (midsEnd - midsStart))
-            let highMaxI, highMaxMag, highSum, highFreqLog, highFreqFrac = analyze (Array.sub complex highStart (highEnd - highStart))
-            let negYaw = -camera.Yaw
+            let bassArray = Array.sub complex bassStart bassEnd
+            let bassIndex, bassMaxMag, bassSum, bassFreqLog, bassFreqFrac = analyze bassArray
+            let _, midsMaxMag, midsSum, midsFreqLog, midsFreqFrac = analyze (Array.sub complex midsStart (midsEnd - midsStart))
+            let _, highMaxMag, highSum, highFreqLog, highFreqFrac = analyze (Array.sub complex highStart (highEnd - highStart))
             let toWorldSpace x y =
                 if camera.UsePerspective then
+                    let negYaw = -camera.Yaw
                     Vector3(x * cos negYaw, y, x * sin negYaw)
                 else
                     Vector3(x, y, 0.f)
-            if bassMaxMag > float32 config.MinimumBass then
+            let avgLastBassMag =
+                let mutable s = 0.f
+                for i = 0 to previousBass.Length - 1 do
+                    s <- s +
+                        if previousBass.[i].Length = 0 then
+                            0.f
+                        else
+                            mag previousBass.[i].[(bassIndex * previousBass.[i].Length) / bassArray.Length]
+                s / float32 previousBass.Length
+            if bassMaxMag > float32 config.MinimumBass && bassMaxMag > 1.5f * avgLastBassMag then
                 let X = 2.f * bassFreqLog - 1.f
                 let Y = 2.f * bassFreqFrac - 1.f
                 whiteHole.W <- defaultMass * bassSum * float32 config.WhiteHoleStrength
@@ -162,6 +177,8 @@ type ColouredSugar(config: Config) as world =
                 let Y = 2.f * highFreqFrac - 1.f
                 blackHole.W <- defaultMass * (sqrt highSum) * float32 config.BlackHoleStrength
                 blackHole.Xyz <- toWorldSpace X Y
+            previousBass.[previousBassIndex] <- bassArray
+            previousBassIndex <- (previousBassIndex + 1) % previousBass.Length
     let onClose () =
         blackHole.W <- 0.f
         curlAttractor.W <- 0.f

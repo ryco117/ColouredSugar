@@ -14,7 +14,7 @@ const float c2 = 0.35;
 const vec3 endC2 = vec3(0.5, 0.75, 0.0);
 const float c3 = 3.0;
 const vec3 endC3 = vec3(0.66, 0.0, 1.0);
-const float maxSpeed = 6.0;
+const float maxSpeed = 8.0;
 
 void main() {
 	float speed = min(length(velocity.xyz), maxSpeed);

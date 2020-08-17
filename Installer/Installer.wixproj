@@ -75,10 +75,16 @@
   </Target>
   <!-- Auto generate WiX copy procedure-->
   <Target Name="BeforeBuild">
+    <!-- Get executable version -->
+    <GetAssemblyIdentity AssemblyFiles="..\bin\$(Configuration)\ColouredSugar.exe">
+      <Output TaskParameter="Assemblies" ItemName="AssemblyVersion" />
+    </GetAssemblyIdentity>
+    
     <!-- Define some variables we need -->
     <PropertyGroup>
-      <DefineConstants>BasePath=..\bin\$(Configuration)</DefineConstants>
+      <DefineConstants>BasePath=..\bin\$(Configuration);BuildVersion=%(AssemblyVersion.Version)</DefineConstants>
     </PropertyGroup>
+    
     <!-- Harvest file components from build directory -->
     <HeatDirectory OutputFile="ComponentsGenerated.wxs" DirectoryRefId="APPLICATIONFOLDER" ComponentGroupName="GeneratedComponents" SuppressCom="true" Directory="..\bin\$(Configuration)\" SuppressFragments="true" SuppressRegistry="true" SuppressRootDirectory="true" AutoGenerateGuids="false" GenerateGuidsNow="true" ToolPath="$(WixToolPath)" PreprocessorVariable="var.BasePath" />
   </Target>

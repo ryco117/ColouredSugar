@@ -22,11 +22,11 @@
   "highStartFreq": 2500.0,
   "highEndFreq": 16000.0,
 
-  "minimumBass": 0.0175,
+  "minimumBass": 0.005,
   "minimumMids": 0.000125,
   "minimumHigh": 0.00009,
 
-  "whiteHoleStrength": 1.15,
+  "whiteHoleStrength": 0.9,
   "curlAttractorStrength": 5.0,
   "blackHoleStrength": 4.75,
 
