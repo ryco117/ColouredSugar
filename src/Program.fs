@@ -162,7 +162,7 @@ type ColouredSugar(config: Config) as world =
                         else
                             mag previousBass.[i].[(bassIndex * previousBass.[i].Length) / bassArray.Length]
                 s / float32 previousBass.Length
-            if bassMaxMag > float32 config.MinimumBass && bassMaxMag > 1.5f * avgLastBassMag then
+            if bassMaxMag > float32 config.MinimumBass && bassMaxMag > 1.75f * avgLastBassMag then
                 let X = 2.f * bassFreqLog - 1.f
                 let Y = 2.f * bassFreqFrac - 1.f
                 whiteHole.W <- defaultMass * bassSum * float32 config.WhiteHoleStrength

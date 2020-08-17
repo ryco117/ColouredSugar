@@ -37,10 +37,10 @@ let DualRealToComplex (samples: float32[]) =
 type CustomCapture() =
     // WasapiCapture(MMDevice captureDevice, bool useEventSync, int audioBufferMillisecondsLength)
     inherit WasapiCapture(WasapiLoopbackCapture.GetDefaultLoopbackCaptureDevice (), false, 100) with
-    member _.GetAudioClientStreamFlags = AudioClientStreamFlags.Loopback
+    override _.GetAudioClientStreamFlags () = AudioClientStreamFlags.Loopback
 
 type AudioOutStreamer(onDataAvail, onClose) =
-    let mutable capture = new CustomCapture()
+    let mutable capture = new CustomCapture ()
     let mutable bytesPerSample = 0
     let dataAvail (eventArgs: WaveInEventArgs) =
         if eventArgs.BytesRecorded < 1 then
@@ -97,6 +97,6 @@ type AudioOutStreamer(onDataAvail, onClose) =
     member this.Reset () =
         this.StopCapturing ()
         (capture :> System.IDisposable).Dispose ()
-        capture <- new CustomCapture()
+        capture <- new CustomCapture ()
         initCapture ()
         

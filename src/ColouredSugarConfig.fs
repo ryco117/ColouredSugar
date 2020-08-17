@@ -28,7 +28,7 @@ let sample = """
   "highStartFreq": 2500.01,
   "highEndFreq": 16000.01,
 
-  "minimumBass": 0.005,
+  "minimumBass": 0.0075,
   "minimumMids": 0.000125,
   "minimumHigh": 0.00009,
 
