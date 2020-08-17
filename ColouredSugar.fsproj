@@ -6,6 +6,7 @@
     <ProjectGuid>{1eeec86b-ba07-4d17-95ea-c7b8fc53a03a}</ProjectGuid>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <TargetFrameworkProfile />
+    <OutputType>Exe</OutputType>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(FSharpTargetsPath)' == '' AND Exists('$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\FSharp\Microsoft.FSharp.Targets') ">
     <FSharpTargetsPath>$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\FSharp\Microsoft.FSharp.Targets</FSharpTargetsPath>
@@ -69,6 +70,9 @@
     <Compile Include="src\Program.fs" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="FSharp.Core">
+      <HintPath>C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\IDE\CommonExtensions\Microsoft\FSharp\FSharp.Core.dll</HintPath>
+    </Reference>
     <Reference Include="FSharp.Data">
       <HintPath>packages\FSharp.Data.3.3.3\lib\net45\FSharp.Data.dll</HintPath>
     </Reference>
