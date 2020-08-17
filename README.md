@@ -78,7 +78,7 @@ but most notably the rate, speed, and strength of various operations.
 | minimumBass | 0.0075 | Minimum magnitude of strongest bass note required to register a whitehole response |
 | minimumMids | 0.000125 | Minimum magnitude of strongest mids note required to register a curl attractor response |
 | minimumHigh | 0.00009 | Minimum magnitude of strongest bass note required to register a blackhole response |
-| whiteHoleStrength | 0.9 | Factor to adjust strength of whiteholes |
+| whiteHoleStrength | 0.95 | Factor to adjust strength of whiteholes |
 | curlAttractorStrength | 5.01 | Factor to adjust strength of curl attractors |
 | blackHoleStrength | 4.75 | Factor to adjust strength of blackholes |
 | cameraOrbitSpeed | 1.01 | Factor to adjust speed of camera rotations/orbits |

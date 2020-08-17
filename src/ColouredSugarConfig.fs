@@ -32,7 +32,7 @@ let sample = """
   "minimumMids": 0.000125,
   "minimumHigh": 0.00009,
 
-  "whiteHoleStrength": 0.9,
+  "whiteHoleStrength": 0.95,
   "curlAttractorStrength": 5.01,
   "blackHoleStrength": 4.75,
 
