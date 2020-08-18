@@ -19,7 +19,7 @@ uniform vec4 musicalSphere;
 
 const float maxSpeed = 10.0;
 const float min_length = 0.01;
-const float friction = 1.4;
+const float friction = 1.425;
 const float invfriction = 1 / friction;
 
 void main(void)
@@ -34,7 +34,7 @@ void main(void)
 	if(perspective) {
 		vec3 t = curlAttractor.xyz - pos.xyz;
 		float r = max(length(t), min_length);
-		g += curlAttractor.w * (normalize(cross(t, pos.xyz)) + normalize(t)/1.5) / (r*r);
+		g += curlAttractor.w * (normalize(cross(t, pos.xyz)) + normalize(t)/1.25) / (r*r);
 
 		t = bigBoomer.xyz - pos.xyz;
 		r = max(length(t), min_length);
@@ -48,7 +48,7 @@ void main(void)
 	} else {
 		vec3 t = vec3(curlAttractor.xy, pos.z) - pos.xyz;
 		float r = max(length(t), min_length);
-		g += curlAttractor.w * (normalize(cross(t, pos.xyz)) + normalize(t)/1.5) / (r*r);
+		g += curlAttractor.w * (normalize(cross(t, pos.xyz)) + normalize(t)/1.25) / (r*r);
 
 		t = vec3(bigBoomer.xy, pos.z) - pos.xyz;
 		r = max(length(t), min_length);
@@ -70,19 +70,19 @@ void main(void)
 	}
 
 	pos += vel * deltaTime;
-	if(abs(pos.x) >= 0.95) {
+	if(abs(pos.x) >= 0.98) {
 		vel.x = sign(pos.x) * (-0.99 * abs(vel.x) - 0.005);
 		if(abs(pos.x) >= 0.99) {
 			pos.x = sign(pos.x) * 0.98;
 		}
 	}
-	if(abs(pos.y) >= 0.95) {
+	if(abs(pos.y) >= 0.98) {
 		vel.y = sign(pos.y) * (-0.99 * abs(vel.y) - 0.005);
 		if(abs(pos.y) >= 0.99) {
 			pos.y = sign(pos.y) * 0.98;
 		}
 	}
-	if(abs(pos.z) >= 0.95) {
+	if(abs(pos.z) >= 0.98) {
 		vel.z = sign(pos.z) * (-0.99 * abs(vel.z) - 0.005);
 		if(abs(pos.z) >= 0.99) {
 			pos.z = sign(pos.z) * 0.98;

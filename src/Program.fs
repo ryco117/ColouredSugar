@@ -160,7 +160,10 @@ type ColouredSugar(config: Config) as world =
                         if previousBass.[i].Length = 0 then
                             0.f
                         else
-                            mag previousBass.[i].[(bassIndex * previousBass.[i].Length) / bassArray.Length]
+                            let j =
+                                let j = int (round (float bassIndex * float previousBass.[i].Length / float bassArray.Length))
+                                if j >= previousBass.[i].Length then previousBass.[i].Length - 1 else j
+                            mag previousBass.[i].[j]
                 s / float32 previousBass.Length
             if bassMaxMag > float32 config.MinimumBass && bassMaxMag > 1.5f * avgLastBassMag then
                 let X = 2.f * bassFreqLog - 1.f

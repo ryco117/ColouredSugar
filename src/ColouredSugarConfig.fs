@@ -32,8 +32,8 @@ let sample = """
   "minimumMids": 0.000125,
   "minimumHigh": 0.00009,
 
-  "whiteHoleStrength": 0.95,
-  "curlAttractorStrength": 5.01,
+  "whiteHoleStrength": 1.01,
+  "curlAttractorStrength": 8.01,
   "blackHoleStrength": 4.75,
 
   "cameraOrbitSpeed": 1.01,

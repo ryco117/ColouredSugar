@@ -28,8 +28,12 @@ determined bin from the domain of `bass`, `mids`, and `highs` respectively. The 
 - ColouredSugar is now installed alongside your other 64-bit program files and shortcuts were created on the `Desktop` and `Start Menu`
 
 ### Example Videos (Click for links)
-[![Coloured Sugar Demo 1](https://img.youtube.com/vi/p_YMFBeia4w/0.jpg)](https://www.youtube.com/watch?v=p_YMFBeia4w "Coloured Sugar Demo 1")
-[![Coloured Sugar Demo 2](https://img.youtube.com/vi/tWfhWh-3q38/0.jpg)](https://www.youtube.com/watch?v=tWfhWh-3q38 "Coloured Sugar Demo 2")
+##### Death Cab for Cutie
+[![Death Cab for Cutie Demo](https://img.youtube.com/vi/p_YMFBeia4w/0.jpg)](https://www.youtube.com/watch?v=p_YMFBeia4w "Death Cab for Cutie Demo")
+##### Santana Demo
+[![Santana Demo](https://img.youtube.com/vi/yuSlCbhd97U/0.jpg)](https://www.youtube.com/watch?v=yuSlCbhd97U "Santana Demo")
+##### L.Dre Demo
+[![L.Dre Demo](https://img.youtube.com/vi/q62CTTlTm-E/0.jpg)](https://www.youtube.com/watch?v=q62CTTlTm-E "L.Dre Demo")
 
 ### Controls
 | Button | Description |
@@ -78,8 +82,8 @@ but most notably the rate, speed, and strength of various operations.
 | minimumBass | 0.0075 | Minimum magnitude of strongest bass note required to register a whitehole response |
 | minimumMids | 0.000125 | Minimum magnitude of strongest mids note required to register a curl attractor response |
 | minimumHigh | 0.00009 | Minimum magnitude of strongest bass note required to register a blackhole response |
-| whiteHoleStrength | 0.95 | Factor to adjust strength of whiteholes |
-| curlAttractorStrength | 5.01 | Factor to adjust strength of curl attractors |
+| whiteHoleStrength | 1.01 | Factor to adjust strength of whiteholes |
+| curlAttractorStrength | 8.01 | Factor to adjust strength of curl attractors |
 | blackHoleStrength | 4.75 | Factor to adjust strength of blackholes |
 | cameraOrbitSpeed | 1.01 | Factor to adjust speed of camera rotations/orbits |
 | cameraMoveSpeed | 1.01 | Factor to adjust speed of camera movement |
