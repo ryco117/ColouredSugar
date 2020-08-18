@@ -31,11 +31,11 @@ determined bin from the domain of `bass`, `mids`, and `highs` respectively. The 
 ##### Death Cab for Cutie
 [![Death Cab for Cutie Demo](https://img.youtube.com/vi/p_YMFBeia4w/0.jpg)](https://www.youtube.com/watch?v=p_YMFBeia4w "Death Cab for Cutie Demo")
 ##### Madeon Demo
-[![Madeon Demo](https://img.youtube.com/vi/f5pirPzv0Yk/0.jpg)](https://www.youtube.com/watch?v=f5pirPzv0Yk "Madeon Demo")
+[![Madeon Demo](https://img.youtube.com/vi/f5pirPzv0Yk/0.jpg)](https://www.youtube.com/watch?v=f5pirPzv0Yk&t=2 "Madeon Demo")
 ##### Santana Demo
-[![Santana Demo](https://img.youtube.com/vi/yuSlCbhd97U/0.jpg)](https://www.youtube.com/watch?v=yuSlCbhd97U "Santana Demo")
+[![Santana Demo](https://img.youtube.com/vi/yuSlCbhd97U/0.jpg)](https://www.youtube.com/watch?v=yuSlCbhd97U&t=4 "Santana Demo")
 ##### L.Dre Demo
-[![L.Dre Demo](https://img.youtube.com/vi/FVB3HRSrhi8/0.jpg)](https://www.youtube.com/watch?v=FVB3HRSrhi8 "L.Dre Demo")
+[![L.Dre Demo](https://img.youtube.com/vi/FVB3HRSrhi8/0.jpg)](https://www.youtube.com/watch?v=FVB3HRSrhi8&t=2 "L.Dre Demo")
 
 ### Controls
 | Button | Description |
