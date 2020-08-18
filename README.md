@@ -21,7 +21,7 @@ determined bin from the domain of `bass`, `mids`, and `highs` respectively. The 
 
 ### Easy Installation (Windows)
 - Go to the [releases page](https://github.com/ryco117/ColouredSugar/releases) and determine the latest release/version
-- Download the `ColouredSugar-Installer-Win64.msi` installer file
+- Download the `ColouredSugarInstaller-Win64.msi` installer file
 - Run the installer (Note: Windows may complain that the installer is not certified/known. Simply pess `More info` and `Run anyway` to continue the installation)
 - Read and agree to the copyleft license agreement to begin the installation
 - By default, after the installation finishes ColouredSugar will be launched. But this can be disabled at the last screen of the install
@@ -30,10 +30,12 @@ determined bin from the domain of `bass`, `mids`, and `highs` respectively. The 
 ### Example Videos (Click for links)
 ##### Death Cab for Cutie
 [![Death Cab for Cutie Demo](https://img.youtube.com/vi/p_YMFBeia4w/0.jpg)](https://www.youtube.com/watch?v=p_YMFBeia4w "Death Cab for Cutie Demo")
+##### Madeon Demo
+[![Madeon Demo](https://img.youtube.com/vi/f5pirPzv0Yk/0.jpg)](https://www.youtube.com/watch?v=f5pirPzv0Yk "Madeon Demo")
 ##### Santana Demo
 [![Santana Demo](https://img.youtube.com/vi/yuSlCbhd97U/0.jpg)](https://www.youtube.com/watch?v=yuSlCbhd97U "Santana Demo")
 ##### L.Dre Demo
-[![L.Dre Demo](https://img.youtube.com/vi/q62CTTlTm-E/0.jpg)](https://www.youtube.com/watch?v=q62CTTlTm-E "L.Dre Demo")
+[![L.Dre Demo](https://img.youtube.com/vi/FVB3HRSrhi8/0.jpg)](https://www.youtube.com/watch?v=FVB3HRSrhi8 "L.Dre Demo")
 
 ### Controls
 | Button | Description |
