@@ -111,7 +111,7 @@ type ColouredSugar(config: Config) as world =
     let mutable complexZero = NAudio.Dsp.Complex ()
     do complexZero.X <- 0.f
     do complexZero.Y <- 0.f
-    let mutable previousBass = Array.create 5 [|complexZero|]
+    let mutable previousBass = Array.create 2 [|complexZero|]
     let mutable previousBassIndex = 0
     let onDataAvail samplingRate (complex: NAudio.Dsp.Complex[]) =
         blackHole.W <- 0.f

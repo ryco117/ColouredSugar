@@ -80,8 +80,8 @@ but most notably the rate, speed, and strength of various operations.
 | midsStartFreq | 300.01 | Lowest frequency (in Hz) considered a mids note |
 | midsEndFreq | 2500.01 | Highest frequency (in Hz) considered a mids note |
 | highStartFreq | 2500.01 | Lowest frequency (in Hz) considered a high note |
-| highEndFreq | 16000.01 | Highest frequency (in Hz) considered a high note |
-| minimumBass | 0.0075 | Minimum magnitude of strongest bass note required to register a whitehole response |
+| highEndFreq | 15000.01 | Highest frequency (in Hz) considered a high note |
+| minimumBass | 0.005 | Minimum magnitude of strongest bass note required to register a whitehole response |
 | minimumMids | 0.000125 | Minimum magnitude of strongest mids note required to register a curl attractor response |
 | minimumHigh | 0.00009 | Minimum magnitude of strongest bass note required to register a blackhole response |
 | whiteHoleStrength | 1.01 | Factor to adjust strength of whiteholes |
