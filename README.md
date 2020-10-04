@@ -40,11 +40,11 @@ determined bin from the domain of `bass`, `mids`, and `highs` respectively. The 
 ### Controls
 | Button | Description |
 | ------ | ----------- |
-| `F1`   | Toggle help overlay |
+| `F1`   | Toggle controls overlay |
 | `ESC`  | Exit the application |
 | `F5`  | Reset the visualizer |
 | `F11`  | Toggle fullscreen (default: `false`) |
-| `F12` | Save a screenshot to `screenshots/awesome.png` at current window resolution. If a file with that name already exists it will increment a counter until it finds an available file name |
+| `F12` | Save a screenshot to `screenshots/awesome.png`. If a file with that name already exists it will increment a counter until it finds an available file name |
 | `ALT+P`  | Toggle between `3D` and `2D` perspectives (default: `3D`) |
 | `W,A,S,D` | Manually direct the camera (Note: only affects `3D` perspective) |
 | `LEFT-SHIFT` | Hold to reduce manual movement speed of the camera |
