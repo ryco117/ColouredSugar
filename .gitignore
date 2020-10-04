@@ -339,3 +339,6 @@ ASALocalRun/
 # BeatPulse healthcheck temp database
 healthchecksdb
 /keyfile.snk
+
+# WIX build generated files
+Installer/ComponentsGenerated.wxs
