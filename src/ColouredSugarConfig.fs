@@ -19,13 +19,13 @@ let sample = """
     "z": -0.3
   },
 
-  "particleCount": 1048576,
+  "particleCount": 1572864,
 
   "bassStartFreq": 20.01,
-  "bassEndFreq": 300.01,
+  "bassEndFreq": 350.01,
   "midsStartFreq": 300.01,
   "midsEndFreq": 2500.01,
-  "highStartFreq": 2500.01,
+  "highStartFreq": 2000.01,
   "highEndFreq": 15000.01,
 
   "minimumBass": 0.005,
@@ -45,7 +45,7 @@ let sample = """
 
   "cameraInertia": 0.3,
 
-  "audioDisconnectCheckWait": 100
+  "audioDisconnectCheckWait": 12
 }
 """
 

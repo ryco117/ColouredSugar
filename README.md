@@ -42,10 +42,8 @@ determined bin from the domain of `bass`, `mids`, and `highs` respectively. The 
 | ------ | ----------- |
 | `F1`   | Toggle help overlay |
 | `ESC`  | Exit the application |
-| `ALT+F4`  | Exit the application (alternative to `ESC`) |
 | `F5`  | Reset the visualizer |
 | `F11`  | Toggle fullscreen (default: `false`) |
-| `ALT+ENTER`  | Toggle fullscreen (alternative to `F11`) |
 | `F12` | Save a screenshot to `screenshots/awesome.png` at current window resolution. If a file with that name already exists it will increment a counter until it finds an available file name |
 | `ALT+P`  | Toggle between `3D` and `2D` perspectives (default: `3D`) |
 | `W,A,S,D` | Manually direct the camera (Note: only affects `3D` perspective) |
@@ -53,6 +51,7 @@ determined bin from the domain of `bass`, `mids`, and `highs` respectively. The 
 | `Z` | Toggle auto-rotation of camera (Note: only affects `3D` perspective; default: `true`) |
 | `X` | Toggle presence of bouncing ball (default: `false`) |
 | `R` | Toggle audio-output responsiveness (Note: framerate may jitter if there is no system audio-out present while set to `true`; default: `true`) |
+| `H` | Toggle hiding the mouse cursor (default: `false`) |
 | `MOUSE-LEFT` | Hold to manually apply a point force attraction/repulsion at the mouse cursor |
 | `MOUSE-RIGHT` | Hold to inverse repulsion force to attraction at the mouse cursor. (Note: must hold both `MOUSE-RIGHT` and `MOUSE-LEFT` to apply an inverted force) |
 | `MOUSE-SCROLL` | Scroll up to increase intensity of manual point force. Scroll down to decrease strength |
@@ -74,12 +73,12 @@ but most notably the rate, speed, and strength of various operations.
 | cursorForceInverseFactor | 1.5 | Factor to multiple cursor strength by on inverse (ie. strength of pull relative to push. if this number is negative then both forces push) |
 | bouncingBallSize | 0.125 | Radius of the bouncing ball. Note that the encompassing cube is 2 units in length |
 | bouncingBallVelocity | {x: -0.4, y: 0.4, z: -0.3} | Describes the starting velocity of the bouncing ball |
-| particleCount | 1048576 | Number of coloured particles in the visualizer |
+| particleCount | 1572864 | Number of coloured particles in the visualizer |
 | bassStartFreq | 20.01 | Lowest frequency (in Hz) considered a bass note |
-| bassEndFreq | 300.01 | Highest frequency (in Hz) considered a bass note |
+| bassEndFreq | 350.01 | Highest frequency (in Hz) considered a bass note |
 | midsStartFreq | 300.01 | Lowest frequency (in Hz) considered a mids note |
 | midsEndFreq | 2500.01 | Highest frequency (in Hz) considered a mids note |
-| highStartFreq | 2500.01 | Lowest frequency (in Hz) considered a high note |
+| highStartFreq | 2000.01 | Lowest frequency (in Hz) considered a high note |
 | highEndFreq | 15000.01 | Highest frequency (in Hz) considered a high note |
 | minimumBass | 0.005 | Minimum magnitude of strongest bass note required to register a whitehole response |
 | minimumMids | 0.000125 | Minimum magnitude of strongest mids note required to register a curl attractor response |
@@ -93,7 +92,7 @@ but most notably the rate, speed, and strength of various operations.
 | shiftFactorOrbit | 0.33 | Factor to multiply camera orbit speed by when holding `LEFT-SHIFT` |
 | shiftFactorMove | 0.33 | Factor to multiply camera movement speed by when holding `LEFT-SHIFT` |
 | cameraInertia | 0.3 | Camera's resistance to user inputs on movement |
-| audioDisconnectCheckWait | 100 | Number of frames to wait before rechecking if audio has disconnected (only if audio-responsiveness is enabled) |
+| audioDisconnectCheckWait | 12 | Number of frames to wait before rechecking if audio has disconnected (only if audio-responsiveness is enabled) |
 
 For an even more customized experience, one must edit the shader programs. The shader files of most interest are 
 [particle_comp.glsl](shaders/particle_comp.glsl) and [particle_vert.glsl](shaders/particle_vert.glsl). 

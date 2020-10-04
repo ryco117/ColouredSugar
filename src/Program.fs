@@ -56,6 +56,7 @@ type ColouredSugar(config: Config) as world =
     let mutable mouseScroll = 0.f
     let mutable mouseLeftDown = false
     let mutable mouseRightDown = false
+    let mutable mouseHidden = false
     let cursorForceInverseFactor = float32 config.CursorForceInverseFactor
     let cursorForceScrollFactor = float32 config.CursorForceScrollIncrease
     let mutable targetCameraVelocity = Vector3.Zero
@@ -119,10 +120,20 @@ type ColouredSugar(config: Config) as world =
         whiteHole.W <- 0.f
         if complex.Length > 0 then
             let mag (c: NAudio.Dsp.Complex) = sqrt(c.X*c.X + c.Y*c.Y)
-            let detailedFreq i len =
+            let toWorldSpace i len =
                 let flog = log (float32 i + 1.f)
                 let ffrac = flog - float32 (int flog)
-                floor flog / log (float32 len), ffrac
+                let x, y = 2.f * (floor flog / log (float32 len)) - 1.f, 2.f * ffrac - 1.f
+                if camera.UsePerspective then
+                    let negYaw = -camera.Yaw
+                    Vector3(x * cos negYaw, y, x * sin negYaw)
+                else
+                    Vector3(x, y, 0.f)
+                (*let t = int (1000.f * float32 i / float32 (len - 1))
+                let x = 2.f * (float32 (t % 10) / 10.f + 0.05f) - 1.f
+                let z = 2.f * (float32 (t/10 % 10) / 10.f + 0.05f) - 1.f
+                let y = 2.f * sqrt(float32 (t/100 % 10) / 10.f + 0.05f) - 1.f
+                Vector3(x, y, z)*)
             let freqResolution = samplingRate / float complex.Length
             let analyze (arr: NAudio.Dsp.Complex[]) =
                 let mutable max_mag = mag arr.[0]
@@ -134,8 +145,7 @@ type ColouredSugar(config: Config) as world =
                     if m > max_mag then
                         max_mag <- m
                         max_i <- i
-                let fl, ff = detailedFreq max_i arr.Length
-                max_i, max_mag, sum, fl, ff
+                max_i, max_mag, sum, toWorldSpace max_i arr.Length
             let roundToInt f = int (round f)
             let bassStart = roundToInt (float config.BassStartFreq / freqResolution)
             let bassEnd = roundToInt (float config.BassEndFreq / freqResolution)
@@ -144,15 +154,9 @@ type ColouredSugar(config: Config) as world =
             let highStart = roundToInt (float config.HighStartFreq / freqResolution)
             let highEnd = roundToInt (float config.HighEndFreq / freqResolution)
             let bassArray = Array.sub complex bassStart bassEnd
-            let bassIndex, bassMaxMag, bassSum, bassFreqLog, bassFreqFrac = analyze bassArray
-            let _, midsMaxMag, midsSum, midsFreqLog, midsFreqFrac = analyze (Array.sub complex midsStart (midsEnd - midsStart))
-            let _, highMaxMag, highSum, highFreqLog, highFreqFrac = analyze (Array.sub complex highStart (highEnd - highStart))
-            let toWorldSpace x y =
-                if camera.UsePerspective then
-                    let negYaw = -camera.Yaw
-                    Vector3(x * cos negYaw, y, x * sin negYaw)
-                else
-                    Vector3(x, y, 0.f)
+            let bassIndex, bassMaxMag, bassSum, bassPos = analyze bassArray
+            let _, midsMaxMag, midsSum, midsPos = analyze (Array.sub complex midsStart (midsEnd - midsStart))
+            let _, highMaxMag, highSum, highPos = analyze (Array.sub complex highStart (highEnd - highStart))
             let avgLastBassMag =
                 let mutable s = 0.f
                 for i = 0 to previousBass.Length - 1 do
@@ -166,20 +170,14 @@ type ColouredSugar(config: Config) as world =
                             mag previousBass.[i].[j]
                 s / float32 previousBass.Length
             if bassMaxMag > float32 config.MinimumBass && bassMaxMag > 1.5f * avgLastBassMag then
-                let X = 2.f * bassFreqLog - 1.f
-                let Y = 2.f * bassFreqFrac - 1.f
                 whiteHole.W <- defaultMass * bassSum * float32 config.WhiteHoleStrength
-                whiteHole.Xyz <- toWorldSpace X Y
+                whiteHole.Xyz <- bassPos
             if midsMaxMag > float32 config.MinimumMids then
-                let X = 2.f * midsFreqLog - 1.f
-                let Y = 2.f * midsFreqFrac - 1.f
                 curlAttractor.W <- defaultMass * (sqrt midsSum) * float32 config.CurlAttractorStrength
-                curlAttractor.Xyz <- toWorldSpace  X Y
+                curlAttractor.Xyz <- midsPos
             if highMaxMag > float32 config.MinimumHigh then
-                let X = 2.f * highFreqLog - 1.f
-                let Y = 2.f * highFreqFrac - 1.f
                 blackHole.W <- defaultMass * (sqrt highSum) * float32 config.BlackHoleStrength
-                blackHole.Xyz <- toWorldSpace X Y
+                blackHole.Xyz <- highPos
             previousBass.[previousBassIndex] <- bassArray
             previousBassIndex <- (previousBassIndex + 1) % previousBass.Length
     let onClose () =
@@ -229,6 +227,11 @@ type ColouredSugar(config: Config) as world =
             sphere.Position <- Vector3.Zero
             camera.Position <- new Vector3(0.f, 0.f, 0.975f)
             mouseScroll <- 0.f
+        // Toggle hidden cursor
+        | Key.H, _, false ->
+            mouseHidden <- not mouseHidden
+            world.Cursor <- if mouseHidden then MouseCursor.Empty else MouseCursor.Default
+
         // Toggle auto rotate
         | Key.Z, _, false -> autoRotate <- not autoRotate
         // Toggle responsive to audio-out
@@ -373,6 +376,9 @@ type ColouredSugar(config: Config) as world =
         if e.Button = MouseButton.Right then
             mouseRightDown <- false
         base.OnMouseUp e
+    override _.OnFocusedChanged e =
+        world.Cursor <- if mouseHidden && world.Focused then MouseCursor.Empty else MouseCursor.Default
+        base.OnFocusedChanged e
     override _.OnLoad eventArgs =
         // Set default values
         GL.ClearColor (0.f, 0.f, 0.f, 1.f)

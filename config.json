@@ -13,13 +13,13 @@
     "z": -0.3
   },
 
-  "particleCount": 1048576,
+  "particleCount": 1572864,
 
   "bassStartFreq": 20.0,
-  "bassEndFreq": 300.0,
+  "bassEndFreq": 350.0,
   "midsStartFreq": 300.0,
   "midsEndFreq": 2500.0,
-  "highStartFreq": 2500.0,
+  "highStartFreq": 2000.0,
   "highEndFreq": 15000.0,
 
   "minimumBass": 0.005,
@@ -39,5 +39,5 @@
 
   "cameraInertia": 0.3,
 
-  "audioDisconnectCheckWait":  100
+  "audioDisconnectCheckWait": 12
 }

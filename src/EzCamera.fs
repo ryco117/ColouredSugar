@@ -21,13 +21,13 @@ open System
 open OpenTK
 
 type EzCamera(rotateSensitivity, moveSensitivity, aspect) =
-    let mutable position = new Vector3(0.f, 0.f, 0.975f)
+    let mutable position = new Vector3(0.f, 0.f, 1.f)
     let mutable perspective = true
     let mutable pitch = 0.f
     let mutable yaw = 0.f
     let mutable strafeRight = 0.f
     let mutable forwardVelocity = 0.f
-    let mutable proj = Matrix4.CreatePerspectiveFieldOfView (float32 (Math.PI/2.), aspect, 0.01f, 50.f)
+    let mutable proj = Matrix4.CreatePerspectiveFieldOfView (float32 (Math.PI/1.8), aspect, 0.01f, 50.f)
     let mutable projInv = proj.Inverted ()
     let orth = Matrix4.Identity
     let orthInv = orth
@@ -53,7 +53,7 @@ type EzCamera(rotateSensitivity, moveSensitivity, aspect) =
         with get () = perspective
         and set p = perspective <- p
     member _.SetProjection aspect =
-        proj <- Matrix4.CreatePerspectiveFieldOfView (float32 (Math.PI/2.), aspect, 0.01f, 50.f)
+        proj <- Matrix4.CreatePerspectiveFieldOfView (float32 (Math.PI/1.8), aspect, 0.01f, 50.f)
         projInv <- proj.Inverted ()
     member _.ProjView () =
         if perspective then
