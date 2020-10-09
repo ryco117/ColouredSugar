@@ -28,13 +28,15 @@ open SixLabors.ImageSharp
 open EzCamera
 open ColouredSugarConfig
 
+type FreqMag = {freq: float32; mag: float32}
+
 // Try to use same RNG source application-wide
-let random = new System.Random ()
+let random = System.Random ()
 let randF () = float32 (random.NextDouble ())
 let randNormF () = (randF () - 0.5f) * 2.f
 
 // Grab handle to console window
-let console = new ConsoleControls.Controller ()
+let console = ConsoleControls.Controller ()
 
 // Get default path for ColouredSugar screenshots
 let screenshotsDir = System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyPictures) + """\ColouredSugar\""";
@@ -42,18 +44,18 @@ let screenshotsDir = System.Environment.GetFolderPath(System.Environment.Special
 type ColouredSugar(config: Config) as world =
     inherit GameWindow(
         1280, 720,
-        new GraphicsMode(new ColorFormat(8, 8, 8, 8), 24, 8, 1),
+        GraphicsMode(ColorFormat(8, 8, 8, 8), 24, 8, 1),
         "ColouredSugar", GameWindowFlags.Default)
     do world.VSync <- if config.EnableVSync then VSyncMode.On else VSyncMode.Off
-    do world.Icon <-new System.Drawing.Icon "res/ColouredSugar.ico"
+    do world.Icon <- new System.Drawing.Icon "res/ColouredSugar.ico"
     let mutable preFullscreenSize = System.Drawing.Size(1, 1)
-    let camera = new EzCamera(float32 config.CameraOrbitSpeed, float32 config.CameraMoveSpeed, 16.f/9.f)
+    let camera = EzCamera(float32 config.CameraOrbitSpeed, float32 config.CameraMoveSpeed, 16.f/9.f)
     let screenshotScale = float config.ScreenshotScale
     let mutable tick = 0UL
     let fpsWait: uint64 = 300UL
     let mutable mouseX = 0.f
     let mutable mouseY = 0.f
-    let mutable mouseScroll = 0.f
+    let mutable mouseScroll = float32 config.CursorForceInitial
     let mutable mouseLeftDown = false
     let mutable mouseRightDown = false
     let mutable mouseHidden = false
@@ -68,12 +70,12 @@ type ColouredSugar(config: Config) as world =
 
     let sphere = new EzObjects.ColouredSphere(Vector3(0.75f, 0.75f, 0.75f), 3)
     let defaultSphereVelocity =
-        new Vector3(
+        Vector3(
             float32 config.BouncingBallVelocity.X,
             float32 config.BouncingBallVelocity.Y,
             float32 config.BouncingBallVelocity.Z)
     let mutable sphereVelocity = defaultSphereVelocity
-    let defaultSphereScale = new Vector3 (float32 config.BouncingBallSize)
+    let defaultSphereScale = Vector3 (float32 config.BouncingBallSize)
     do sphere.Scale <- Vector3.Zero
 
     let mutable overlay = true
@@ -104,9 +106,9 @@ type ColouredSugar(config: Config) as world =
     let mutable particleCompShader = 0
     let mutable particleRenderShader = 0
     let defaultMass = 0.005f
-    let mutable blackHole = new Vector4()
-    let mutable curlAttractor = new Vector4()
-    let mutable whiteHole = new Vector4()
+    let mutable blackHoles = Array.zeroCreate<Vector4> 6
+    let mutable curlAttractors = Array.zeroCreate<Vector4> 6
+    let mutable whiteHoles = Array.zeroCreate<Vector4> 3
 
     // Audio handler funciton
     let mutable complexZero = NAudio.Dsp.Complex ()
@@ -115,37 +117,25 @@ type ColouredSugar(config: Config) as world =
     let mutable previousBass = Array.create 2 [|complexZero|]
     let mutable previousBassIndex = 0
     let onDataAvail samplingRate (complex: NAudio.Dsp.Complex[]) =
-        blackHole.W <- 0.f
-        curlAttractor.W <- 0.f
-        whiteHole.W <- 0.f
         if complex.Length > 0 then
             let mag (c: NAudio.Dsp.Complex) = sqrt(c.X*c.X + c.Y*c.Y)
-            let toWorldSpace i len =
-                let flog = log (float32 i + 1.f)
-                let ffrac = flog - float32 (int flog)
-                let x, y = 2.f * (floor flog / log (float32 len)) - 1.f, 2.f * ffrac - 1.f
-                if camera.UsePerspective then
-                    let negYaw = -camera.Yaw
-                    Vector3(x * cos negYaw, y, x * sin negYaw)
-                else
-                    Vector3(x, y, 0.f)
-                (*let t = int (1000.f * float32 i / float32 (len - 1))
-                let x = 2.f * (float32 (t % 10) / 10.f + 0.05f) - 1.f
-                let z = 2.f * (float32 (t/10 % 10) / 10.f + 0.05f) - 1.f
-                let y = 2.f * sqrt(float32 (t/100 % 10) / 10.f + 0.05f) - 1.f
-                Vector3(x, y, z)*)
+            let toWorldSpace t =
+                CubeFillingCurve.curveToCubeN 8 (sqrt (float t))
             let freqResolution = samplingRate / float complex.Length
-            let analyze (arr: NAudio.Dsp.Complex[]) =
-                let mutable max_mag = mag arr.[0]
-                let mutable max_i = 0
-                let mutable sum = max_mag
-                for i = 1 to arr.Length - 1 do
-                    let m = mag arr.[i]
-                    sum <- sum + m
-                    if m > max_mag then
-                        max_mag <- m
-                        max_i <- i
-                max_i, max_mag, sum, toWorldSpace max_i arr.Length
+            let getStrongest maxCount delta (input: NAudio.Dsp.Complex[]) =
+                let fLen = float32 input.Length
+                let arr = Array.init input.Length (fun i -> {freq = (float32 i) / fLen; mag = mag input.[i]})
+                let cmp {freq = _; mag = a} {freq = _; mag = b} = sign (b - a)
+                let sorted = Array.sortWith cmp arr
+                let rec getList acc size (arr: FreqMag[]) =
+                    if arr.Length = 0  || size = maxCount then
+                        acc
+                    else
+                        let t = arr.[0].freq
+                        let remaining, friends = Array.partition (fun {freq = s; mag = _} -> abs (t - s) > delta) arr
+                        let m = Array.fold (fun acc {freq = _; mag = m} -> acc + m) 0.f friends
+                        getList ({freq = t; mag = m}::acc) (size + 1) remaining
+                List.toArray (List.rev (getList [] 0 sorted))
             let roundToInt f = int (round f)
             let bassStart = roundToInt (float config.BassStartFreq / freqResolution)
             let bassEnd = roundToInt (float config.BassEndFreq / freqResolution)
@@ -153,11 +143,11 @@ type ColouredSugar(config: Config) as world =
             let midsEnd = roundToInt (float config.MidsEndFreq / freqResolution)
             let highStart = roundToInt (float config.HighStartFreq / freqResolution)
             let highEnd = roundToInt (float config.HighEndFreq / freqResolution)
-            let bassArray = Array.sub complex bassStart bassEnd
-            let bassIndex, bassMaxMag, bassSum, bassPos = analyze bassArray
-            let _, midsMaxMag, midsSum, midsPos = analyze (Array.sub complex midsStart (midsEnd - midsStart))
-            let _, highMaxMag, highSum, highPos = analyze (Array.sub complex highStart (highEnd - highStart))
-            let avgLastBassMag =
+            let bassArray = Array.sub complex bassStart (bassEnd - bassStart)
+            let bassNotes = getStrongest whiteHoles.Length 0.125f bassArray
+            let midsNotes = getStrongest curlAttractors.Length 0.05f (Array.sub complex midsStart (midsEnd - midsStart))
+            let highNotes = getStrongest blackHoles.Length 0.075f (Array.sub complex highStart (highEnd - highStart))
+            let avgLastBassMag x =
                 let mutable s = 0.f
                 for i = 0 to previousBass.Length - 1 do
                     s <- s +
@@ -165,25 +155,37 @@ type ColouredSugar(config: Config) as world =
                             0.f
                         else
                             let j =
-                                let j = int (round (float bassIndex * float previousBass.[i].Length / float bassArray.Length))
+                                let j = int (round (x * float32 previousBass.[i].Length))
                                 if j >= previousBass.[i].Length then previousBass.[i].Length - 1 else j
                             mag previousBass.[i].[j]
                 s / float32 previousBass.Length
-            if bassMaxMag > float32 config.MinimumBass && bassMaxMag > 1.5f * avgLastBassMag then
-                whiteHole.W <- defaultMass * bassSum * float32 config.WhiteHoleStrength
-                whiteHole.Xyz <- bassPos
-            if midsMaxMag > float32 config.MinimumMids then
-                curlAttractor.W <- defaultMass * (sqrt midsSum) * float32 config.CurlAttractorStrength
-                curlAttractor.Xyz <- midsPos
-            if highMaxMag > float32 config.MinimumHigh then
-                blackHole.W <- defaultMass * (sqrt highSum) * float32 config.BlackHoleStrength
-                blackHole.Xyz <- highPos
+            for i = 0 to bassNotes.Length - 1 do
+                if bassNotes.[i].mag > float32 config.MinimumBass && bassNotes.[i].mag > 1.2f * avgLastBassMag bassNotes.[i].freq then
+                    whiteHoles.[i] <- Vector4(
+                        toWorldSpace bassNotes.[i].freq,
+                        defaultMass * bassNotes.[i].mag * float32 config.WhiteHoleStrength)
+                else
+                    whiteHoles.[i] <- Vector4()
+            for i = 0 to midsNotes.Length - 1 do
+                if midsNotes.[i].mag > float32 config.MinimumMids then
+                    curlAttractors.[i] <- Vector4(
+                        toWorldSpace midsNotes.[i].freq,
+                        defaultMass * (sqrt midsNotes.[i].mag) * float32 config.CurlAttractorStrength)
+                else
+                    curlAttractors.[i] <- Vector4()
+            for i = 0 to highNotes.Length - 1 do
+                if highNotes.[i].mag > float32 config.MinimumHigh then
+                    blackHoles.[i] <- Vector4(
+                        toWorldSpace highNotes.[i].freq,
+                        defaultMass * (sqrt highNotes.[i].mag) * float32 config.BlackHoleStrength)
+                else
+                    blackHoles.[i] <- Vector4()
             previousBass.[previousBassIndex] <- bassArray
             previousBassIndex <- (previousBassIndex + 1) % previousBass.Length
     let onClose () =
-        blackHole.W <- 0.f
-        curlAttractor.W <- 0.f
-        whiteHole.W <- 0.f
+        blackHoles <- Array.zeroCreate<Vector4> 6
+        curlAttractors <- Array.zeroCreate<Vector4> 6
+        whiteHoles <- Array.zeroCreate<Vector4> 4
     let audioOutCapture = new EzSound.AudioOutStreamer(onDataAvail, onClose)
 
     override this.OnKeyDown e =
@@ -217,16 +219,24 @@ type ColouredSugar(config: Config) as world =
                 sphere.Scale <- defaultSphereScale
         // Reset states of objects
         | Key.F5, _, false ->
-            let velocities = Array.init (particleCount * 4) (fun i -> if i % 4 = 3 then 0.f else randNormF () * 0.01f)
+            let velocities = Array.zeroCreate<float32> (particleCount * 4)
             GL.BindBuffer(BufferTarget.ShaderStorageBuffer, particleVelocityArray)
             GL.BufferSubData(BufferTarget.ShaderStorageBuffer, nativeint 0, velocities.Length * sizeof<float32>, velocities)
-            let positions = Array.init (particleCount * 4) (fun i -> if i % 4 = 3 then 1.f else randNormF ())
+            let PARTICLES = Array.init particleCount (fun i -> CubeFillingCurve.curveToCube ((float i) / (float particleCount)))
+            let positions =
+                Array.init<float32> (particleCount * 4) (fun i -> match (i % 4) with
+                                                                  | 0 -> PARTICLES.[i/4].X
+                                                                  | 1 -> PARTICLES.[i/4].Y
+                                                                  | 2 -> PARTICLES.[i/4].Z
+                                                                  | 3 -> 1.f
+                                                                  | _ -> raise (System.Exception "Mathematics is broken!!"))
             GL.BindBuffer(BufferTarget.ShaderStorageBuffer, particleVBO)
             GL.BufferSubData(BufferTarget.ShaderStorageBuffer, nativeint 0, positions.Length * sizeof<float32>, positions)
             sphereVelocity <- defaultSphereVelocity
             sphere.Position <- Vector3.Zero
-            camera.Position <- new Vector3(0.f, 0.f, 0.975f)
-            mouseScroll <- 0.f
+            camera.Position <- Vector3(0.f, 0.f, 1.725f)
+            camera.Yaw <- 0.f
+            mouseScroll <- float32 config.CursorForceInitial
         // Toggle hidden cursor
         | Key.H, _, false ->
             mouseHidden <- not mouseHidden
@@ -320,11 +330,11 @@ type ColouredSugar(config: Config) as world =
                         newPath 1
                     else
                         defaultPath
-                let managedImage = new Image<PixelFormats.Rgb24>(width, height)
+                use managedImage = new Image<PixelFormats.Rgb24>(width, height)
                 for j = 0 to height - 1 do
                     for i = 0 to width - 1 do
                         managedImage.[i, j] <-
-                            new PixelFormats.Rgb24 (
+                            PixelFormats.Rgb24(
                                 rawImage.[bytesPerRow * (height - j - 1) + 3 * i],
                                 rawImage.[bytesPerRow * (height - j - 1) + 3 * i + 1],
                                 rawImage.[bytesPerRow * (height - j - 1) + 3 * i + 2])
@@ -393,11 +403,19 @@ type ColouredSugar(config: Config) as world =
         // Load particle system
         particleCompShader <- EzShader.CreateComputeShader "shaders/particle_comp.glsl"
         particleRenderShader <- EzShader.CreateShaderProgram "shaders/particle_vert.glsl" "shaders/particle_frag.glsl"
-        let particlePos = Array.init (particleCount * 4) (fun i -> if i % 4 = 3 then 1.f else randNormF ())
+        //let particlePos = Array.init (particleCount * 4) (fun i -> if i % 4 = 3 then 1.f else randNormF ())
+        let positions = Array.init particleCount (fun i -> CubeFillingCurve.curveToCube ((float i) / (float particleCount)))
+        let particlePos =
+            Array.init<float32> (particleCount * 4) (fun i -> match (i % 4) with
+                                                              | 0 -> positions.[i/4].X
+                                                              | 1 -> positions.[i/4].Y
+                                                              | 2 -> positions.[i/4].Z
+                                                              | 3 -> 1.f
+                                                              | _ -> raise (System.Exception "Mathematics is broken!"))
         particleVBO <- GL.GenBuffer ()
         GL.BindBuffer(BufferTarget.ShaderStorageBuffer, particleVBO)
         GL.BufferData(BufferTarget.ShaderStorageBuffer, particlePos.Length * sizeof<float32>, particlePos, BufferUsageHint.StreamDraw)
-        let velocities = Array.init (particleCount * 4) (fun i -> if i % 4 = 3 then 0.f else randNormF () * 0.01f)
+        let velocities = Array.zeroCreate<float32> (particleCount * 4)
         particleVelocityArray <- GL.GenBuffer ()
         GL.BindBuffer(BufferTarget.ShaderStorageBuffer, particleVelocityArray)
         GL.BufferData(BufferTarget.ShaderStorageBuffer, velocities.Length * sizeof<float32>, velocities, BufferUsageHint.StreamDraw)
@@ -443,7 +461,7 @@ type ColouredSugar(config: Config) as world =
         GL.Uniform1(GL.GetUniformLocation(particleCompShader, "perspective"), if camera.UsePerspective then 1u else 0u)
         GL.Uniform4(
             GL.GetUniformLocation(particleCompShader, "attractors[0]"),
-            new Vector4(
+            Vector4(
                 camera.ToWorldSpace mouseX mouseY,
                 if mouseLeftDown then
                     if mouseRightDown then
@@ -452,12 +470,16 @@ type ColouredSugar(config: Config) as world =
                         -defaultMass * cursorForceScrollFactor**mouseScroll
                 else
                     0.f))
-        GL.Uniform4(GL.GetUniformLocation(particleCompShader, "attractors[1]"), blackHole)
-        GL.Uniform4(GL.GetUniformLocation(particleCompShader, "bigBoomer"), whiteHole)
-        GL.Uniform4(GL.GetUniformLocation(particleCompShader, "curlAttractor"), curlAttractor)
+        // TODO: Use interpolated strings here when .NET 5 releases!
+        for i = 1 to blackHoles.Length do
+            GL.Uniform4(GL.GetUniformLocation(particleCompShader, sprintf "attractors[%i]" i), blackHoles.[i-1])
+        for i = 0 to whiteHoles.Length - 1 do
+            GL.Uniform4(GL.GetUniformLocation(particleCompShader, sprintf "bigBoomers[%i]" i), whiteHoles.[i])
+        for i = 0 to curlAttractors.Length - 1 do
+            GL.Uniform4(GL.GetUniformLocation(particleCompShader, sprintf "curlAttractors[%i]" i), curlAttractors.[i])
         GL.Uniform4(
             GL.GetUniformLocation(particleCompShader, "musicalSphere"),
-            new Vector4(sphere.Position, sphere.Scale.X))
+            Vector4(sphere.Position, sphere.Scale.X))
         GL.BindBufferBase(BufferRangeTarget.ShaderStorageBuffer, 0, particleVBO)
         GL.BindBufferBase(BufferRangeTarget.ShaderStorageBuffer, 1, particleVelocityArray)
         GL.DispatchCompute(particleCount / 128, 1, 1)
@@ -514,7 +536,7 @@ let main args =
     // Set OpenTK options
     let options = ToolkitOptions.Default
     options.Backend <- PlatformBackend.PreferNative
-    let toolkit = Toolkit.Init options
+    use toolkit = Toolkit.Init options
 
     // Create screenshots directory (if non-existant)
     System.IO.Directory.CreateDirectory screenshotsDir |> ignore
@@ -537,14 +559,12 @@ let main args =
 
     // Run
     try
-        let game = new ColouredSugar(config)
+        use game = new ColouredSugar(config)
         game.Run ()
-        game.Dispose ()
     with
     | e ->
         console.Maximize ()
         printfn "ColouredSugar failed with the following error:\n %s" e.Message
         printf "Press ENTER to safely close..."
         System.Console.ReadLine () |> ignore
-    toolkit.Dispose ()
     0

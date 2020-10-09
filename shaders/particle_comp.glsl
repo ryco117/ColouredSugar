@@ -9,11 +9,11 @@ layout (binding = 1) buffer VelocityBuffer {
 	vec4 velocities[];
 };
 
-// Delta time
+uniform vec4 bigBoomers[3];
+uniform vec4 curlAttractors[6];
+uniform vec4 attractors[7];
+
 uniform float deltaTime;
-uniform vec4 attractors[2];
-uniform vec4 curlAttractor;
-uniform vec4 bigBoomer;
 uniform bool perspective;
 uniform vec4 musicalSphere;
 
@@ -32,31 +32,39 @@ void main(void)
 	
 	vec3 g = vec3(0.0);
 	if(perspective) {
-		vec3 t = curlAttractor.xyz - pos.xyz;
-		float r = max(length(t), min_length);
-		g += curlAttractor.w * (normalize(cross(t, pos.xyz)) + normalize(t)/1.25) / (r*r);
+		for(int i = 0; i < curlAttractors.length(); i++) {
+			vec3 t = curlAttractors[i].xyz - pos.xyz;
+			float r = max(length(t), min_length);
+			g += curlAttractors[i].w * (normalize(cross(t, pos.xyz)) + normalize(t)/1.25) / (r*r);
+		}
 
-		t = bigBoomer.xyz - pos.xyz;
-		r = max(length(t), min_length);
-		g -= bigBoomer.w * normalize(t) / (r*r*r*r*r);
+		for(int i = 0; i < bigBoomers.length(); i++) {
+			vec3 t = bigBoomers[i].xyz - pos.xyz;
+			float r = max(length(t), min_length);
+			g -= bigBoomers[i].w * normalize(t) / (r*r*r*r*r);
+		}
 
 		for(int i = 0; i < attractors.length(); i++) {
-			t = attractors[i].xyz - pos.xyz;
-			r = max(length(t), min_length);
+			vec3 t = attractors[i].xyz - pos.xyz;
+			float r = max(length(t), min_length);
 			g += attractors[i].w * normalize(t) / (r*r);
 		}
 	} else {
-		vec3 t = vec3(curlAttractor.xy, pos.z) - pos.xyz;
-		float r = max(length(t), min_length);
-		g += curlAttractor.w * (normalize(cross(t, pos.xyz)) + normalize(t)/1.25) / (r*r);
+		for(int i = 0; i < curlAttractors.length(); i++) {
+			vec3 t = vec3(curlAttractors[i].xy, pos.z) - pos.xyz;
+			float r = max(length(t), min_length);
+			g += curlAttractors[i].w * (normalize(cross(t, pos.xyz)) + normalize(t)/1.25) / (r*r);
+		}
 
-		t = vec3(bigBoomer.xy, pos.z) - pos.xyz;
-		r = max(length(t), min_length);
-		g -= bigBoomer.w * normalize(t) / (r*r*r);
+		for(int i = 0; i < bigBoomers.length(); i++) {
+			vec3 t = vec3(bigBoomers[i].xy, pos.z) - pos.xyz;
+			float r = max(length(t), min_length);
+			g -= bigBoomers[i].w * normalize(t) / (r*r*r);
+		}
 
 		for(int i = 0; i < attractors.length(); i++) {
-			t = vec3(attractors[i].xy, pos.z) - pos.xyz;
-			r = max(length(t), min_length);
+			vec3 t = vec3(attractors[i].xy, pos.z) - pos.xyz;
+			float r = max(length(t), min_length);
 			g += attractors[i].w * normalize(t) / (r*r);
 		}
 

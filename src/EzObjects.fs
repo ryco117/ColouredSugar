@@ -69,7 +69,7 @@ let GenSphere n =
     let right = 1.f, 0.f, 0.f       // right 3
     let front = 0.f, 0.f, 1.f       // front 4
     let back = 0.f, 0.f, -1.f       // back 5
-    let pointArray = new GrowingArray<float32*float32*float32> [|top; bot; left; right; front; back|]
+    let pointArray = GrowingArray<float32*float32*float32> [|top; bot; left; right; front; back|]
     let rec apply n (triList: (int*int*int) list) =
         if n < 1 then
             triList 

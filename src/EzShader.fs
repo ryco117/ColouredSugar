@@ -22,7 +22,7 @@ open OpenTK.Graphics.OpenGL
 let CreateShaderProgram vertPath fragPath =
     // Read shaders from file-path
     let readSrc (path: string) =
-        let r = new System.IO.StreamReader(path, System.Text.Encoding.UTF8)
+        use r = new System.IO.StreamReader(path, System.Text.Encoding.UTF8)
         r.ReadToEnd ()
     let vertSrc = readSrc vertPath
     let fragSrc = readSrc fragPath
@@ -35,7 +35,7 @@ let CreateShaderProgram vertPath fragPath =
     let checkErr hndl =
         let infoLog = GL.GetShaderInfoLog hndl
         if infoLog.Length <> 0 then
-            raise (new System.Exception(infoLog))
+            raise (System.Exception(infoLog))
     GL.CompileShader vertHndl
     checkErr vertHndl
     GL.CompileShader fragHndl
@@ -56,7 +56,7 @@ let CreateShaderProgram vertPath fragPath =
 let CreateComputeShader (compPath: string) =
     // Read shaders from file-path
     let compSrc =
-        let r = new System.IO.StreamReader(compPath, System.Text.Encoding.UTF8)
+        use r = new System.IO.StreamReader(compPath, System.Text.Encoding.UTF8)
         r.ReadToEnd ()
     // Move src to GPU
     let compHndl = GL.CreateShader ShaderType.ComputeShader
@@ -65,7 +65,7 @@ let CreateComputeShader (compPath: string) =
     let checkErr hndl =
         let infoLog = GL.GetShaderInfoLog hndl
         if infoLog.Length <> 0 then
-            raise (new System.Exception(infoLog))
+            raise (System.Exception(infoLog))
     GL.CompileShader compHndl
     checkErr compHndl
     // Link shaders into a shader program

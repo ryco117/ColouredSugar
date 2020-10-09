@@ -12,9 +12,9 @@ NAudio also provides the Fast Fourier Transform I used.
 ColouredSugar uses the [WASAPI loopback](https://docs.microsoft.com/en-us/windows/win32/coreaudio/loopback-recording) 
 feature to capture the current audio out stream. The audio is then read in chunks as they become available 
 and a fast fourier transform is applied to the sampled audio stream. The resulting frequency domain is partitioned into three unequal parts, 
-`bass`, `mids`, and `highs`. For each of these sub domains, the discrete frequency bin with the largest magnitude is determined 
-(ie. the tone most present in the sound wave is determined). 
-Then a corresponding `whitehole`, `curl-attractor`, or `blackhole` is created with parameters determined by the magnitude and frequency of the 
+`bass`, `mids`, and `highs`. For each of these sub domains, the discrete frequency bins with the largest magnitudes are determined 
+(ie. the tones most present in the sound wave are determined). 
+Then corresponding `whitehole`, `curl-attractor`, or `blackhole` point forces are created with parameters determined by the magnitude and frequency of the 
 determined bin from the domain of `bass`, `mids`, and `highs` respectively. The `whitehole`s apply a force outward from their location, 
 `curl-attractor`s apply a force determined by the cross-product of their positions relative to the origin and to the attractor, 
 `blackhole`s apply a force towards their location following an inverse square law.
@@ -68,30 +68,31 @@ but most notably the rate, speed, and strength of various operations.
 | Name | Default value | Description |
 | ---- | ------------- | ----------- |
 | enableVSync | true | | Whether to enable application level VSync |
-| screenshotScale | 1.01 | Scale at which to save screenshots. If this value were 2.0 then screenshots would save at 2X current window width and height |
+| screenshotScale | 1.0001 | Scale at which to save screenshots. If this value were 2.0 then screenshots would save at 2X current window width and height |
 | cursorForceScrollIncrease | 1.4 | Factor to multiply cursor strength by on user `MOUSE-SCROLL` up |
 | cursorForceInverseFactor | 1.5 | Factor to multiple cursor strength by on inverse (ie. strength of pull relative to push. if this number is negative then both forces push) |
+| cursorForceInitial | 4.2 | Starting strength of the cursor's point-force. |
 | bouncingBallSize | 0.125 | Radius of the bouncing ball. Note that the encompassing cube is 2 units in length |
 | bouncingBallVelocity | {x: -0.4, y: 0.4, z: -0.3} | Describes the starting velocity of the bouncing ball |
 | particleCount | 1572864 | Number of coloured particles in the visualizer |
-| bassStartFreq | 20.01 | Lowest frequency (in Hz) considered a bass note |
-| bassEndFreq | 350.01 | Highest frequency (in Hz) considered a bass note |
-| midsStartFreq | 300.01 | Lowest frequency (in Hz) considered a mids note |
-| midsEndFreq | 2500.01 | Highest frequency (in Hz) considered a mids note |
+| bassStartFreq | 50.01 | Lowest frequency (in Hz) considered a bass note |
+| bassEndFreq | 250.01 | Highest frequency (in Hz) considered a bass note |
+| midsStartFreq | 250.01 | Lowest frequency (in Hz) considered a mids note |
+| midsEndFreq | 2000.01 | Highest frequency (in Hz) considered a mids note |
 | highStartFreq | 2000.01 | Lowest frequency (in Hz) considered a high note |
 | highEndFreq | 15000.01 | Highest frequency (in Hz) considered a high note |
-| minimumBass | 0.005 | Minimum magnitude of strongest bass note required to register a whitehole response |
-| minimumMids | 0.000125 | Minimum magnitude of strongest mids note required to register a curl attractor response |
-| minimumHigh | 0.00009 | Minimum magnitude of strongest bass note required to register a blackhole response |
-| whiteHoleStrength | 1.01 | Factor to adjust strength of whiteholes |
-| curlAttractorStrength | 8.01 | Factor to adjust strength of curl attractors |
-| blackHoleStrength | 4.75 | Factor to adjust strength of blackholes |
-| cameraOrbitSpeed | 1.01 | Factor to adjust speed of camera rotations/orbits |
-| cameraMoveSpeed | 1.01 | Factor to adjust speed of camera movement |
-| autoOrbitSpeed | 0.05 | Factor to adjust speed of auto orbit |
-| shiftFactorOrbit | 0.33 | Factor to multiply camera orbit speed by when holding `LEFT-SHIFT` |
-| shiftFactorMove | 0.33 | Factor to multiply camera movement speed by when holding `LEFT-SHIFT` |
-| cameraInertia | 0.3 | Camera's resistance to user inputs on movement |
+| minimumBass | 0.006 | Minimum magnitude of strongest bass note required to register a whitehole response |
+| minimumMids | 0.0005 | Minimum magnitude of strongest mids note required to register a curl attractor response |
+| minimumHigh | 0.0004 | Minimum magnitude of strongest bass note required to register a blackhole response |
+| whiteHoleStrength | 27.5 | Factor to adjust strength of whiteholes |
+| curlAttractorStrength | 17.25 | Factor to adjust strength of curl attractors |
+| blackHoleStrength | 14.5 | Factor to adjust strength of blackholes |
+| cameraOrbitSpeed | 0.75 | Factor to adjust speed of camera rotations/orbits |
+| cameraMoveSpeed | 0.75 | Factor to adjust speed of camera movement |
+| autoOrbitSpeed | 0.085 | Factor to adjust speed of auto orbit |
+| shiftFactorOrbit | 0.3 | Factor to multiply camera orbit speed by when holding `LEFT-SHIFT` |
+| shiftFactorMove | 0.3 | Factor to multiply camera movement speed by when holding `LEFT-SHIFT` |
+| cameraInertia | 0.4 | Camera's resistance to user inputs on movement |
 | audioDisconnectCheckWait | 12 | Number of frames to wait before rechecking if audio has disconnected (only if audio-responsiveness is enabled) |
 
 For an even more customized experience, one must edit the shader programs. The shader files of most interest are 

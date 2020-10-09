@@ -5,6 +5,7 @@
 
   "cursorForceScrollIncrease": 1.4,
   "cursorForceInverseFactor": 1.5,
+  "cursorForceInitial": 4.2,
 
   "bouncingBallSize": 0.125,
   "bouncingBallVelocity": {
@@ -15,29 +16,29 @@
 
   "particleCount": 1572864,
 
-  "bassStartFreq": 20.0,
-  "bassEndFreq": 350.0,
-  "midsStartFreq": 300.0,
-  "midsEndFreq": 2500.0,
+  "bassStartFreq": 50.0,
+  "bassEndFreq": 250.0,
+  "midsStartFreq": 250.0,
+  "midsEndFreq": 2000.0,
   "highStartFreq": 2000.0,
   "highEndFreq": 15000.0,
 
-  "minimumBass": 0.005,
-  "minimumMids": 0.000125,
-  "minimumHigh": 0.00009,
+  "minimumBass": 0.006,
+  "minimumMids": 0.0005,
+  "minimumHigh": 0.0004,
 
-  "whiteHoleStrength": 1.0,
-  "curlAttractorStrength": 8.0,
-  "blackHoleStrength": 4.75,
+  "whiteHoleStrength": 27.5,
+  "curlAttractorStrength": 17.25,
+  "blackHoleStrength": 14.5,
 
-  "cameraOrbitSpeed": 1.0,
-  "cameraMoveSpeed": 1.0,
-  "autoOrbitSpeed": 0.05,
+  "cameraOrbitSpeed": 0.75,
+  "cameraMoveSpeed": 0.75,
+  "autoOrbitSpeed": 0.085,
 
-  "shiftFactorOrbit": 0.33,
-  "shiftFactorMove": 0.33,
+  "shiftFactorOrbit": 0.3,
+  "shiftFactorMove": 0.3,
 
-  "cameraInertia": 0.3,
+  "cameraInertia": 0.4,
 
   "audioDisconnectCheckWait": 12
 }

@@ -59,9 +59,10 @@
     <None Include="res\HelpMenu.png" />
     <Content Include="res\ColouredSugar.ico" />
     <Compile Include="src\AssemblyInfo.fs" />
+    <Compile Include="src\GrowingArray.fs" />
+    <Compile Include="src\CubeFillingCurve.fs" />
     <Compile Include="src\ColouredSugarConfig.fs" />
     <Compile Include="src\ConsoleControls.fs" />
-    <Compile Include="src\GrowingArray.fs" />
     <Compile Include="src\EzTexture.fs" />
     <Compile Include="src\EzSound.fs" />
     <Compile Include="src\EzShader.fs" />

@@ -25,7 +25,7 @@ let DualRealToComplex (samples: float32[]) =
     Array.init
         (samples.Length / 2)
         (fun i ->
-            let mutable z = new Complex()
+            let mutable z = Complex()
             // Mix stereo to mono
             z.X <- (samples.[2 * i] + samples.[2 * i + 1]) / 2.f
             // Only left
@@ -62,8 +62,8 @@ type AudioOutStreamer(onDataAvail, onClose) =
             FastFourierTransform.FFT(true, logSize, finalForm)
             onDataAvail (float capture.WaveFormat.SampleRate / scale) finalForm
     let initCapture () =
-        if capture.WaveFormat.Channels <> 2 then raise (new System.Exception())
-        if capture.WaveFormat.Encoding <> WaveFormatEncoding.IeeeFloat then raise (new System.Exception())
+        if capture.WaveFormat.Channels <> 2 then raise (System.Exception())
+        if capture.WaveFormat.Encoding <> WaveFormatEncoding.IeeeFloat then raise (System.Exception())
         bytesPerSample <- capture.WaveFormat.BitsPerSample / 8
         capture.DataAvailable.Add dataAvail
         capture.StartRecording ()

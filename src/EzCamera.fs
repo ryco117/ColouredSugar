@@ -17,17 +17,16 @@ along with ColouredSugar. If not, see <https://www.gnu.org/licenses/>.
 
 module EzCamera
 
-open System
 open OpenTK
 
 type EzCamera(rotateSensitivity, moveSensitivity, aspect) =
-    let mutable position = new Vector3(0.f, 0.f, 1.f)
+    let mutable position = Vector3(0.f, 0.f, 1.725f)
     let mutable perspective = true
     let mutable pitch = 0.f
     let mutable yaw = 0.f
     let mutable strafeRight = 0.f
     let mutable forwardVelocity = 0.f
-    let mutable proj = Matrix4.CreatePerspectiveFieldOfView (float32 (Math.PI/1.8), aspect, 0.01f, 50.f)
+    let mutable proj = Matrix4.CreatePerspectiveFieldOfView(MathHelper.Pi/2.f, aspect, 0.01f, 20.f)
     let mutable projInv = proj.Inverted ()
     let orth = Matrix4.Identity
     let orthInv = orth
@@ -53,7 +52,7 @@ type EzCamera(rotateSensitivity, moveSensitivity, aspect) =
         with get () = perspective
         and set p = perspective <- p
     member _.SetProjection aspect =
-        proj <- Matrix4.CreatePerspectiveFieldOfView (float32 (Math.PI/1.8), aspect, 0.01f, 50.f)
+        proj <- Matrix4.CreatePerspectiveFieldOfView (MathHelper.Pi/2.f, aspect, 0.01f, 20.f)
         projInv <- proj.Inverted ()
     member _.ProjView () =
         if perspective then
@@ -63,7 +62,7 @@ type EzCamera(rotateSensitivity, moveSensitivity, aspect) =
     member _.ToWorldSpace x y =
         if perspective then
             let p =
-                let v = projInv * Vector4(x, y, -0.99f, 0.02f)
+                let v = projInv * Vector4(x, y, -0.5f, 0.02f)
                 let r = v.Xyz / v.W
                 Vector4(r + position, 0.f)
             (Matrix4.CreateRotationY(-yaw) * p).Xyz

@@ -22,7 +22,7 @@ let ReadFileToTexture (filePath: string) =
     {Width = width; Height = height; Data = imgData}
 
 let StringToTexture (str: string) (font: Font)=
-    let img =
+    use img =
         let textRows = str.Split '\n'
         let width = Array.fold (fun acc (e: string) -> max acc e.Length) 0 textRows
         let height = textRows.Length
