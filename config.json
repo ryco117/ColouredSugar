@@ -19,21 +19,21 @@
   "bassStartFreq": 50.0,
   "bassEndFreq": 250.0,
   "midsStartFreq": 250.0,
-  "midsEndFreq": 2000.0,
-  "highStartFreq": 2000.0,
+  "midsEndFreq": 3000.0,
+  "highStartFreq": 3000.0,
   "highEndFreq": 15000.0,
 
   "minimumBass": 0.006,
-  "minimumMids": 0.0005,
-  "minimumHigh": 0.0004,
+  "minimumMids": 0.001,
+  "minimumHigh": 0.0005,
 
   "whiteHoleStrength": 27.5,
-  "curlAttractorStrength": 17.25,
-  "blackHoleStrength": 14.5,
+  "curlAttractorStrength": 17.15,
+  "blackHoleStrength": 14.66,
 
   "cameraOrbitSpeed": 0.75,
   "cameraMoveSpeed": 0.75,
-  "autoOrbitSpeed": 0.085,
+  "autoOrbitSpeed": 0.075,
 
   "shiftFactorOrbit": 0.3,
   "shiftFactorMove": 0.3,

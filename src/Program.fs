@@ -107,7 +107,7 @@ type ColouredSugar(config: Config) as world =
     let mutable particleRenderShader = 0
     let defaultMass = 0.005f
     let mutable blackHoles = Array.zeroCreate<Vector4> 6
-    let mutable curlAttractors = Array.zeroCreate<Vector4> 6
+    let mutable curlAttractors = Array.zeroCreate<Vector4> 5
     let mutable whiteHoles = Array.zeroCreate<Vector4> 3
 
     // Audio handler funciton
@@ -120,7 +120,8 @@ type ColouredSugar(config: Config) as world =
         if complex.Length > 0 then
             let mag (c: NAudio.Dsp.Complex) = sqrt(c.X*c.X + c.Y*c.Y)
             let toWorldSpace t =
-                CubeFillingCurve.curveToCubeN 8 (sqrt (float t))
+                let s = System.Math.Pow(float t, 0.4)
+                CubeFillingCurve.curveToCubeN 8 s
             let freqResolution = samplingRate / float complex.Length
             let getStrongest maxCount delta (input: NAudio.Dsp.Complex[]) =
                 let fLen = float32 input.Length
@@ -184,8 +185,8 @@ type ColouredSugar(config: Config) as world =
             previousBassIndex <- (previousBassIndex + 1) % previousBass.Length
     let onClose () =
         blackHoles <- Array.zeroCreate<Vector4> 6
-        curlAttractors <- Array.zeroCreate<Vector4> 6
-        whiteHoles <- Array.zeroCreate<Vector4> 4
+        curlAttractors <- Array.zeroCreate<Vector4> 5
+        whiteHoles <- Array.zeroCreate<Vector4> 3
     let audioOutCapture = new EzSound.AudioOutStreamer(onDataAvail, onClose)
 
     override this.OnKeyDown e =
@@ -222,16 +223,16 @@ type ColouredSugar(config: Config) as world =
             let velocities = Array.zeroCreate<float32> (particleCount * 4)
             GL.BindBuffer(BufferTarget.ShaderStorageBuffer, particleVelocityArray)
             GL.BufferSubData(BufferTarget.ShaderStorageBuffer, nativeint 0, velocities.Length * sizeof<float32>, velocities)
-            let PARTICLES = Array.init particleCount (fun i -> CubeFillingCurve.curveToCube ((float i) / (float particleCount)))
-            let positions =
+            let hilbertCurve = Array.init particleCount (fun i -> CubeFillingCurve.curveToCube ((float i) / (float particleCount)))
+            let particlePos =
                 Array.init<float32> (particleCount * 4) (fun i -> match (i % 4) with
-                                                                  | 0 -> PARTICLES.[i/4].X
-                                                                  | 1 -> PARTICLES.[i/4].Y
-                                                                  | 2 -> PARTICLES.[i/4].Z
+                                                                  | 0 -> hilbertCurve.[i/4].X
+                                                                  | 1 -> hilbertCurve.[i/4].Y
+                                                                  | 2 -> hilbertCurve.[i/4].Z
                                                                   | 3 -> 1.f
                                                                   | _ -> raise (System.Exception "Mathematics is broken!!"))
             GL.BindBuffer(BufferTarget.ShaderStorageBuffer, particleVBO)
-            GL.BufferSubData(BufferTarget.ShaderStorageBuffer, nativeint 0, positions.Length * sizeof<float32>, positions)
+            GL.BufferSubData(BufferTarget.ShaderStorageBuffer, nativeint 0, particlePos.Length * sizeof<float32>, particlePos)
             sphereVelocity <- defaultSphereVelocity
             sphere.Position <- Vector3.Zero
             camera.Position <- Vector3(0.f, 0.f, 1.725f)
@@ -241,7 +242,6 @@ type ColouredSugar(config: Config) as world =
         | Key.H, _, false ->
             mouseHidden <- not mouseHidden
             world.Cursor <- if mouseHidden then MouseCursor.Empty else MouseCursor.Default
-
         // Toggle auto rotate
         | Key.Z, _, false -> autoRotate <- not autoRotate
         // Toggle responsive to audio-out
@@ -403,13 +403,12 @@ type ColouredSugar(config: Config) as world =
         // Load particle system
         particleCompShader <- EzShader.CreateComputeShader "shaders/particle_comp.glsl"
         particleRenderShader <- EzShader.CreateShaderProgram "shaders/particle_vert.glsl" "shaders/particle_frag.glsl"
-        //let particlePos = Array.init (particleCount * 4) (fun i -> if i % 4 = 3 then 1.f else randNormF ())
-        let positions = Array.init particleCount (fun i -> CubeFillingCurve.curveToCube ((float i) / (float particleCount)))
+        let hilbertCurve = Array.init particleCount (fun i -> CubeFillingCurve.curveToCube ((float i) / (float particleCount)))
         let particlePos =
             Array.init<float32> (particleCount * 4) (fun i -> match (i % 4) with
-                                                              | 0 -> positions.[i/4].X
-                                                              | 1 -> positions.[i/4].Y
-                                                              | 2 -> positions.[i/4].Z
+                                                              | 0 -> hilbertCurve.[i/4].X
+                                                              | 1 -> hilbertCurve.[i/4].Y
+                                                              | 2 -> hilbertCurve.[i/4].Z
                                                               | 3 -> 1.f
                                                               | _ -> raise (System.Exception "Mathematics is broken!"))
         particleVBO <- GL.GenBuffer ()

@@ -1,5 +1,6 @@
 ﻿module CubeFillingCurve
 
+// Define vertices of a cube as a type
 type private Vertex =
 | Vertex0
 | Vertex1
@@ -10,6 +11,7 @@ type private Vertex =
 | Vertex6
 | Vertex7
 
+// Create a point for each vertex
 let private v0 = (1., 1., -1.)
 let private v1 = (1., -1., -1.)
 let private v2 = (-1., -1., -1.)
@@ -19,6 +21,7 @@ let private v5 = (-1., -1., 1.)
 let private v6 = (1., -1., 1.)
 let private v7 = (1., 1., 1.)
 
+// Function to turn a number `x` into nearest vertex and remainder
 let private nearestVertex x =
     if x < 0.5 then
         if x < 0.25 then
@@ -43,9 +46,11 @@ let private nearestVertex x =
             else
                 Vertex7, (x - 0.875) * 8.
 
+// Function to add points together
 let private addPoints (x:float, y:float, z:float) (x':float, y':float, z':float) =
     (x + x', y + y', z + z')
 
+// Function to map number `x` and vertex to a point along an edge
 let private vertexPos x = function
 | Vertex0 -> addPoints v0 (0., -x, 0.)
 | Vertex1 -> addPoints v1 (if x < 0.5 then (0., 1. - (x * 2.), 0.) else (-2. * (x - 0.5), 0., 0.))
@@ -56,9 +61,11 @@ let private vertexPos x = function
 | Vertex6 -> addPoints v6 (if x < 0.5 then ((x * 2.) - 1., 0., 0.) else (0., 2. * (x - 0.5), 0.))
 | Vertex7 -> addPoints v7 (0., x - 1., 0.)
 
+// Function to halve the distance of a point from the origin
 let private scale = function
 | x, y, z -> x/2., y/2., z/2.
 
+// Set of functions that rotate a point about the origin to align with a vertex
 let private r0 = function
 | x, y, z -> y, -z, -x
 let private r1 = function
@@ -73,6 +80,7 @@ let private r6 = r5
 let private r7 = function
 | x, y, z -> y, z, x
 
+// Function to map a point `p` to its location in a specified vertex cell
 let private cellTransform p = function
 | Vertex0 -> addPoints (0.5, 0.5, -0.5) (scale (r0 p))
 | Vertex1 -> addPoints (0.5, -0.5, -0.5) (scale (r1 p))
@@ -83,10 +91,11 @@ let private cellTransform p = function
 | Vertex6 -> addPoints (0.5, -0.5, 0.5) (scale (r6 p))
 | Vertex7 -> addPoints (0.5, 0.5, 0.5) (scale (r7 p))
 
+// Function to map a number `x` to a point in the cube, applying a depth of `n` inner cubes
 let curveToCubeN n x =
     let rec f n x =
         let v, x' = nearestVertex x
-        if n = 0 then
+        if n <= 0 then
             vertexPos x' v
         else
             let p' = f (n-1) x'
@@ -94,4 +103,5 @@ let curveToCubeN n x =
     match f n x with
     | x, y, z -> OpenTK.Vector3(float32 x, float32 y, float32 z)
 
+// Same as `curveToCubeN` but with default depth of 4
 let curveToCube = curveToCubeN 4

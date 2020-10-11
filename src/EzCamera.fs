@@ -19,6 +19,9 @@ module EzCamera
 
 open OpenTK
 
+let private far = 20.f
+let private near = 0.01f
+
 type EzCamera(rotateSensitivity, moveSensitivity, aspect) =
     let mutable position = Vector3(0.f, 0.f, 1.725f)
     let mutable perspective = true
@@ -26,7 +29,7 @@ type EzCamera(rotateSensitivity, moveSensitivity, aspect) =
     let mutable yaw = 0.f
     let mutable strafeRight = 0.f
     let mutable forwardVelocity = 0.f
-    let mutable proj = Matrix4.CreatePerspectiveFieldOfView(MathHelper.Pi/2.f, aspect, 0.01f, 20.f)
+    let mutable proj = Matrix4.CreatePerspectiveFieldOfView(MathHelper.Pi/2.f, aspect, near, far)
     let mutable projInv = proj.Inverted ()
     let orth = Matrix4.Identity
     let orthInv = orth
@@ -52,7 +55,7 @@ type EzCamera(rotateSensitivity, moveSensitivity, aspect) =
         with get () = perspective
         and set p = perspective <- p
     member _.SetProjection aspect =
-        proj <- Matrix4.CreatePerspectiveFieldOfView (MathHelper.Pi/2.f, aspect, 0.01f, 20.f)
+        proj <- Matrix4.CreatePerspectiveFieldOfView (MathHelper.Pi/2.f, aspect, near, far)
         projInv <- proj.Inverted ()
     member _.ProjView () =
         if perspective then
@@ -62,9 +65,9 @@ type EzCamera(rotateSensitivity, moveSensitivity, aspect) =
     member _.ToWorldSpace x y =
         if perspective then
             let p =
-                let v = projInv * Vector4(x, y, -0.5f, 0.02f)
-                let r = v.Xyz / v.W
-                Vector4(r + position, 0.f)
-            (Matrix4.CreateRotationY(-yaw) * p).Xyz
+                let d = 0.95f
+                let v =  (Vector4(x * d, y * d, (far + near) / (far - near) * d - (2.f * far * near) / (far - near), d) * projInv).Xyz
+                Vector4(v + position, 1.f)
+            (p * Matrix4.CreateRotationY(yaw)).Xyz
         else
-            (orthInv * Vector4(x, y, -1.f, 0.f)).Xyz
+            (Vector4(x, y, -1.f, 0.f) * orthInv).Xyz

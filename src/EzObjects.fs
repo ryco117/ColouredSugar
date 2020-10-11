@@ -70,28 +70,28 @@ let GenSphere n =
     let front = 0.f, 0.f, 1.f       // front 4
     let back = 0.f, 0.f, -1.f       // back 5
     let pointArray = GrowingArray<float32*float32*float32> [|top; bot; left; right; front; back|]
+    let rec recurseTriangles (acc: (int*int*int) list) = function
+    | [] -> acc
+    | (p0, p1, p2)::tl ->
+        let avg p0 p1 =
+            match (pointArray.At p0), (pointArray.At p1) with
+            | (x0, y0, z0), (x1, y1, z1) ->
+                let cx = (x0 + x1) / 2.f
+                let cy = (y0 + y1) / 2.f
+                let cz = (z0 + z1) / 2.f
+                let r = sqrt (cx**2.f + cy**2.f + cz**2.f)
+                let index = pointArray.Size ()
+                pointArray.Push (cx/r, cy/r, cz/r)
+                index
+        let c0 = avg p0 p1
+        let c1 = avg p1 p2
+        let c2 = avg p2 p0
+        recurseTriangles ([(p0, c0, c2); (c0, c1, c2); (p1, c1, c0); (p2, c2, c1)] @ acc) tl
     let rec apply n (triList: (int*int*int) list) =
         if n < 1 then
             triList 
         else
-            let rec f (acc: (int*int*int) list) = function
-            | [] -> acc
-            | (p0, p1, p2)::tl ->
-                let avg p0 p1 =
-                    match (pointArray.At p0), (pointArray.At p1) with
-                    | (x0, y0, z0), (x1, y1, z1) ->
-                        let cx = (x0 + x1) / 2.f
-                        let cy = (y0 + y1) / 2.f
-                        let cz = (z0 + z1) / 2.f
-                        let r = sqrt (cx**2.f + cy**2.f + cz**2.f)
-                        let index = pointArray.Size ()
-                        pointArray.Push (cx/r, cy/r, cz/r)
-                        index
-                let c0 = avg p0 p1
-                let c1 = avg p1 p2
-                let c2 = avg p2 p0
-                f ([(p0, c0, c2); (c0, c1, c2); (p1, c1, c0); (p2, c2, c1)] @ acc) tl
-            apply (n - 1) (f [] triList)
+            apply (n - 1) (recurseTriangles [] triList)
     let triIndexArray =
         apply n [(0, 4, 3); (0, 3, 5); (0, 5, 2); (0, 2, 4); 
         (1, 4, 2); (1, 2, 5); (1, 5, 3); (1, 3, 4)]

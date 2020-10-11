@@ -78,15 +78,15 @@ but most notably the rate, speed, and strength of various operations.
 | bassStartFreq | 50.01 | Lowest frequency (in Hz) considered a bass note |
 | bassEndFreq | 250.01 | Highest frequency (in Hz) considered a bass note |
 | midsStartFreq | 250.01 | Lowest frequency (in Hz) considered a mids note |
-| midsEndFreq | 2000.01 | Highest frequency (in Hz) considered a mids note |
-| highStartFreq | 2000.01 | Lowest frequency (in Hz) considered a high note |
+| midsEndFreq | 3000.01 | Highest frequency (in Hz) considered a mids note |
+| highStartFreq | 3000.01 | Lowest frequency (in Hz) considered a high note |
 | highEndFreq | 15000.01 | Highest frequency (in Hz) considered a high note |
 | minimumBass | 0.006 | Minimum magnitude of strongest bass note required to register a whitehole response |
-| minimumMids | 0.0005 | Minimum magnitude of strongest mids note required to register a curl attractor response |
-| minimumHigh | 0.0004 | Minimum magnitude of strongest bass note required to register a blackhole response |
+| minimumMids | 0.001 | Minimum magnitude of strongest mids note required to register a curl attractor response |
+| minimumHigh | 0.0005 | Minimum magnitude of strongest bass note required to register a blackhole response |
 | whiteHoleStrength | 27.5 | Factor to adjust strength of whiteholes |
-| curlAttractorStrength | 17.25 | Factor to adjust strength of curl attractors |
-| blackHoleStrength | 14.5 | Factor to adjust strength of blackholes |
+| curlAttractorStrength | 17.15 | Factor to adjust strength of curl attractors |
+| blackHoleStrength | 14.66 | Factor to adjust strength of blackholes |
 | cameraOrbitSpeed | 0.75 | Factor to adjust speed of camera rotations/orbits |
 | cameraMoveSpeed | 0.75 | Factor to adjust speed of camera movement |
 | autoOrbitSpeed | 0.085 | Factor to adjust speed of auto orbit |

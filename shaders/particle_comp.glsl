@@ -10,7 +10,7 @@ layout (binding = 1) buffer VelocityBuffer {
 };
 
 uniform vec4 bigBoomers[3];
-uniform vec4 curlAttractors[6];
+uniform vec4 curlAttractors[5];
 uniform vec4 attractors[7];
 
 uniform float deltaTime;
