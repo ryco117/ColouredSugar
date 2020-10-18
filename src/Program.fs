@@ -235,7 +235,7 @@ type ColouredSugar(config: Config) as world =
             GL.BufferSubData(BufferTarget.ShaderStorageBuffer, nativeint 0, particlePos.Length * sizeof<float32>, particlePos)
             sphereVelocity <- defaultSphereVelocity
             sphere.Position <- Vector3.Zero
-            camera.Position <- Vector3(0.f, 0.f, 1.725f)
+            camera.Position <- Vector3(0.f, 0.f, 1.72f)
             camera.Yaw <- 0.f
             mouseScroll <- float32 config.CursorForceInitial
         // Toggle hidden cursor
@@ -500,12 +500,7 @@ type ColouredSugar(config: Config) as world =
         GL.DrawArrays(PrimitiveType.Points, 0, particleCount)
 
         if sphere.Scale.X > 0.f then
-            // Draw sphere
-            GL.Disable EnableCap.CullFace
-            GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line)
             sphere.Draw projViewMutable
-            GL.Enable EnableCap.CullFace
-            GL.PolygonMode(MaterialFace.Front, PolygonMode.Fill)
 
         if overlay then
             billboard.Update deltaTime

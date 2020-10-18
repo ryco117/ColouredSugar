@@ -23,7 +23,7 @@ let private far = 20.f
 let private near = 0.01f
 
 type EzCamera(rotateSensitivity, moveSensitivity, aspect) =
-    let mutable position = Vector3(0.f, 0.f, 1.725f)
+    let mutable position = Vector3(0.f, 0.f, 1.72f)
     let mutable perspective = true
     let mutable pitch = 0.f
     let mutable yaw = 0.f
@@ -65,7 +65,7 @@ type EzCamera(rotateSensitivity, moveSensitivity, aspect) =
     member _.ToWorldSpace x y =
         if perspective then
             let p =
-                let d = 0.95f
+                let d = 1.295f
                 let v =  (Vector4(x * d, y * d, (far + near) / (far - near) * d - (2.f * far * near) / (far - near), d) * projInv).Xyz
                 Vector4(v + position, 1.f)
             (p * Matrix4.CreateRotationY(yaw)).Xyz

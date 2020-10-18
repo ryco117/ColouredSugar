@@ -19,8 +19,7 @@ uniform vec4 musicalSphere;
 
 const float maxSpeed = 10.0;
 const float min_length = 0.01;
-const float friction = 1.425;
-const float invfriction = 1 / friction;
+const float friction = -1.001;
 
 void main(void)
 {
@@ -106,5 +105,5 @@ void main(void)
 	}
 
 	positions[index] = pos;
-	velocities[index] =  vel * (1 - friction * min(deltaTime, invfriction));
+	velocities[index] =  vel * exp(friction * deltaTime);
 }
