@@ -1,11 +1,15 @@
 {
+  "fullscreenOnLaunch": false,
+  "showHelpOnLaunch": true,
+
   "enableVSync": true,
 
   "screenshotScale": 1.0,
 
   "cursorForceScrollIncrease": 1.4,
   "cursorForceInverseFactor": 1.5,
-  "cursorForceInitial": 4.2,
+  "cursorForceInitial": 4.5,
+  "cursorHideAfterSeconds": 2.5,
 
   "bouncingBallSize": 0.125,
   "bouncingBallVelocity": {
@@ -23,7 +27,7 @@
   "highStartFreq": 3000.0,
   "highEndFreq": 15000.0,
 
-  "minimumBass": 0.006,
+  "minimumBass": 0.0075,
   "minimumMids": 0.001,
   "minimumHigh": 0.0005,
 

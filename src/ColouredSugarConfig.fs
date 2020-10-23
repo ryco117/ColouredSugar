@@ -5,13 +5,17 @@ open FSharp.Data
 [<Literal>]
 let sample = """
 {
+  "fullscreenOnLaunch": false,
+  "showHelpOnLaunch": true,
+
   "enableVSync": true,
 
   "screenshotScale": 1.0001,
 
   "cursorForceScrollIncrease": 1.4,
   "cursorForceInverseFactor": 1.5,
-  "cursorForceInitial": 4.2,
+  "cursorForceInitial": 4.5,
+  "cursorHideAfterSeconds": 2.5,
 
   "bouncingBallSize": 0.125,
   "bouncingBallVelocity": {
@@ -29,7 +33,7 @@ let sample = """
   "highStartFreq": 3000.01,
   "highEndFreq": 15000.01,
 
-  "minimumBass": 0.006,
+  "minimumBass": 0.0075,
   "minimumMids": 0.001,
   "minimumHigh": 0.0005,
 

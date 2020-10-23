@@ -11,7 +11,7 @@ layout (binding = 1) buffer VelocityBuffer {
 
 uniform vec4 bigBoomers[3];
 uniform vec4 curlAttractors[5];
-uniform vec4 attractors[7];
+uniform vec4 attractors[6];
 
 uniform float deltaTime;
 uniform bool perspective;
@@ -19,7 +19,7 @@ uniform vec4 musicalSphere;
 
 const float maxSpeed = 10.0;
 const float min_length = 0.01;
-const float friction = -1.001;
+const float friction = -1.3;
 
 void main(void)
 {

@@ -51,7 +51,6 @@ determined bin from the domain of `bass`, `mids`, and `highs` respectively. The 
 | `Z` | Toggle auto-rotation of camera (Note: only affects `3D` perspective; default: `true`) |
 | `X` | Toggle presence of bouncing ball (default: `false`) |
 | `R` | Toggle audio-output responsiveness (Note: framerate may jitter if there is no system audio-out present while set to `true`; default: `true`) |
-| `H` | Toggle hiding the mouse cursor (default: `false`) |
 | `MOUSE-LEFT` | Hold to manually apply a point force attraction/repulsion at the mouse cursor |
 | `MOUSE-RIGHT` | Hold to inverse repulsion force to attraction at the mouse cursor. (Note: must hold both `MOUSE-RIGHT` and `MOUSE-LEFT` to apply an inverted force) |
 | `MOUSE-SCROLL` | Scroll up to increase intensity of manual point force. Scroll down to decrease strength |
@@ -67,11 +66,14 @@ but most notably the rate, speed, and strength of various operations.
 
 | Name | Default value | Description |
 | ---- | ------------- | ----------- |
-| enableVSync | true | | Whether to enable application level VSync |
+| fullscreenOnLaunch | false | | Toggles whether fullscreen mode is applied on launch |
+| showHelpOnLaunch | true | | Toggles whether to show help overlay on launch |
+| enableVSync | true | | Toggles whether to enable application level VSync |
 | screenshotScale | 1.0001 | Scale at which to save screenshots. If this value were 2.0 then screenshots would save at 2X current window width and height |
 | cursorForceScrollIncrease | 1.4 | Factor to multiply cursor strength by on user `MOUSE-SCROLL` up |
 | cursorForceInverseFactor | 1.5 | Factor to multiple cursor strength by on inverse (ie. strength of pull relative to push. if this number is negative then both forces push) |
-| cursorForceInitial | 4.2 | Starting strength of the cursor's point-force. |
+| cursorForceInitial | 4.5 | Starting strength of the cursor's point-force. |
+| cursorHideAfterSeconds | 2.5 | Amount of seconds of cursor inactivity to wait before hiding the cursor. Cursor appears upon moving again |
 | bouncingBallSize | 0.125 | Radius of the bouncing ball. Note that the encompassing cube is 2 units in length |
 | bouncingBallVelocity | {x: -0.4, y: 0.4, z: -0.3} | Describes the starting velocity of the bouncing ball |
 | particleCount | 1572864 | Number of coloured particles in the visualizer |
@@ -81,7 +83,7 @@ but most notably the rate, speed, and strength of various operations.
 | midsEndFreq | 3000.01 | Highest frequency (in Hz) considered a mids note |
 | highStartFreq | 3000.01 | Lowest frequency (in Hz) considered a high note |
 | highEndFreq | 15000.01 | Highest frequency (in Hz) considered a high note |
-| minimumBass | 0.006 | Minimum magnitude of strongest bass note required to register a whitehole response |
+| minimumBass | 0.0075 | Minimum magnitude of strongest bass note required to register a whitehole response |
 | minimumMids | 0.001 | Minimum magnitude of strongest mids note required to register a curl attractor response |
 | minimumHigh | 0.0005 | Minimum magnitude of strongest bass note required to register a blackhole response |
 | whiteHoleStrength | 27.5 | Factor to adjust strength of whiteholes |

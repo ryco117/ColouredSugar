@@ -65,7 +65,7 @@ type EzCamera(rotateSensitivity, moveSensitivity, aspect) =
     member _.ToWorldSpace x y =
         if perspective then
             let p =
-                let d = 1.295f
+                let d = 1.325f
                 let v =  (Vector4(x * d, y * d, (far + near) / (far - near) * d - (2.f * far * near) / (far - near), d) * projInv).Xyz
                 Vector4(v + position, 1.f)
             (p * Matrix4.CreateRotationY(yaw)).Xyz

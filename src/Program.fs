@@ -46,9 +46,14 @@ type ColouredSugar(config: Config) as world =
         1280, 720,
         GraphicsMode(ColorFormat(8, 8, 8, 8), 24, 8, 1),
         "ColouredSugar", GameWindowFlags.Default)
-    do world.VSync <- if config.EnableVSync then VSyncMode.On else VSyncMode.Off
-    do world.Icon <- new System.Drawing.Icon "res/ColouredSugar.ico"
-    let mutable preFullscreenSize = System.Drawing.Size(1, 1)
+    let mutable preFullscreenSize = System.Drawing.Size(1280, 720)
+    do
+        world.VSync <- if config.EnableVSync then VSyncMode.On else VSyncMode.Off
+        world.Icon <- new System.Drawing.Icon "res/ColouredSugar.ico"
+        if config.FullscreenOnLaunch then
+            world.WindowBorder <- WindowBorder.Hidden
+            world.WindowState <- WindowState.Fullscreen
+
     let camera = EzCamera(float32 config.CameraOrbitSpeed, float32 config.CameraMoveSpeed, 16.f/9.f)
     let screenshotScale = float config.ScreenshotScale
     let mutable tick = 0UL
@@ -58,7 +63,9 @@ type ColouredSugar(config: Config) as world =
     let mutable mouseScroll = float32 config.CursorForceInitial
     let mutable mouseLeftDown = false
     let mutable mouseRightDown = false
+    let mutable mouseLastMove = System.DateTime.MinValue
     let mutable mouseHidden = false
+    let cursorWait = float config.CursorHideAfterSeconds
     let cursorForceInverseFactor = float32 config.CursorForceInverseFactor
     let cursorForceScrollFactor = float32 config.CursorForceScrollIncrease
     let mutable targetCameraVelocity = Vector3.Zero
@@ -78,7 +85,7 @@ type ColouredSugar(config: Config) as world =
     let defaultSphereScale = Vector3 (float32 config.BouncingBallSize)
     do sphere.Scale <- Vector3.Zero
 
-    let mutable overlay = true
+    let mutable overlay = config.ShowHelpOnLaunch
     let texture = EzTexture.ReadFileToTexture "res/HelpMenu.png"
     let billboard = {
         new EzObjects.TexturedBillboard(Vector3.Zero, Vector3.One, 0.f, texture) with
@@ -106,7 +113,7 @@ type ColouredSugar(config: Config) as world =
     let mutable particleCompShader = 0
     let mutable particleRenderShader = 0
     let defaultMass = 0.005f
-    let mutable blackHoles = Array.zeroCreate<Vector4> 6
+    let mutable blackHoles = Array.zeroCreate<Vector4> 5
     let mutable curlAttractors = Array.zeroCreate<Vector4> 5
     let mutable whiteHoles = Array.zeroCreate<Vector4> 3
 
@@ -145,9 +152,9 @@ type ColouredSugar(config: Config) as world =
             let highStart = roundToInt (float config.HighStartFreq / freqResolution)
             let highEnd = roundToInt (float config.HighEndFreq / freqResolution)
             let bassArray = Array.sub complex bassStart (bassEnd - bassStart)
-            let bassNotes = getStrongest whiteHoles.Length 0.125f bassArray
-            let midsNotes = getStrongest curlAttractors.Length 0.05f (Array.sub complex midsStart (midsEnd - midsStart))
-            let highNotes = getStrongest blackHoles.Length 0.075f (Array.sub complex highStart (highEnd - highStart))
+            let bassNotes = getStrongest whiteHoles.Length 0.15f bassArray
+            let midsNotes = getStrongest curlAttractors.Length 0.075f (Array.sub complex midsStart (midsEnd - midsStart))
+            let highNotes = getStrongest blackHoles.Length 0.125f (Array.sub complex highStart (highEnd - highStart))
             let avgLastBassMag x =
                 let mutable s = 0.f
                 for i = 0 to previousBass.Length - 1 do
@@ -161,7 +168,7 @@ type ColouredSugar(config: Config) as world =
                             mag previousBass.[i].[j]
                 s / float32 previousBass.Length
             for i = 0 to bassNotes.Length - 1 do
-                if bassNotes.[i].mag > float32 config.MinimumBass && bassNotes.[i].mag > 1.2f * avgLastBassMag bassNotes.[i].freq then
+                if bassNotes.[i].mag > float32 config.MinimumBass && bassNotes.[i].mag > 1.25f * avgLastBassMag bassNotes.[i].freq then
                     whiteHoles.[i] <- Vector4(
                         toWorldSpace bassNotes.[i].freq,
                         defaultMass * bassNotes.[i].mag * float32 config.WhiteHoleStrength)
@@ -184,11 +191,10 @@ type ColouredSugar(config: Config) as world =
             previousBass.[previousBassIndex] <- bassArray
             previousBassIndex <- (previousBassIndex + 1) % previousBass.Length
     let onClose () =
-        blackHoles <- Array.zeroCreate<Vector4> 6
+        blackHoles <- Array.zeroCreate<Vector4> 5
         curlAttractors <- Array.zeroCreate<Vector4> 5
         whiteHoles <- Array.zeroCreate<Vector4> 3
     let audioOutCapture = new EzSound.AudioOutStreamer(onDataAvail, onClose)
-
     override this.OnKeyDown e =
         match e.Key, (e.Alt, e.Shift, e.Control, e.Command), e.IsRepeat with
         // Toggle Overlay/Help
@@ -238,10 +244,6 @@ type ColouredSugar(config: Config) as world =
             camera.Position <- Vector3(0.f, 0.f, 1.72f)
             camera.Yaw <- 0.f
             mouseScroll <- float32 config.CursorForceInitial
-        // Toggle hidden cursor
-        | Key.H, _, false ->
-            mouseHidden <- not mouseHidden
-            world.Cursor <- if mouseHidden then MouseCursor.Empty else MouseCursor.Default
         // Toggle auto rotate
         | Key.Z, _, false -> autoRotate <- not autoRotate
         // Toggle responsive to audio-out
@@ -368,6 +370,7 @@ type ColouredSugar(config: Config) as world =
             holdShift <- false
         | _ -> base.OnKeyUp e
     override this.OnMouseMove e =
+        mouseLastMove <- System.DateTime.UtcNow
         mouseX <- (float32 e.X / float32 this.Width) * 2.f - 1.f
         mouseY <- (float32 e.Y / float32 this.Height) * -2.f + 1.f
         base.OnMouseMove e
@@ -386,9 +389,6 @@ type ColouredSugar(config: Config) as world =
         if e.Button = MouseButton.Right then
             mouseRightDown <- false
         base.OnMouseUp e
-    override _.OnFocusedChanged e =
-        world.Cursor <- if mouseHidden && world.Focused then MouseCursor.Empty else MouseCursor.Default
-        base.OnFocusedChanged e
     override _.OnLoad eventArgs =
         // Set default values
         GL.ClearColor (0.f, 0.f, 0.f, 1.f)
@@ -516,6 +516,15 @@ type ColouredSugar(config: Config) as world =
         // Occasionally check if audio out stopped
         if audioResponsive && tick % audioDisconnectCheckRate = 0UL && audioOutCapture.Stopped () then
             audioOutCapture.StartCapturing ()
+
+        if (System.DateTime.UtcNow.Subtract mouseLastMove).TotalSeconds > cursorWait then
+            if not mouseHidden then
+                world.Cursor <- MouseCursor.Empty
+                mouseHidden <- true
+        else
+            if mouseHidden then
+                world.Cursor <- MouseCursor.Default
+                mouseHidden <- false
 
         base.OnRenderFrame eventArgs
     member this.Aspect =
