@@ -11,7 +11,7 @@ layout (binding = 1) buffer VelocityBuffer {
 
 uniform vec4 bigBoomers[3];
 uniform vec4 curlAttractors[5];
-uniform vec4 attractors[6];
+uniform vec4 attractors[7];
 
 uniform float deltaTime;
 uniform bool perspective;
@@ -68,7 +68,7 @@ void main(void)
 		}
 
 		// Scale 2D forces down (to account for smaller distances)
-		g *= 0.75;
+		g *= 0.15;
 	}
 	vel.xyz += deltaTime * g;
 	

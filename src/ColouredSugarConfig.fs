@@ -39,7 +39,7 @@ let sample = """
 
   "whiteHoleStrength": 27.5,
   "curlAttractorStrength": 17.15,
-  "blackHoleStrength": 14.66,
+  "blackHoleStrength": 14.7,
 
   "cameraOrbitSpeed": 0.75,
   "cameraMoveSpeed": 0.75,

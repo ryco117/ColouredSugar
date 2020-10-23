@@ -113,7 +113,7 @@ type ColouredSugar(config: Config) as world =
     let mutable particleCompShader = 0
     let mutable particleRenderShader = 0
     let defaultMass = 0.005f
-    let mutable blackHoles = Array.zeroCreate<Vector4> 5
+    let mutable blackHoles = Array.zeroCreate<Vector4> 6
     let mutable curlAttractors = Array.zeroCreate<Vector4> 5
     let mutable whiteHoles = Array.zeroCreate<Vector4> 3
 
@@ -191,7 +191,7 @@ type ColouredSugar(config: Config) as world =
             previousBass.[previousBassIndex] <- bassArray
             previousBassIndex <- (previousBassIndex + 1) % previousBass.Length
     let onClose () =
-        blackHoles <- Array.zeroCreate<Vector4> 5
+        blackHoles <- Array.zeroCreate<Vector4> 6
         curlAttractors <- Array.zeroCreate<Vector4> 5
         whiteHoles <- Array.zeroCreate<Vector4> 3
     let audioOutCapture = new EzSound.AudioOutStreamer(onDataAvail, onClose)

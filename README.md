@@ -88,7 +88,7 @@ but most notably the rate, speed, and strength of various operations.
 | minimumHigh | 0.0005 | Minimum magnitude of strongest bass note required to register a blackhole response |
 | whiteHoleStrength | 27.5 | Factor to adjust strength of whiteholes |
 | curlAttractorStrength | 17.15 | Factor to adjust strength of curl attractors |
-| blackHoleStrength | 14.66 | Factor to adjust strength of blackholes |
+| blackHoleStrength | 14.7 | Factor to adjust strength of blackholes |
 | cameraOrbitSpeed | 0.75 | Factor to adjust speed of camera rotations/orbits |
 | cameraMoveSpeed | 0.75 | Factor to adjust speed of camera movement |
 | autoOrbitSpeed | 0.075 | Factor to adjust speed of auto orbit |
