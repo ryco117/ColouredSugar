@@ -15,7 +15,7 @@ let sample = """
   "cursorForceScrollIncrease": 1.4,
   "cursorForceInverseFactor": 1.5,
   "cursorForceInitial": 4.5,
-  "cursorHideAfterSeconds": 2.5,
+  "cursorHideAfterSeconds": 0.75,
 
   "bouncingBallSize": 0.125,
   "bouncingBallVelocity": {
@@ -37,20 +37,22 @@ let sample = """
   "minimumMids": 0.001,
   "minimumHigh": 0.0005,
 
-  "whiteHoleStrength": 27.5,
+  "whiteHoleStrength": 25.5,
   "curlAttractorStrength": 17.15,
   "blackHoleStrength": 14.7,
 
   "cameraOrbitSpeed": 0.75,
   "cameraMoveSpeed": 0.75,
-  "autoOrbitSpeed": 0.075,
+  "autoOrbitSpeed": 0.07,
 
   "shiftFactorOrbit": 0.3,
   "shiftFactorMove": 0.3,
 
   "cameraInertia": 0.4,
 
-  "audioDisconnectCheckWait": 12
+  "audioDisconnectCheckWait": 12,
+
+  "springCoefficient": 80.01
 }
 """
 

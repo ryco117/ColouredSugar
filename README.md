@@ -51,6 +51,7 @@ determined bin from the domain of `bass`, `mids`, and `highs` respectively. The 
 | `Z` | Toggle auto-rotation of camera (Note: only affects `3D` perspective; default: `true`) |
 | `X` | Toggle presence of bouncing ball (default: `false`) |
 | `R` | Toggle audio-output responsiveness (Note: framerate may jitter if there is no system audio-out present while set to `true`; default: `true`) |
+| `H` | Toggle fixing particles to their start position with springs (default: `true`) |
 | `MOUSE-LEFT` | Hold to manually apply a point force attraction/repulsion at the mouse cursor |
 | `MOUSE-RIGHT` | Hold to inverse repulsion force to attraction at the mouse cursor. (Note: must hold both `MOUSE-RIGHT` and `MOUSE-LEFT` to apply an inverted force) |
 | `MOUSE-SCROLL` | Scroll up to increase intensity of manual point force. Scroll down to decrease strength |
@@ -73,7 +74,7 @@ but most notably the rate, speed, and strength of various operations.
 | cursorForceScrollIncrease | 1.4 | Factor to multiply cursor strength by on user `MOUSE-SCROLL` up |
 | cursorForceInverseFactor | 1.5 | Factor to multiple cursor strength by on inverse (ie. strength of pull relative to push. if this number is negative then both forces push) |
 | cursorForceInitial | 4.5 | Starting strength of the cursor's point-force. |
-| cursorHideAfterSeconds | 2.5 | Amount of seconds of cursor inactivity to wait before hiding the cursor. Cursor appears upon moving again |
+| cursorHideAfterSeconds | 0.75 | Amount of seconds of cursor inactivity to wait before hiding the cursor. Cursor appears upon moving again |
 | bouncingBallSize | 0.125 | Radius of the bouncing ball. Note that the encompassing cube is 2 units in length |
 | bouncingBallVelocity | {x: -0.4, y: 0.4, z: -0.3} | Describes the starting velocity of the bouncing ball |
 | particleCount | 1572864 | Number of coloured particles in the visualizer |
@@ -86,16 +87,17 @@ but most notably the rate, speed, and strength of various operations.
 | minimumBass | 0.0075 | Minimum magnitude of strongest bass note required to register a whitehole response |
 | minimumMids | 0.001 | Minimum magnitude of strongest mids note required to register a curl attractor response |
 | minimumHigh | 0.0005 | Minimum magnitude of strongest bass note required to register a blackhole response |
-| whiteHoleStrength | 27.5 | Factor to adjust strength of whiteholes |
+| whiteHoleStrength | 25.5 | Factor to adjust strength of whiteholes |
 | curlAttractorStrength | 17.15 | Factor to adjust strength of curl attractors |
 | blackHoleStrength | 14.7 | Factor to adjust strength of blackholes |
 | cameraOrbitSpeed | 0.75 | Factor to adjust speed of camera rotations/orbits |
 | cameraMoveSpeed | 0.75 | Factor to adjust speed of camera movement |
-| autoOrbitSpeed | 0.075 | Factor to adjust speed of auto orbit |
+| autoOrbitSpeed | 0.07 | Factor to adjust speed of auto orbit |
 | shiftFactorOrbit | 0.3 | Factor to multiply camera orbit speed by when holding `LEFT-SHIFT` |
 | shiftFactorMove | 0.3 | Factor to multiply camera movement speed by when holding `LEFT-SHIFT` |
 | cameraInertia | 0.4 | Camera's resistance to user inputs on movement |
 | audioDisconnectCheckWait | 12 | Number of frames to wait before rechecking if audio has disconnected (only if audio-responsiveness is enabled) |
+| springCoefficient | 80.01 | The spring coefficient used to fix particles to their start positions |
 
 For an even more customized experience, one must edit the shader programs. The shader files of most interest are 
 [particle_comp.glsl](shaders/particle_comp.glsl) and [particle_vert.glsl](shaders/particle_vert.glsl). 

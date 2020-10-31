@@ -74,6 +74,7 @@ type ColouredSugar(config: Config) as world =
     let autoRotateSpeed = float32 config.AutoOrbitSpeed
     let audioDisconnectCheckRate = uint64 config.AudioDisconnectCheckWait
     let mutable audioResponsive = true
+    let mutable fixParticles = true
 
     let sphere = new EzObjects.ColouredSphere(Vector3(0.75f, 0.75f, 0.75f), 3)
     let defaultSphereVelocity =
@@ -110,12 +111,13 @@ type ColouredSugar(config: Config) as world =
     let mutable particleRenderVAO = 0
     let mutable particleVBO = 0
     let mutable particleVelocityArray = 0
+    let mutable particleFixedPosArray = 0
     let mutable particleCompShader = 0
     let mutable particleRenderShader = 0
     let defaultMass = 0.005f
     let mutable blackHoles = Array.zeroCreate<Vector4> 6
     let mutable curlAttractors = Array.zeroCreate<Vector4> 5
-    let mutable whiteHoles = Array.zeroCreate<Vector4> 3
+    let mutable whiteHoles = Array.zeroCreate<Vector4> 2
 
     // Audio handler funciton
     let mutable complexZero = NAudio.Dsp.Complex ()
@@ -193,7 +195,7 @@ type ColouredSugar(config: Config) as world =
     let onClose () =
         blackHoles <- Array.zeroCreate<Vector4> 6
         curlAttractors <- Array.zeroCreate<Vector4> 5
-        whiteHoles <- Array.zeroCreate<Vector4> 3
+        whiteHoles <- Array.zeroCreate<Vector4> 2
     let audioOutCapture = new EzSound.AudioOutStreamer(onDataAvail, onClose)
     override this.OnKeyDown e =
         match e.Key, (e.Alt, e.Shift, e.Control, e.Command), e.IsRepeat with
@@ -241,7 +243,7 @@ type ColouredSugar(config: Config) as world =
             GL.BufferSubData(BufferTarget.ShaderStorageBuffer, nativeint 0, particlePos.Length * sizeof<float32>, particlePos)
             sphereVelocity <- defaultSphereVelocity
             sphere.Position <- Vector3.Zero
-            camera.Position <- Vector3(0.f, 0.f, 1.72f)
+            camera.Position <- Vector3(0.f, 0.f, 1.6f)
             camera.Yaw <- 0.f
             mouseScroll <- float32 config.CursorForceInitial
         // Toggle auto rotate
@@ -255,6 +257,8 @@ type ColouredSugar(config: Config) as world =
             else
                 audioResponsive <- true
                 audioOutCapture.Reset ()
+        // Toggle Hooke's Law springs to fix position
+        | Key.H, _, false -> fixParticles <- not fixParticles
         // Movement keys
         | Key.A, _, false ->
             targetCameraVelocity.X <- targetCameraVelocity.X - 1.f
@@ -418,6 +422,9 @@ type ColouredSugar(config: Config) as world =
         particleVelocityArray <- GL.GenBuffer ()
         GL.BindBuffer(BufferTarget.ShaderStorageBuffer, particleVelocityArray)
         GL.BufferData(BufferTarget.ShaderStorageBuffer, velocities.Length * sizeof<float32>, velocities, BufferUsageHint.StreamDraw)
+        particleFixedPosArray <- GL.GenBuffer ()
+        GL.BindBuffer(BufferTarget.ShaderStorageBuffer, particleFixedPosArray)
+        GL.BufferData(BufferTarget.ShaderStorageBuffer, particlePos.Length * sizeof<float32>, Array.copy particlePos, BufferUsageHint.StaticDraw)
         particleRenderVAO <- GL.GenVertexArray ()
         GL.BindVertexArray particleRenderVAO
         GL.BindBuffer(BufferTarget.ArrayBuffer, particleVBO)
@@ -426,6 +433,13 @@ type ColouredSugar(config: Config) as world =
         GL.BindBuffer(BufferTarget.ArrayBuffer, particleVelocityArray)
         GL.VertexAttribPointer(1, 4, VertexAttribPointerType.Float, false, 0, 0)
         GL.EnableVertexAttribArray 1
+        GL.BindBuffer(BufferTarget.ArrayBuffer, particleFixedPosArray)
+        GL.VertexAttribPointer(2, 4, VertexAttribPointerType.Float, false, 0, 0)
+        GL.EnableVertexAttribArray 2
+
+        // Set static uniforms
+        GL.UseProgram particleCompShader
+        GL.Uniform1(GL.GetUniformLocation(particleCompShader, "springCoefficient"), float32 config.SpringCoefficient)
 
         base.OnLoad eventArgs
     override _.OnUnload eventArgs =
@@ -458,6 +472,7 @@ type ColouredSugar(config: Config) as world =
         GL.UseProgram particleCompShader
         GL.Uniform1(GL.GetUniformLocation(particleCompShader, "deltaTime"), deltaTime)
         GL.Uniform1(GL.GetUniformLocation(particleCompShader, "perspective"), if camera.UsePerspective then 1u else 0u)
+        GL.Uniform1(GL.GetUniformLocation(particleCompShader, "fixParticles"), if fixParticles then 1u else 0u)
         GL.Uniform4(
             GL.GetUniformLocation(particleCompShader, "attractors[0]"),
             Vector4(
@@ -481,6 +496,7 @@ type ColouredSugar(config: Config) as world =
             Vector4(sphere.Position, sphere.Scale.X))
         GL.BindBufferBase(BufferRangeTarget.ShaderStorageBuffer, 0, particleVBO)
         GL.BindBufferBase(BufferRangeTarget.ShaderStorageBuffer, 1, particleVelocityArray)
+        GL.BindBufferBase(BufferRangeTarget.ShaderStorageBuffer, 2, particleFixedPosArray)
         GL.DispatchCompute(particleCount / 128, 1, 1)
         GL.MemoryBarrier (MemoryBarrierFlags.ShaderStorageBarrierBit)
 

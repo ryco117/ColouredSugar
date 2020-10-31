@@ -8,18 +8,23 @@ layout (binding = 0) buffer PositionBuffer {
 layout (binding = 1) buffer VelocityBuffer {
 	vec4 velocities[];
 };
+layout (binding = 2) buffer FixedPosBuffer {
+	vec4 fixedPositions[];
+};
 
-uniform vec4 bigBoomers[3];
+uniform vec4 bigBoomers[2];
 uniform vec4 curlAttractors[5];
 uniform vec4 attractors[7];
 
 uniform float deltaTime;
 uniform bool perspective;
+uniform bool fixParticles;
 uniform vec4 musicalSphere;
+uniform float springCoefficient;
 
 const float maxSpeed = 10.0;
 const float min_length = 0.01;
-const float friction = -1.3;
+const float friction = -1.315;
 
 void main(void)
 {
@@ -68,8 +73,16 @@ void main(void)
 		}
 
 		// Scale 2D forces down (to account for smaller distances)
-		g *= 0.15;
+		g *= 0.14;
 	}
+
+	if(fixParticles) {
+		// Scale forces down when attached to springs
+		g *= 0.69;
+
+		g += springCoefficient * (fixedPositions[index].xyz - pos.xyz);
+	}
+
 	vel.xyz += deltaTime * g;
 	
 	if(length(vel.xyz) > maxSpeed) {
