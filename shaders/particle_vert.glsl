@@ -8,9 +8,9 @@ uniform bool perspective;
 
 out vec4 outColor;
 
-const float c1 = 0.0815;
+const float c1 = 0.0825;
 const vec3 endC1 = vec3(0.0, 0.5, 0.6);
-const float c2 = 0.35;
+const float c2 = 0.36;
 const vec3 endC2 = vec3(0.5, 0.8, 0.0);
 const float c3 = 3.0;
 const vec3 endC3 = vec3(0.7, 0.0, 1.0);

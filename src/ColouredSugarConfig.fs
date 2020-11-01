@@ -17,7 +17,7 @@ let sample = """
   "cursorForceInitial": 4.5,
   "cursorHideAfterSeconds": 0.75,
 
-  "bouncingBallSize": 0.125,
+  "bouncingBallSize": 0.1,
   "bouncingBallVelocity": {
     "x": -0.4,
     "y": 0.4,
@@ -37,7 +37,7 @@ let sample = """
   "minimumMids": 0.001,
   "minimumHigh": 0.0005,
 
-  "whiteHoleStrength": 25.5,
+  "whiteHoleStrength": 27.5,
   "curlAttractorStrength": 17.15,
   "blackHoleStrength": 14.7,
 
@@ -52,7 +52,7 @@ let sample = """
 
   "audioDisconnectCheckWait": 12,
 
-  "springCoefficient": 80.01
+  "springCoefficient": 100.01
 }
 """
 

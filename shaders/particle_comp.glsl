@@ -24,7 +24,7 @@ uniform float springCoefficient;
 
 const float maxSpeed = 10.0;
 const float min_length = 0.01;
-const float friction = -1.315;
+const float friction = -1.35;
 
 void main(void)
 {
@@ -39,13 +39,13 @@ void main(void)
 		for(int i = 0; i < curlAttractors.length(); i++) {
 			vec3 t = curlAttractors[i].xyz - pos.xyz;
 			float r = max(length(t), min_length);
-			g += curlAttractors[i].w * (normalize(cross(t, pos.xyz)) + normalize(t)/1.25) / (r*r);
+			g += curlAttractors[i].w * (normalize(cross(t, pos.xyz)) + normalize(t)/1.25) / (r*r) * (fixParticles ? 1.5 : 1.0);
 		}
 
 		for(int i = 0; i < bigBoomers.length(); i++) {
 			vec3 t = bigBoomers[i].xyz - pos.xyz;
 			float r = max(length(t), min_length);
-			g -= bigBoomers[i].w * normalize(t) / (r*r*r*r*r);
+			g -= bigBoomers[i].w * normalize(t) / (r*r*r*r*r) * (fixParticles ? 0.35 : 1.0);
 		}
 
 		for(int i = 0; i < attractors.length(); i++) {
@@ -57,13 +57,13 @@ void main(void)
 		for(int i = 0; i < curlAttractors.length(); i++) {
 			vec3 t = vec3(curlAttractors[i].xy, pos.z) - pos.xyz;
 			float r = max(length(t), min_length);
-			g += curlAttractors[i].w * (normalize(cross(t, pos.xyz)) + normalize(t)/1.25) / (r*r);
+			g += curlAttractors[i].w * (normalize(cross(t, pos.xyz)) + normalize(t)/1.25) / (r*r) * (fixParticles ? 1.5 : 1.0);
 		}
 
 		for(int i = 0; i < bigBoomers.length(); i++) {
 			vec3 t = vec3(bigBoomers[i].xy, pos.z) - pos.xyz;
 			float r = max(length(t), min_length);
-			g -= bigBoomers[i].w * normalize(t) / (r*r*r);
+			g -= bigBoomers[i].w * normalize(t) / (r*r*r)  * (fixParticles ? 0.35 : 1.0);
 		}
 
 		for(int i = 0; i < attractors.length(); i++) {
@@ -73,13 +73,10 @@ void main(void)
 		}
 
 		// Scale 2D forces down (to account for smaller distances)
-		g *= 0.14;
+		g *= 0.175;
 	}
 
 	if(fixParticles) {
-		// Scale forces down when attached to springs
-		g *= 0.69;
-
 		g += springCoefficient * (fixedPositions[index].xyz - pos.xyz);
 	}
 

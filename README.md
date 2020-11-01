@@ -75,7 +75,7 @@ but most notably the rate, speed, and strength of various operations.
 | cursorForceInverseFactor | 1.5 | Factor to multiple cursor strength by on inverse (ie. strength of pull relative to push. if this number is negative then both forces push) |
 | cursorForceInitial | 4.5 | Starting strength of the cursor's point-force. |
 | cursorHideAfterSeconds | 0.75 | Amount of seconds of cursor inactivity to wait before hiding the cursor. Cursor appears upon moving again |
-| bouncingBallSize | 0.125 | Radius of the bouncing ball. Note that the encompassing cube is 2 units in length |
+| bouncingBallSize | 0.1 | Radius of the bouncing ball. Note that the encompassing cube is 2 units in length |
 | bouncingBallVelocity | {x: -0.4, y: 0.4, z: -0.3} | Describes the starting velocity of the bouncing ball |
 | particleCount | 1572864 | Number of coloured particles in the visualizer |
 | bassStartFreq | 50.01 | Lowest frequency (in Hz) considered a bass note |
@@ -87,7 +87,7 @@ but most notably the rate, speed, and strength of various operations.
 | minimumBass | 0.0075 | Minimum magnitude of strongest bass note required to register a whitehole response |
 | minimumMids | 0.001 | Minimum magnitude of strongest mids note required to register a curl attractor response |
 | minimumHigh | 0.0005 | Minimum magnitude of strongest bass note required to register a blackhole response |
-| whiteHoleStrength | 25.5 | Factor to adjust strength of whiteholes |
+| whiteHoleStrength | 27.5 | Factor to adjust strength of whiteholes |
 | curlAttractorStrength | 17.15 | Factor to adjust strength of curl attractors |
 | blackHoleStrength | 14.7 | Factor to adjust strength of blackholes |
 | cameraOrbitSpeed | 0.75 | Factor to adjust speed of camera rotations/orbits |
@@ -97,7 +97,7 @@ but most notably the rate, speed, and strength of various operations.
 | shiftFactorMove | 0.3 | Factor to multiply camera movement speed by when holding `LEFT-SHIFT` |
 | cameraInertia | 0.4 | Camera's resistance to user inputs on movement |
 | audioDisconnectCheckWait | 12 | Number of frames to wait before rechecking if audio has disconnected (only if audio-responsiveness is enabled) |
-| springCoefficient | 80.01 | The spring coefficient used to fix particles to their start positions |
+| springCoefficient | 100.01 | The spring coefficient used to fix particles to their start positions |
 
 For an even more customized experience, one must edit the shader programs. The shader files of most interest are 
 [particle_comp.glsl](shaders/particle_comp.glsl) and [particle_vert.glsl](shaders/particle_vert.glsl). 

@@ -457,13 +457,14 @@ type ColouredSugar(config: Config) as world =
             // Update sphere
             sphereVelocity.Y <- sphereVelocity.Y - deltaTime
             let mutable pos = sphere.Position + deltaTime*sphereVelocity
-            if abs pos.X > 0.7f then
+            let bound = 1.f - float32 config.BouncingBallSize
+            if abs pos.X > bound then
                 sphereVelocity.X <- -sphereVelocity.X
                 pos.X <- pos.X + deltaTime*sphereVelocity.X
-            if abs pos.Y > 0.7f then
+            if abs pos.Y > bound then
                 sphereVelocity.Y <- -sphereVelocity.Y
                 pos.Y <- pos.Y + deltaTime*sphereVelocity.Y
-            if abs pos.Z > 0.7f then
+            if abs pos.Z > bound then
                 sphereVelocity.Z <- -sphereVelocity.Z
                 pos.Z <- pos.Z + deltaTime*sphereVelocity.Z
             sphere.Position <- pos
@@ -516,7 +517,11 @@ type ColouredSugar(config: Config) as world =
         GL.DrawArrays(PrimitiveType.Points, 0, particleCount)
 
         if sphere.Scale.X > 0.f then
+            GL.Disable EnableCap.CullFace
+            GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line)
             sphere.Draw projViewMutable
+            GL.Enable EnableCap.CullFace
+            GL.PolygonMode(MaterialFace.Front, PolygonMode.Fill)
 
         if overlay then
             billboard.Update deltaTime
