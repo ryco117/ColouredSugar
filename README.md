@@ -51,7 +51,7 @@ determined bin from the domain of `bass`, `mids`, and `highs` respectively. The 
 | `Z` | Toggle auto-rotation of camera (Note: only affects `3D` perspective; default: `true`) |
 | `X` | Toggle presence of bouncing ball (default: `false`) |
 | `R` | Toggle audio-output responsiveness (Note: framerate may jitter if there is no system audio-out present while set to `true`; default: `true`) |
-| `H` | Toggle fixing particles to their start position with springs (default: `true`) |
+| `J` | Toggle fixing particles to their start position with springs, ie. `Jello mode` (default: `true`) |
 | `MOUSE-LEFT` | Hold to manually apply a point force attraction/repulsion at the mouse cursor |
 | `MOUSE-RIGHT` | Hold to inverse repulsion force to attraction at the mouse cursor. (Note: must hold both `MOUSE-RIGHT` and `MOUSE-LEFT` to apply an inverted force) |
 | `MOUSE-SCROLL` | Scroll up to increase intensity of manual point force. Scroll down to decrease strength |
@@ -92,7 +92,7 @@ but most notably the rate, speed, and strength of various operations.
 | blackHoleStrength | 14.7 | Factor to adjust strength of blackholes |
 | cameraOrbitSpeed | 0.75 | Factor to adjust speed of camera rotations/orbits |
 | cameraMoveSpeed | 0.75 | Factor to adjust speed of camera movement |
-| autoOrbitSpeed | 0.07 | Factor to adjust speed of auto orbit |
+| autoOrbitSpeed | 0.05 | Factor to adjust speed of auto orbit |
 | shiftFactorOrbit | 0.3 | Factor to multiply camera orbit speed by when holding `LEFT-SHIFT` |
 | shiftFactorMove | 0.3 | Factor to multiply camera movement speed by when holding `LEFT-SHIFT` |
 | cameraInertia | 0.4 | Camera's resistance to user inputs on movement |

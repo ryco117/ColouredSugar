@@ -43,7 +43,7 @@ let sample = """
 
   "cameraOrbitSpeed": 0.75,
   "cameraMoveSpeed": 0.75,
-  "autoOrbitSpeed": 0.07,
+  "autoOrbitSpeed": 0.05,
 
   "shiftFactorOrbit": 0.3,
   "shiftFactorMove": 0.3,

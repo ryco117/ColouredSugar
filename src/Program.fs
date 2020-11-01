@@ -257,8 +257,8 @@ type ColouredSugar(config: Config) as world =
             else
                 audioResponsive <- true
                 audioOutCapture.Reset ()
-        // Toggle Hooke's Law springs to fix position
-        | Key.H, _, false -> fixParticles <- not fixParticles
+        // Toggle Jello mode
+        | Key.J, _, false -> fixParticles <- not fixParticles
         // Movement keys
         | Key.A, _, false ->
             targetCameraVelocity.X <- targetCameraVelocity.X - 1.f
