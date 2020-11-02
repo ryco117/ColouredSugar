@@ -22,13 +22,13 @@ uniform bool fixParticles;
 uniform vec4 musicalSphere;
 uniform float springCoefficient;
 
-const float maxSpeed = 8.0;
+const float maxSpeed = 6.0;
 const float min_length = 0.01;
 const float friction = -1.35;
 
 void main(void)
 {
-	uint index = gl_GlobalInvocationID.x;
+	const uint index = gl_GlobalInvocationID.x;
 
 	// Read the current position and velocity from the buffers
 	vec4 pos = positions[index];
@@ -86,23 +86,23 @@ void main(void)
 		vel.xyz = maxSpeed*normalize(vel.xyz);
 	}
 
-	pos += vel * deltaTime;
-	if(abs(pos.x) >= 0.98) {
-		vel.x = sign(pos.x) * (-0.99 * abs(vel.x) - 0.005);
-		if(abs(pos.x) >= 0.99) {
-			pos.x = sign(pos.x) * 0.98;
+	pos.xyz += vel.xyz * deltaTime;
+	if(abs(pos.x) > 1.0) {
+		vel.x = sign(pos.x) * (-0.95 * abs(vel.x) - 0.005);
+		if(abs(pos.x) >= 1.05) {
+			pos.x = sign(pos.x);
 		}
 	}
-	if(abs(pos.y) >= 0.98) {
-		vel.y = sign(pos.y) * (-0.99 * abs(vel.y) - 0.005);
-		if(abs(pos.y) >= 0.99) {
-			pos.y = sign(pos.y) * 0.98;
+	if(abs(pos.y) > 1.0) {
+		vel.y = sign(pos.y) * (-0.95 * abs(vel.y) - 0.005);
+		if(abs(pos.y) >= 1.05) {
+			pos.y = sign(pos.y);
 		}
 	}
-	if(abs(pos.z) >= 0.98) {
-		vel.z = sign(pos.z) * (-0.99 * abs(vel.z) - 0.005);
-		if(abs(pos.z) >= 0.99) {
-			pos.z = sign(pos.z) * 0.98;
+	if(abs(pos.z) > 1.0) {
+		vel.z = sign(pos.z) * (-0.95 * abs(vel.z) - 0.005);
+		if(abs(pos.z) >= 1.05) {
+			pos.z = sign(pos.z);
 		}
 	}
 

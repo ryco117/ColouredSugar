@@ -12,9 +12,9 @@ let sample = """
 
   "screenshotScale": 1.0001,
 
-  "cursorForceScrollIncrease": 1.4,
+  "cursorForceScrollIncrease": 1.5,
   "cursorForceInverseFactor": 1.5,
-  "cursorForceInitial": 4.5,
+  "cursorForceInitial": 7.5,
   "cursorHideAfterSeconds": 0.75,
 
   "bouncingBallSize": 0.1,
@@ -26,7 +26,7 @@ let sample = """
 
   "particleCount": 1572864,
 
-  "bassStartFreq": 50.01,
+  "bassStartFreq": 30.01,
   "bassEndFreq": 250.01,
   "midsStartFreq": 250.01,
   "midsEndFreq": 3000.01,
@@ -44,6 +44,7 @@ let sample = """
   "cameraOrbitSpeed": 0.75,
   "cameraMoveSpeed": 0.75,
   "autoOrbitSpeed": 0.05,
+  "autoOrbitJerk": 0.1,
 
   "shiftFactorOrbit": 0.3,
   "shiftFactorMove": 0.3,

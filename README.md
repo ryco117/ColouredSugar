@@ -48,7 +48,7 @@ determined bin from the domain of `bass`, `mids`, and `highs` respectively. The 
 | `ALT+P`  | Toggle between `3D` and `2D` perspectives (default: `3D`) |
 | `W,A,S,D` | Manually direct the camera (Note: only affects `3D` perspective) |
 | `LEFT-SHIFT` | Hold to reduce manual movement speed of the camera |
-| `Z` | Toggle auto-rotation of camera (Note: only affects `3D` perspective; default: `true`) |
+| `Z` | Cycle camera auto-rotation mode between `Off`, `Classic`, and `Full` (Note: only affects `3D` perspective; default: `Full`) |
 | `X` | Toggle presence of bouncing ball (default: `false`) |
 | `R` | Toggle audio-output responsiveness (Note: framerate may jitter if there is no system audio-out present while set to `true`; default: `true`) |
 | `J` | Toggle fixing particles to their start position with springs, ie. `Jello mode` (default: `true`) |
@@ -71,14 +71,14 @@ but most notably the rate, speed, and strength of various operations.
 | showHelpOnLaunch | true | | Toggles whether to show help overlay on launch |
 | enableVSync | true | | Toggles whether to enable application level VSync |
 | screenshotScale | 1.0001 | Scale at which to save screenshots. If this value were 2.0 then screenshots would save at 2X current window width and height |
-| cursorForceScrollIncrease | 1.4 | Factor to multiply cursor strength by on user `MOUSE-SCROLL` up |
+| cursorForceScrollIncrease | 1.5 | Factor to multiply cursor strength by on user `MOUSE-SCROLL` up |
 | cursorForceInverseFactor | 1.5 | Factor to multiple cursor strength by on inverse (ie. strength of pull relative to push. if this number is negative then both forces push) |
-| cursorForceInitial | 4.5 | Starting strength of the cursor's point-force. |
+| cursorForceInitial | 7.5 | Starting strength of the cursor's point-force. |
 | cursorHideAfterSeconds | 0.75 | Amount of seconds of cursor inactivity to wait before hiding the cursor. Cursor appears upon moving again |
 | bouncingBallSize | 0.1 | Radius of the bouncing ball. Note that the encompassing cube is 2 units in length |
 | bouncingBallVelocity | {x: -0.4, y: 0.4, z: -0.3} | Describes the starting velocity of the bouncing ball |
 | particleCount | 1572864 | Number of coloured particles in the visualizer |
-| bassStartFreq | 50.01 | Lowest frequency (in Hz) considered a bass note |
+| bassStartFreq | 30.01 | Lowest frequency (in Hz) considered a bass note |
 | bassEndFreq | 250.01 | Highest frequency (in Hz) considered a bass note |
 | midsStartFreq | 250.01 | Lowest frequency (in Hz) considered a mids note |
 | midsEndFreq | 3000.01 | Highest frequency (in Hz) considered a mids note |
@@ -92,7 +92,8 @@ but most notably the rate, speed, and strength of various operations.
 | blackHoleStrength | 14.7 | Factor to adjust strength of blackholes |
 | cameraOrbitSpeed | 0.75 | Factor to adjust speed of camera rotations/orbits |
 | cameraMoveSpeed | 0.75 | Factor to adjust speed of camera movement |
-| autoOrbitSpeed | 0.05 | Factor to adjust speed of auto orbit |
+| autoOrbitSpeed | 0.05 | Main rotation speed of camera auto-rotation |
+| autoOrbitJerk | 0.1 | Factor to increase strength of camera jerks in `Full` camera auto-rotation |
 | shiftFactorOrbit | 0.3 | Factor to multiply camera orbit speed by when holding `LEFT-SHIFT` |
 | shiftFactorMove | 0.3 | Factor to multiply camera movement speed by when holding `LEFT-SHIFT` |
 | cameraInertia | 0.4 | Camera's resistance to user inputs on movement |

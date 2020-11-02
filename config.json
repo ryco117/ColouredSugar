@@ -6,9 +6,9 @@
 
   "screenshotScale": 1.0,
 
-  "cursorForceScrollIncrease": 1.4,
+  "cursorForceScrollIncrease": 1.5,
   "cursorForceInverseFactor": 1.5,
-  "cursorForceInitial": 4.5,
+  "cursorForceInitial": 7.5,
   "cursorHideAfterSeconds": 0.75,
 
   "bouncingBallSize": 0.1,
@@ -20,7 +20,7 @@
 
   "particleCount": 1572864,
 
-  "bassStartFreq": 50.0,
+  "bassStartFreq": 30.0,
   "bassEndFreq": 250.0,
   "midsStartFreq": 250.0,
   "midsEndFreq": 3000.0,
@@ -38,6 +38,7 @@
   "cameraOrbitSpeed": 0.75,
   "cameraMoveSpeed": 0.75,
   "autoOrbitSpeed": 0.05,
+  "autoOrbitJerk": 0.1,
 
   "shiftFactorOrbit": 0.3,
   "shiftFactorMove": 0.3,

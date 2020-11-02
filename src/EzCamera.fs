@@ -23,7 +23,7 @@ let private far = 20.f
 let private near = 0.01f
 
 type EzCamera(rotateSensitivity, moveSensitivity, aspect) =
-    let mutable position = Vector3(0.f, 0.f, 1.6f)
+    let mutable position = Vector3(0.f, 0.f, 1.625f)
     let mutable perspective = true
     let mutable pitch = 0.f
     let mutable yaw = 0.f

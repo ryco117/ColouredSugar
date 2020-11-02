@@ -28,7 +28,14 @@ open SixLabors.ImageSharp
 open EzCamera
 open ColouredSugarConfig
 
-type FreqMag = {freq: float32; mag: float32}
+// Define type for storing a note
+type Note = {freq: float32; mag: float32}
+
+// Define auto rotate types
+type AutoRotate =
+| Off
+| Classic
+| Full
 
 // Try to use same RNG source application-wide
 let random = System.Random ()
@@ -70,11 +77,14 @@ type ColouredSugar(config: Config) as world =
     let cursorForceScrollFactor = float32 config.CursorForceScrollIncrease
     let mutable targetCameraVelocity = Vector3.Zero
     let mutable holdShift = false
-    let mutable autoRotate = true
+    let mutable autoRotate = Full
     let autoRotateSpeed = float32 config.AutoOrbitSpeed
     let audioDisconnectCheckRate = uint64 config.AudioDisconnectCheckWait
     let mutable audioResponsive = true
     let mutable fixParticles = true
+    let mutable cubeRotation = Quaternion(0.f, 0.f, 0.f, 1.f)
+    let mutable cubeAngularVelocity = Vector4(0.f, 1.f, 0.f, autoRotateSpeed)
+    let mutable lastAngularChange = System.DateTime.UtcNow
 
     let sphere = new EzObjects.ColouredSphere(Vector3(0.75f, 0.75f, 0.75f), 3)
     let defaultSphereVelocity =
@@ -108,9 +118,19 @@ type ColouredSugar(config: Config) as world =
 
     // Particle System
     let particleCount = config.ParticleCount
+    let fixedParticlePositions =
+        let hilbertCurve = Array.init particleCount (fun i -> CubeFillingCurve.curveToCube ((float i) / (float particleCount)))
+        Array.init<float32> (particleCount * 4) (fun i -> match (i % 4) with
+                                                          | 0 -> hilbertCurve.[i/4].X
+                                                          | 1 -> hilbertCurve.[i/4].Y
+                                                          | 2 -> hilbertCurve.[i/4].Z
+                                                          | 3 -> 1.f
+                                                          | _ -> raise (System.Exception "Mathematics is broken!"))
     let mutable particleRenderVAO = 0
     let mutable particleVBO = 0
+    let mutable particlePositions = Array.empty<float32>
     let mutable particleVelocityArray = 0
+    let mutable particleVelocities = Array.empty<float32>
     let mutable particleFixedPosArray = 0
     let mutable particleCompShader = 0
     let mutable particleRenderShader = 0
@@ -123,7 +143,7 @@ type ColouredSugar(config: Config) as world =
     let mutable complexZero = NAudio.Dsp.Complex ()
     do complexZero.X <- 0.f
     do complexZero.Y <- 0.f
-    let mutable previousBass = Array.create 2 [|complexZero|]
+    let mutable previousBass = Array.create 3 [|complexZero|]
     let mutable previousBassIndex = 0
     let onDataAvail samplingRate (complex: NAudio.Dsp.Complex[]) =
         if complex.Length > 0 then
@@ -137,7 +157,7 @@ type ColouredSugar(config: Config) as world =
                 let arr = Array.init input.Length (fun i -> {freq = (float32 i) / fLen; mag = mag input.[i]})
                 let cmp {freq = _; mag = a} {freq = _; mag = b} = sign (b - a)
                 let sorted = Array.sortWith cmp arr
-                let rec getList acc size (arr: FreqMag[]) =
+                let rec getList acc size (arr: Note[]) =
                     if arr.Length = 0  || size = maxCount then
                         acc
                     else
@@ -169,14 +189,17 @@ type ColouredSugar(config: Config) as world =
                                 if j >= previousBass.[i].Length then previousBass.[i].Length - 1 else j
                             mag previousBass.[i].[j]
                 s / float32 previousBass.Length
+            let mutable volume = 0.f
             for i = 0 to bassNotes.Length - 1 do
-                if bassNotes.[i].mag > float32 config.MinimumBass && bassNotes.[i].mag > 1.25f * avgLastBassMag bassNotes.[i].freq then
+                volume <- volume + bassNotes.[i].mag
+                if bassNotes.[i].mag > float32 config.MinimumBass && bassNotes.[i].mag > 1.1f * avgLastBassMag bassNotes.[i].freq then
                     whiteHoles.[i] <- Vector4(
                         toWorldSpace bassNotes.[i].freq,
                         defaultMass * bassNotes.[i].mag * float32 config.WhiteHoleStrength)
                 else
                     whiteHoles.[i] <- Vector4()
             for i = 0 to midsNotes.Length - 1 do
+                volume <- volume + midsNotes.[i].mag
                 if midsNotes.[i].mag > float32 config.MinimumMids then
                     curlAttractors.[i] <- Vector4(
                         toWorldSpace midsNotes.[i].freq,
@@ -184,12 +207,22 @@ type ColouredSugar(config: Config) as world =
                 else
                     curlAttractors.[i] <- Vector4()
             for i = 0 to highNotes.Length - 1 do
+                volume <- volume + highNotes.[i].mag
                 if highNotes.[i].mag > float32 config.MinimumHigh then
                     blackHoles.[i] <- Vector4(
                         toWorldSpace highNotes.[i].freq,
                         defaultMass * (sqrt highNotes.[i].mag) * float32 config.BlackHoleStrength)
                 else
                     blackHoles.[i] <- Vector4()
+            if autoRotate = Full &&
+                bassNotes.Length > 0 && 
+                bassNotes.[0].mag > float32 config.MinimumBass &&
+                (System.DateTime.UtcNow - lastAngularChange).TotalSeconds > 2. &&
+                bassNotes.[0].mag > 20.f * avgLastBassMag bassNotes.[0].freq then
+                cubeAngularVelocity <- Vector4(
+                    Vector3(randNormF(), randNormF(), randNormF()).Normalized(),
+                    (float32 (System.Math.Pow((float volume), 1.5))) * float32 config.AutoOrbitJerk)
+                lastAngularChange <- System.DateTime.UtcNow
             previousBass.[previousBassIndex] <- bassArray
             previousBassIndex <- (previousBassIndex + 1) % previousBass.Length
     let onClose () =
@@ -228,26 +261,25 @@ type ColouredSugar(config: Config) as world =
                 sphere.Scale <- defaultSphereScale
         // Reset states of objects
         | Key.F5, _, false ->
-            let velocities = Array.zeroCreate<float32> (particleCount * 4)
+            particleVelocities <- Array.zeroCreate<float32> (particleCount * 4)
             GL.BindBuffer(BufferTarget.ShaderStorageBuffer, particleVelocityArray)
-            GL.BufferSubData(BufferTarget.ShaderStorageBuffer, nativeint 0, velocities.Length * sizeof<float32>, velocities)
-            let hilbertCurve = Array.init particleCount (fun i -> CubeFillingCurve.curveToCube ((float i) / (float particleCount)))
-            let particlePos =
-                Array.init<float32> (particleCount * 4) (fun i -> match (i % 4) with
-                                                                  | 0 -> hilbertCurve.[i/4].X
-                                                                  | 1 -> hilbertCurve.[i/4].Y
-                                                                  | 2 -> hilbertCurve.[i/4].Z
-                                                                  | 3 -> 1.f
-                                                                  | _ -> raise (System.Exception "Mathematics is broken!!"))
+            GL.BufferSubData(BufferTarget.ShaderStorageBuffer, nativeint 0, particleVelocities.Length * sizeof<float32>, particleVelocities)
+            particlePositions <- Array.copy fixedParticlePositions
             GL.BindBuffer(BufferTarget.ShaderStorageBuffer, particleVBO)
-            GL.BufferSubData(BufferTarget.ShaderStorageBuffer, nativeint 0, particlePos.Length * sizeof<float32>, particlePos)
+            GL.BufferSubData(BufferTarget.ShaderStorageBuffer, nativeint 0, particlePositions.Length * sizeof<float32>, particlePositions)
             sphereVelocity <- defaultSphereVelocity
             sphere.Position <- Vector3.Zero
-            camera.Position <- Vector3(0.f, 0.f, 1.6f)
+            camera.Position <- Vector3(0.f, 0.f, 1.625f)
             camera.Yaw <- 0.f
+            cubeRotation <- Quaternion(0.f, 0.f, 0.f, 1.f)
+            cubeAngularVelocity <- Vector4(0.f, 1.f, 0.f, autoRotateSpeed)
             mouseScroll <- float32 config.CursorForceInitial
         // Toggle auto rotate
-        | Key.Z, _, false -> autoRotate <- not autoRotate
+        | Key.Z, _, false ->
+            match autoRotate with
+            | Off -> autoRotate <- Classic
+            | Classic -> autoRotate <- Full
+            | Full -> autoRotate <- Off
         // Toggle responsive to audio-out
         | Key.R, _, false ->
             if audioResponsive then
@@ -403,28 +435,22 @@ type ColouredSugar(config: Config) as world =
         GL.Enable EnableCap.DepthTest
         GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha)
         GL.Enable EnableCap.Blend
+        GL.PointSize 1.f
 
         // Load particle system
         particleCompShader <- EzShader.CreateComputeShader "shaders/particle_comp.glsl"
         particleRenderShader <- EzShader.CreateShaderProgram "shaders/particle_vert.glsl" "shaders/particle_frag.glsl"
-        let hilbertCurve = Array.init particleCount (fun i -> CubeFillingCurve.curveToCube ((float i) / (float particleCount)))
-        let particlePos =
-            Array.init<float32> (particleCount * 4) (fun i -> match (i % 4) with
-                                                              | 0 -> hilbertCurve.[i/4].X
-                                                              | 1 -> hilbertCurve.[i/4].Y
-                                                              | 2 -> hilbertCurve.[i/4].Z
-                                                              | 3 -> 1.f
-                                                              | _ -> raise (System.Exception "Mathematics is broken!"))
+        particlePositions <- Array.copy fixedParticlePositions
         particleVBO <- GL.GenBuffer ()
         GL.BindBuffer(BufferTarget.ShaderStorageBuffer, particleVBO)
-        GL.BufferData(BufferTarget.ShaderStorageBuffer, particlePos.Length * sizeof<float32>, particlePos, BufferUsageHint.StreamDraw)
-        let velocities = Array.zeroCreate<float32> (particleCount * 4)
+        GL.BufferData(BufferTarget.ShaderStorageBuffer, particlePositions.Length * sizeof<float32>, particlePositions, BufferUsageHint.StreamDraw)
+        particleVelocities <- Array.zeroCreate<float32> (particleCount * 4)
         particleVelocityArray <- GL.GenBuffer ()
         GL.BindBuffer(BufferTarget.ShaderStorageBuffer, particleVelocityArray)
-        GL.BufferData(BufferTarget.ShaderStorageBuffer, velocities.Length * sizeof<float32>, velocities, BufferUsageHint.StreamDraw)
+        GL.BufferData(BufferTarget.ShaderStorageBuffer, particleVelocities.Length * sizeof<float32>, particleVelocities, BufferUsageHint.StreamDraw)
         particleFixedPosArray <- GL.GenBuffer ()
         GL.BindBuffer(BufferTarget.ShaderStorageBuffer, particleFixedPosArray)
-        GL.BufferData(BufferTarget.ShaderStorageBuffer, particlePos.Length * sizeof<float32>, Array.copy particlePos, BufferUsageHint.StaticDraw)
+        GL.BufferData(BufferTarget.ShaderStorageBuffer, fixedParticlePositions.Length * sizeof<float32>, fixedParticlePositions, BufferUsageHint.StaticDraw)
         particleRenderVAO <- GL.GenVertexArray ()
         GL.BindVertexArray particleRenderVAO
         GL.BindBuffer(BufferTarget.ArrayBuffer, particleVBO)
@@ -476,15 +502,20 @@ type ColouredSugar(config: Config) as world =
         GL.Uniform1(GL.GetUniformLocation(particleCompShader, "fixParticles"), if fixParticles then 1u else 0u)
         GL.Uniform4(
             GL.GetUniformLocation(particleCompShader, "attractors[0]"),
-            Vector4(
-                camera.ToWorldSpace mouseX mouseY,
-                if mouseLeftDown then
+            if mouseLeftDown then
+                let p =
+                    if camera.UsePerspective then
+                        (Vector4(camera.ToWorldSpace mouseX mouseY, 1.f) * Matrix4.CreateFromQuaternion (cubeRotation.Inverted())).Xyz
+                    else
+                        camera.ToWorldSpace mouseX mouseY
+                Vector4(
+                    p,
                     if mouseRightDown then
                         cursorForceInverseFactor * defaultMass * cursorForceScrollFactor**mouseScroll
                     else
-                        -defaultMass * cursorForceScrollFactor**mouseScroll
-                else
-                    0.f))
+                        -defaultMass * cursorForceScrollFactor**mouseScroll)
+            else
+                Vector4(0.f))
         // TODO: Use interpolated strings here when .NET 5 releases!
         for i = 1 to blackHoles.Length do
             GL.Uniform4(GL.GetUniformLocation(particleCompShader, sprintf "attractors[%i]" i), blackHoles.[i-1])
@@ -505,13 +536,22 @@ type ColouredSugar(config: Config) as world =
         GL.BindVertexArray particleRenderVAO
         GL.UseProgram particleRenderShader
         let mutable projViewMutable =
-            if autoRotate then
+            if autoRotate = Classic then
                 camera.Yaw <- camera.Yaw + autoRotateSpeed * deltaTime
+            elif autoRotate = Full then
+                let w = cubeAngularVelocity.W
+                let theta = w * deltaTime
+                let r = Quaternion(sin theta * cubeAngularVelocity.Xyz, cos theta)
+                cubeRotation <- (cubeRotation * r).Normalized()
+                cubeAngularVelocity <- Vector4(cubeAngularVelocity.Xyz, w + (autoRotateSpeed - w) * (1.f - exp -deltaTime))
             let t = deltaTime / float32 config.CameraInertia
             camera.ForwardVelocity <- (1.f - t) * camera.ForwardVelocity + t * targetCameraVelocity.Z * if holdShift then float32 config.ShiftFactorMove else 1.f
             camera.StrafeRight <- (1.f - t) * camera.StrafeRight + t * targetCameraVelocity.X * if holdShift then float32 config.ShiftFactorOrbit else 1.f
             camera.Update deltaTime
-            camera.ProjView ()
+            if camera.UsePerspective then
+                Matrix4.CreateFromQuaternion cubeRotation * camera.ProjView ()
+            else
+                camera.ProjView ()
         GL.UniformMatrix4(GL.GetUniformLocation(particleRenderShader, "projViewMatrix"), true, &projViewMutable)
         GL.Uniform1(GL.GetUniformLocation(particleRenderShader, "perspective"), if camera.UsePerspective then 1u else 0u)
         GL.DrawArrays(PrimitiveType.Points, 0, particleCount)
