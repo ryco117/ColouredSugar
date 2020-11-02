@@ -15,7 +15,7 @@ let sample = """
   "cursorForceScrollIncrease": 1.5,
   "cursorForceInverseFactor": 1.5,
   "cursorForceInitial": 7.5,
-  "cursorHideAfterSeconds": 0.75,
+  "cursorHideAfterSeconds": 0.5,
 
   "bouncingBallSize": 0.1,
   "bouncingBallVelocity": {
@@ -45,6 +45,7 @@ let sample = """
   "cameraMoveSpeed": 0.75,
   "autoOrbitSpeed": 0.05,
   "autoOrbitJerk": 0.1,
+  "minimumBassForJerk": 0.05,
 
   "shiftFactorOrbit": 0.3,
   "shiftFactorMove": 0.3,

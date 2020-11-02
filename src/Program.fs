@@ -143,7 +143,7 @@ type ColouredSugar(config: Config) as world =
     let mutable complexZero = NAudio.Dsp.Complex ()
     do complexZero.X <- 0.f
     do complexZero.Y <- 0.f
-    let mutable previousBass = Array.create 3 [|complexZero|]
+    let mutable previousBass = Array.create 2 [|complexZero|]
     let mutable previousBassIndex = 0
     let onDataAvail samplingRate (complex: NAudio.Dsp.Complex[]) =
         if complex.Length > 0 then
@@ -192,7 +192,7 @@ type ColouredSugar(config: Config) as world =
             let mutable volume = 0.f
             for i = 0 to bassNotes.Length - 1 do
                 volume <- volume + bassNotes.[i].mag
-                if bassNotes.[i].mag > float32 config.MinimumBass && bassNotes.[i].mag > 1.1f * avgLastBassMag bassNotes.[i].freq then
+                if bassNotes.[i].mag > float32 config.MinimumBass && bassNotes.[i].mag > 1.25f * avgLastBassMag bassNotes.[i].freq then
                     whiteHoles.[i] <- Vector4(
                         toWorldSpace bassNotes.[i].freq,
                         defaultMass * bassNotes.[i].mag * float32 config.WhiteHoleStrength)
