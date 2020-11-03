@@ -26,6 +26,13 @@ const float maxSpeed = 6.0;
 const float min_length = 0.01;
 const float friction = -1.35;
 
+vec3 Normalize(vec3 t) {
+	if(length(t) < 0.000001) {
+		return t;
+	}
+	return normalize(t);
+}
+
 void main(void)
 {
 	const uint index = gl_GlobalInvocationID.x;
@@ -39,37 +46,37 @@ void main(void)
 		for(int i = 0; i < curlAttractors.length(); i++) {
 			vec3 t = curlAttractors[i].xyz - pos.xyz;
 			float r = max(length(t), min_length);
-			g += curlAttractors[i].w * (normalize(cross(t, pos.xyz)) + normalize(t)/1.25) / (r*r) * (fixParticles ? 1.7 : 1.0);
+			g += curlAttractors[i].w * (Normalize(cross(t, pos.xyz)) + Normalize(t)/1.25) / (r*r) * (fixParticles ? 1.7 : 1.0);
 		}
 
 		for(int i = 0; i < bigBoomers.length(); i++) {
 			vec3 t = bigBoomers[i].xyz - pos.xyz;
 			float r = max(length(t), min_length);
-			g -= bigBoomers[i].w * normalize(t) / (r*r*r*r*r) * (fixParticles ? 0.3 : 1.0);
+			g -= bigBoomers[i].w * Normalize(t) / (r*r*r*r*r) * (fixParticles ? 0.3 : 1.0);
 		}
 
 		for(int i = 0; i < attractors.length(); i++) {
 			vec3 t = attractors[i].xyz - pos.xyz;
 			float r = max(length(t), min_length);
-			g += attractors[i].w * normalize(t) / (r*r) * (fixParticles ? 0.95 : 1.0);
+			g += attractors[i].w * Normalize(t) / (r*r) * (fixParticles ? 0.95 : 1.0);
 		}
 	} else {
 		for(int i = 0; i < curlAttractors.length(); i++) {
 			vec3 t = vec3(curlAttractors[i].xy, pos.z) - pos.xyz;
 			float r = max(length(t), min_length);
-			g += curlAttractors[i].w * (normalize(cross(t, pos.xyz)) + normalize(t)/1.25) / (r*r) * (fixParticles ? 1.7 : 1.0);
+			g += curlAttractors[i].w * (Normalize(cross(t, pos.xyz)) + Normalize(t)/1.25) / (r*r) * (fixParticles ? 1.7 : 1.0);
 		}
 
 		for(int i = 0; i < bigBoomers.length(); i++) {
 			vec3 t = vec3(bigBoomers[i].xy, pos.z) - pos.xyz;
 			float r = max(length(t), min_length);
-			g -= bigBoomers[i].w * normalize(t) / (r*r*r)  * (fixParticles ? 0.3 : 1.0);
+			g -= bigBoomers[i].w * Normalize(t) / (r*r*r)  * (fixParticles ? 0.3 : 1.0);
 		}
 
 		for(int i = 0; i < attractors.length(); i++) {
 			vec3 t = vec3(attractors[i].xy, pos.z) - pos.xyz;
 			float r = max(length(t), min_length);
-			g += attractors[i].w * normalize(t) / (r*r) * (fixParticles ? 0.95 : 1.0);
+			g += attractors[i].w * Normalize(t) / (r*r) * (fixParticles ? 0.95 : 1.0);
 		}
 
 		// Scale 2D forces down (to account for smaller distances)
@@ -88,19 +95,19 @@ void main(void)
 
 	pos.xyz += vel.xyz * deltaTime;
 	if(abs(pos.x) > 1.0) {
-		vel.x = sign(pos.x) * (-0.95 * abs(vel.x) - 0.005);
+		vel.x = sign(pos.x) * (-0.95 * abs(vel.x) - 0.0001);
 		if(abs(pos.x) >= 1.05) {
 			pos.x = sign(pos.x);
 		}
 	}
 	if(abs(pos.y) > 1.0) {
-		vel.y = sign(pos.y) * (-0.95 * abs(vel.y) - 0.005);
+		vel.y = sign(pos.y) * (-0.95 * abs(vel.y) - 0.0001);
 		if(abs(pos.y) >= 1.05) {
 			pos.y = sign(pos.y);
 		}
 	}
 	if(abs(pos.z) > 1.0) {
-		vel.z = sign(pos.z) * (-0.95 * abs(vel.z) - 0.005);
+		vel.z = sign(pos.z) * (-0.95 * abs(vel.z) - 0.0001);
 		if(abs(pos.z) >= 1.05) {
 			pos.z = sign(pos.z);
 		}
@@ -108,10 +115,10 @@ void main(void)
 
 	// Musical Spheres
 	vec3 d = perspective ? pos.xyz - musicalSphere.xyz : vec3(pos.xy - musicalSphere.xy, 0.0);
-	float mag = length(d);
+	float mag = max(length(d), min_length);
 	if(mag <= musicalSphere.w) {
 		pos.xyz = musicalSphere.xyz + (musicalSphere.w/mag)*d;
-		vel.xyz += 20.0 * (musicalSphere.w - mag) * normalize(d);
+		vel.xyz += 20.0 * (musicalSphere.w - mag) * Normalize(d);
 	}
 
 	positions[index] = pos;

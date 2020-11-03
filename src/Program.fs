@@ -189,17 +189,28 @@ type ColouredSugar(config: Config) as world =
                                 if j >= previousBass.[i].Length then previousBass.[i].Length - 1 else j
                             mag previousBass.[i].[j]
                 s / float32 previousBass.Length
-            let mutable volume = 0.f
+            let volume = 
+                let summer a = Array.sumBy (fun n -> n.mag) a
+                summer bassNotes + summer midsNotes + summer highNotes
+            let mutable canJerk = autoRotate = Full
             for i = 0 to bassNotes.Length - 1 do
-                volume <- volume + bassNotes.[i].mag
                 if bassNotes.[i].mag > float32 config.MinimumBass && bassNotes.[i].mag > 1.25f * avgLastBassMag bassNotes.[i].freq then
                     whiteHoles.[i] <- Vector4(
                         toWorldSpace bassNotes.[i].freq,
                         defaultMass * bassNotes.[i].mag * float32 config.WhiteHoleStrength)
                 else
                     whiteHoles.[i] <- Vector4()
+
+                if canJerk &&
+                    bassNotes.[i].mag > float32 config.MinimumBassForJerk &&
+                    (System.DateTime.UtcNow - lastAngularChange).TotalSeconds > 2. &&
+                    bassNotes.[i].mag > 10.f * avgLastBassMag bassNotes.[i].freq then
+                    cubeAngularVelocity <- Vector4(
+                        (toWorldSpace bassNotes.[i].freq).Normalized(),
+                        (float32 (System.Math.Pow((float volume), 1.15))) * float32 config.AutoOrbitJerk)
+                    lastAngularChange <- System.DateTime.UtcNow
+                    canJerk <- false
             for i = 0 to midsNotes.Length - 1 do
-                volume <- volume + midsNotes.[i].mag
                 if midsNotes.[i].mag > float32 config.MinimumMids then
                     curlAttractors.[i] <- Vector4(
                         toWorldSpace midsNotes.[i].freq,
@@ -207,22 +218,13 @@ type ColouredSugar(config: Config) as world =
                 else
                     curlAttractors.[i] <- Vector4()
             for i = 0 to highNotes.Length - 1 do
-                volume <- volume + highNotes.[i].mag
                 if highNotes.[i].mag > float32 config.MinimumHigh then
                     blackHoles.[i] <- Vector4(
                         toWorldSpace highNotes.[i].freq,
                         defaultMass * (sqrt highNotes.[i].mag) * float32 config.BlackHoleStrength)
                 else
                     blackHoles.[i] <- Vector4()
-            if autoRotate = Full &&
-                bassNotes.Length > 0 && 
-                bassNotes.[0].mag > float32 config.MinimumBass &&
-                (System.DateTime.UtcNow - lastAngularChange).TotalSeconds > 2. &&
-                bassNotes.[0].mag > 20.f * avgLastBassMag bassNotes.[0].freq then
-                cubeAngularVelocity <- Vector4(
-                    Vector3(randNormF(), randNormF(), randNormF()).Normalized(),
-                    (float32 (System.Math.Pow((float volume), 1.5))) * float32 config.AutoOrbitJerk)
-                lastAngularChange <- System.DateTime.UtcNow
+
             previousBass.[previousBassIndex] <- bassArray
             previousBassIndex <- (previousBassIndex + 1) % previousBass.Length
     let onClose () =
@@ -307,7 +309,6 @@ type ColouredSugar(config: Config) as world =
         | Key.Tilde, _, false -> console.Show(not (console.Visible()))
         // Save screenshot
         | Key.F12, _ , false ->
-            GL.Enable EnableCap.Multisample
             GL.ReadBuffer ReadBufferMode.Front
             GL.PixelStore(PixelStoreParameter.PackAlignment, 1)
             let width = int (float this.Width * screenshotScale)
@@ -347,7 +348,7 @@ type ColouredSugar(config: Config) as world =
             GL.FramebufferRenderbuffer(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, RenderbufferTarget.Renderbuffer, copyRenderbufferId)
             GL.BindFramebuffer(FramebufferTarget.ReadFramebuffer, framebufferId)
             GL.BindFramebuffer(FramebufferTarget.DrawFramebuffer, copyBufferId)
-            GL.BlitFramebuffer(0, 0, width, height, 0, 0, width, height, ClearBufferMask.ColorBufferBit, BlitFramebufferFilter.Nearest)
+            GL.BlitFramebuffer(0, 0, width, height, 0, 0, width, height, ClearBufferMask.ColorBufferBit, BlitFramebufferFilter.Linear)
 
             GL.BindFramebuffer(FramebufferTarget.Framebuffer, copyBufferId)
             GL.ReadBuffer ReadBufferMode.ColorAttachment0
@@ -381,7 +382,6 @@ type ColouredSugar(config: Config) as world =
                 printfn "Screenshot saved to '%s'" filePath
                 file.Close ()
             })
-            GL.Disable EnableCap.Multisample
             GL.DeleteRenderbuffer renderbufferId
             GL.DeleteRenderbuffer copyRenderbufferId
             GL.DeleteRenderbuffer depthbufferId
@@ -427,11 +427,12 @@ type ColouredSugar(config: Config) as world =
         base.OnMouseUp e
     override _.OnLoad eventArgs =
         // Set default values
+        GL.Enable EnableCap.Multisample
         GL.ClearColor (0.f, 0.f, 0.f, 1.f)
         GL.CullFace CullFaceMode.Back
         GL.Enable EnableCap.CullFace
         GL.PolygonMode(MaterialFace.Front, PolygonMode.Fill)
-        GL.DepthFunc DepthFunction.Less
+        GL.DepthFunc DepthFunction.Lequal
         GL.Enable EnableCap.DepthTest
         GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha)
         GL.Enable EnableCap.Blend
@@ -450,7 +451,7 @@ type ColouredSugar(config: Config) as world =
         GL.BufferData(BufferTarget.ShaderStorageBuffer, particleVelocities.Length * sizeof<float32>, particleVelocities, BufferUsageHint.StreamDraw)
         particleFixedPosArray <- GL.GenBuffer ()
         GL.BindBuffer(BufferTarget.ShaderStorageBuffer, particleFixedPosArray)
-        GL.BufferData(BufferTarget.ShaderStorageBuffer, fixedParticlePositions.Length * sizeof<float32>, fixedParticlePositions, BufferUsageHint.StaticDraw)
+        GL.BufferData(BufferTarget.ShaderStorageBuffer, fixedParticlePositions.Length * sizeof<float32>, fixedParticlePositions, BufferUsageHint.StaticRead)
         particleRenderVAO <- GL.GenVertexArray ()
         GL.BindVertexArray particleRenderVAO
         GL.BindBuffer(BufferTarget.ArrayBuffer, particleVBO)
@@ -459,13 +460,13 @@ type ColouredSugar(config: Config) as world =
         GL.BindBuffer(BufferTarget.ArrayBuffer, particleVelocityArray)
         GL.VertexAttribPointer(1, 4, VertexAttribPointerType.Float, false, 0, 0)
         GL.EnableVertexAttribArray 1
-        GL.BindBuffer(BufferTarget.ArrayBuffer, particleFixedPosArray)
-        GL.VertexAttribPointer(2, 4, VertexAttribPointerType.Float, false, 0, 0)
-        GL.EnableVertexAttribArray 2
 
-        // Set static uniforms
+        // Set shader values
         GL.UseProgram particleCompShader
         GL.Uniform1(GL.GetUniformLocation(particleCompShader, "springCoefficient"), float32 config.SpringCoefficient)
+        GL.BindBufferBase(BufferRangeTarget.ShaderStorageBuffer, 0, particleVBO)
+        GL.BindBufferBase(BufferRangeTarget.ShaderStorageBuffer, 1, particleVelocityArray)
+        GL.BindBufferBase(BufferRangeTarget.ShaderStorageBuffer, 2, particleFixedPosArray)
 
         base.OnLoad eventArgs
     override _.OnUnload eventArgs =
@@ -517,8 +518,8 @@ type ColouredSugar(config: Config) as world =
             else
                 Vector4(0.f))
         // TODO: Use interpolated strings here when .NET 5 releases!
-        for i = 1 to blackHoles.Length do
-            GL.Uniform4(GL.GetUniformLocation(particleCompShader, sprintf "attractors[%i]" i), blackHoles.[i-1])
+        for i = 0 to blackHoles.Length - 1 do
+            GL.Uniform4(GL.GetUniformLocation(particleCompShader, sprintf "attractors[%i]" (i + 1)), blackHoles.[i])
         for i = 0 to whiteHoles.Length - 1 do
             GL.Uniform4(GL.GetUniformLocation(particleCompShader, sprintf "bigBoomers[%i]" i), whiteHoles.[i])
         for i = 0 to curlAttractors.Length - 1 do
@@ -526,11 +527,7 @@ type ColouredSugar(config: Config) as world =
         GL.Uniform4(
             GL.GetUniformLocation(particleCompShader, "musicalSphere"),
             Vector4(sphere.Position, sphere.Scale.X))
-        GL.BindBufferBase(BufferRangeTarget.ShaderStorageBuffer, 0, particleVBO)
-        GL.BindBufferBase(BufferRangeTarget.ShaderStorageBuffer, 1, particleVelocityArray)
-        GL.BindBufferBase(BufferRangeTarget.ShaderStorageBuffer, 2, particleFixedPosArray)
         GL.DispatchCompute(particleCount / 128, 1, 1)
-        GL.MemoryBarrier (MemoryBarrierFlags.ShaderStorageBarrierBit)
 
         // Draw particles
         GL.BindVertexArray particleRenderVAO
@@ -544,9 +541,11 @@ type ColouredSugar(config: Config) as world =
                 let r = Quaternion(sin theta * cubeAngularVelocity.Xyz, cos theta)
                 cubeRotation <- (cubeRotation * r).Normalized()
                 cubeAngularVelocity <- Vector4(cubeAngularVelocity.Xyz, w + (autoRotateSpeed - w) * (1.f - exp -deltaTime))
-            let t = deltaTime / float32 config.CameraInertia
-            camera.ForwardVelocity <- (1.f - t) * camera.ForwardVelocity + t * targetCameraVelocity.Z * if holdShift then float32 config.ShiftFactorMove else 1.f
-            camera.StrafeRight <- (1.f - t) * camera.StrafeRight + t * targetCameraVelocity.X * if holdShift then float32 config.ShiftFactorOrbit else 1.f
+            let t = exp (-deltaTime / float32 config.CameraInertia)
+            camera.ForwardVelocity <- camera.ForwardVelocity + 
+                ((targetCameraVelocity.Z * if holdShift then float32 config.ShiftFactorMove else 1.f) - camera.ForwardVelocity) * (1.f - t)
+            camera.StrafeRight <- camera.StrafeRight +
+                ((targetCameraVelocity.X * if holdShift then float32 config.ShiftFactorOrbit else 1.f) - camera.StrafeRight) * (1.f - t)
             camera.Update deltaTime
             if camera.UsePerspective then
                 Matrix4.CreateFromQuaternion cubeRotation * camera.ProjView ()

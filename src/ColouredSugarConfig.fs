@@ -44,7 +44,7 @@ let sample = """
   "cameraOrbitSpeed": 0.75,
   "cameraMoveSpeed": 0.75,
   "autoOrbitSpeed": 0.05,
-  "autoOrbitJerk": 0.1,
+  "autoOrbitJerk": 0.175,
   "minimumBassForJerk": 0.05,
 
   "shiftFactorOrbit": 0.3,

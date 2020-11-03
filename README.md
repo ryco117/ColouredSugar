@@ -93,7 +93,7 @@ but most notably the rate, speed, and strength of various operations.
 | cameraOrbitSpeed | 0.75 | Factor to adjust speed of camera rotations/orbits |
 | cameraMoveSpeed | 0.75 | Factor to adjust speed of camera movement |
 | autoOrbitSpeed | 0.05 | Main rotation speed of camera auto-rotation |
-| autoOrbitJerk | 0.1 | Factor to increase strength of camera jerks in `Full` camera auto-rotation mode |
+| autoOrbitJerk | 0.175 | Factor to increase strength of camera jerks in `Full` camera auto-rotation mode |
 | minimumBassForJerk | 0.05 | Minimum bass note magnitude to trigger camera jerk in `Full` camera auto-rotation mode |
 | shiftFactorOrbit | 0.3 | Factor to multiply camera orbit speed by when holding `LEFT-SHIFT` |
 | shiftFactorMove | 0.3 | Factor to multiply camera movement speed by when holding `LEFT-SHIFT` |

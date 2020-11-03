@@ -16,6 +16,10 @@ const float c3 = 3.0;
 const vec3 endC3 = vec3(0.7, 0.0, 1.0);
 const float maxSpeed = 6.0;
 
+bool isFinite(float x) {
+	return !(isinf(x) || isnan(x));
+}
+
 void main() {
 	float speed = min(length(velocity.xyz), maxSpeed);
 	if(speed < c1) {
