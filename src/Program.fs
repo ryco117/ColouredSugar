@@ -31,6 +31,8 @@ open ColouredSugarConfig
 // Define type for storing a note
 type Note = {freq: float32; mag: float32}
 
+type NoteRange = Bass | Mids | High
+
 // Define auto rotate types
 type AutoRotate =
 | Off
@@ -51,7 +53,7 @@ let screenshotsDir = System.Environment.GetFolderPath(System.Environment.Special
 type ColouredSugar(config: Config) as world =
     inherit GameWindow(
         1280, 720,
-        GraphicsMode(ColorFormat(8, 8, 8, 8), 24, 8, 1),
+        GraphicsMode(ColorFormat(8, 8, 8, 8), 24, 8, 4),
         "ColouredSugar", GameWindowFlags.Default)
     let mutable preFullscreenSize = System.Drawing.Size(1280, 720)
     do
@@ -148,8 +150,11 @@ type ColouredSugar(config: Config) as world =
     let onDataAvail samplingRate (complex: NAudio.Dsp.Complex[]) =
         if complex.Length > 0 then
             let mag (c: NAudio.Dsp.Complex) = sqrt(c.X*c.X + c.Y*c.Y)
-            let toWorldSpace t =
-                let s = System.Math.Pow(float t, 0.4)
+            let toWorldSpace t noteType =
+                let s = match noteType with
+                        | Bass -> System.Math.Pow(float t, 0.75)
+                        | Mids -> System.Math.Pow(float t, 0.85)
+                        | High -> float t
                 CubeFillingCurve.curveToCubeN 8 s
             let freqResolution = samplingRate / float complex.Length
             let getStrongest maxCount delta (input: NAudio.Dsp.Complex[]) =
@@ -196,31 +201,31 @@ type ColouredSugar(config: Config) as world =
             for i = 0 to bassNotes.Length - 1 do
                 if bassNotes.[i].mag > float32 config.MinimumBass && bassNotes.[i].mag > 1.25f * avgLastBassMag bassNotes.[i].freq then
                     whiteHoles.[i] <- Vector4(
-                        toWorldSpace bassNotes.[i].freq,
+                        toWorldSpace bassNotes.[i].freq Bass,
                         defaultMass * bassNotes.[i].mag * float32 config.WhiteHoleStrength)
                 else
                     whiteHoles.[i] <- Vector4()
 
                 if canJerk &&
                     bassNotes.[i].mag > float32 config.MinimumBassForJerk &&
-                    (System.DateTime.UtcNow - lastAngularChange).TotalSeconds > 2. &&
-                    bassNotes.[i].mag > 10.f * avgLastBassMag bassNotes.[i].freq then
+                    (let t = (System.DateTime.UtcNow - lastAngularChange).TotalSeconds in t > 0.66 / float bassNotes.[i].mag || t > 2.) &&
+                    bassNotes.[i].mag > 12.5f * avgLastBassMag bassNotes.[i].freq then
                     cubeAngularVelocity <- Vector4(
-                        (toWorldSpace bassNotes.[i].freq).Normalized(),
-                        (float32 (System.Math.Pow((float volume), 1.15))) * float32 config.AutoOrbitJerk)
+                        (toWorldSpace bassNotes.[i].freq Bass).Normalized(),
+                        volume * float32 config.AutoOrbitJerk)
                     lastAngularChange <- System.DateTime.UtcNow
                     canJerk <- false
             for i = 0 to midsNotes.Length - 1 do
                 if midsNotes.[i].mag > float32 config.MinimumMids then
                     curlAttractors.[i] <- Vector4(
-                        toWorldSpace midsNotes.[i].freq,
+                        toWorldSpace midsNotes.[i].freq Mids,
                         defaultMass * (sqrt midsNotes.[i].mag) * float32 config.CurlAttractorStrength)
                 else
                     curlAttractors.[i] <- Vector4()
             for i = 0 to highNotes.Length - 1 do
                 if highNotes.[i].mag > float32 config.MinimumHigh then
                     blackHoles.[i] <- Vector4(
-                        toWorldSpace highNotes.[i].freq,
+                        toWorldSpace highNotes.[i].freq High,
                         defaultMass * (sqrt highNotes.[i].mag) * float32 config.BlackHoleStrength)
                 else
                     blackHoles.[i] <- Vector4()

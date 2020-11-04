@@ -20,7 +20,7 @@
 
   "particleCount": 1572864,
 
-  "bassStartFreq": 30.0,
+  "bassStartFreq": 20.0,
   "bassEndFreq": 250.0,
   "midsStartFreq": 250.0,
   "midsEndFreq": 3000.0,
@@ -38,7 +38,7 @@
   "cameraOrbitSpeed": 0.75,
   "cameraMoveSpeed": 0.75,
   "autoOrbitSpeed": 0.05,
-  "autoOrbitJerk": 0.175,
+  "autoOrbitJerk": 0.2,
   "minimumBassForJerk": 0.05,
 
   "shiftFactorOrbit": 0.3,

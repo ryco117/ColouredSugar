@@ -26,7 +26,7 @@ let sample = """
 
   "particleCount": 1572864,
 
-  "bassStartFreq": 30.01,
+  "bassStartFreq": 20.01,
   "bassEndFreq": 250.01,
   "midsStartFreq": 250.01,
   "midsEndFreq": 3000.01,
@@ -44,7 +44,7 @@ let sample = """
   "cameraOrbitSpeed": 0.75,
   "cameraMoveSpeed": 0.75,
   "autoOrbitSpeed": 0.05,
-  "autoOrbitJerk": 0.175,
+  "autoOrbitJerk": 0.2,
   "minimumBassForJerk": 0.05,
 
   "shiftFactorOrbit": 0.3,

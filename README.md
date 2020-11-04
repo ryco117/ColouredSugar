@@ -78,7 +78,7 @@ but most notably the rate, speed, and strength of various operations.
 | bouncingBallSize | 0.1 | Radius of the bouncing ball. Note that the encompassing cube is 2 units in length |
 | bouncingBallVelocity | {x: -0.4, y: 0.4, z: -0.3} | Describes the starting velocity of the bouncing ball |
 | particleCount | 1572864 | Number of coloured particles in the visualizer |
-| bassStartFreq | 30.01 | Lowest frequency (in Hz) considered a bass note |
+| bassStartFreq | 20.01 | Lowest frequency (in Hz) considered a bass note |
 | bassEndFreq | 250.01 | Highest frequency (in Hz) considered a bass note |
 | midsStartFreq | 250.01 | Lowest frequency (in Hz) considered a mids note |
 | midsEndFreq | 3000.01 | Highest frequency (in Hz) considered a mids note |
@@ -93,7 +93,7 @@ but most notably the rate, speed, and strength of various operations.
 | cameraOrbitSpeed | 0.75 | Factor to adjust speed of camera rotations/orbits |
 | cameraMoveSpeed | 0.75 | Factor to adjust speed of camera movement |
 | autoOrbitSpeed | 0.05 | Main rotation speed of camera auto-rotation |
-| autoOrbitJerk | 0.175 | Factor to increase strength of camera jerks in `Full` camera auto-rotation mode |
+| autoOrbitJerk | 0.2 | Factor to increase strength of camera jerks in `Full` camera auto-rotation mode |
 | minimumBassForJerk | 0.05 | Minimum bass note magnitude to trigger camera jerk in `Full` camera auto-rotation mode |
 | shiftFactorOrbit | 0.3 | Factor to multiply camera orbit speed by when holding `LEFT-SHIFT` |
 | shiftFactorMove | 0.3 | Factor to multiply camera movement speed by when holding `LEFT-SHIFT` |
