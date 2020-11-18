@@ -1,5 +1,5 @@
 ﻿(*
-Coloured Sugar - Compute Shader driven audio visualizer
+ColouredSugar - Compute Shader driven audio visualizer
 Copyright (C) 2020  Ryan Andersen
 
 This program is free software: you can redistribute it and/or modify
